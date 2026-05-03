@@ -1815,7 +1815,8 @@
                 }
                 if (data.status === 'result' && data.message) {
                     updateResult(data.message);
-                    if (swarmActive) {
+                    if (swarmActive && data.message !== lastSwarmTask) {
+                        lastSwarmTask = data.message;
                         runSwarm(data.message);
                     }
                 }
@@ -1830,7 +1831,8 @@
                 setStatus(data.status, data.message);
                 if (data.status === 'result' && data.message) {
                     updateResult(data.message);
-                    if (swarmActive) {
+                    if (swarmActive && data.message !== lastSwarmTask) {
+                        lastSwarmTask = data.message;
                         runSwarm(data.message);
                     }
                 }
@@ -1864,6 +1866,7 @@
         // Swarm state
         let swarmActive = false;
         let swarmAbort = null;
+        let lastSwarmTask = '';
         const swarmPanel = document.getElementById('swarmPanel');
         const swarmStatus = document.getElementById('swarmStatus');
         const swarmAgents = document.getElementById('swarmAgents');
@@ -1979,6 +1982,7 @@
 
         swarmCloseBtn.addEventListener('click', () => {
             swarmActive = false;
+            lastSwarmTask = '';
             if (swarmAbort) swarmAbort.abort();
             swarmPanel.style.display = 'none';
             clearSwarm();
