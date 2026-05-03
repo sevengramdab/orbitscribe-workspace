@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv/
+venv/
+
+# Node.js
+node_modules/
+out/
+dist/
+*.vsix
+
+# IDE
+.vscode/
+.vscode-test/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+*.egg-info/

@@ -247,7 +247,7 @@ export class SwarmPanel {
                 document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 currentMode = tab.dataset.mode;
-                addMessage('system', `Switched to **${currentMode.toUpperCase()}** mode`);
+                addMessage('system', 'Switched to **' + currentMode.toUpperCase() + '** mode');
             });
         });
 
