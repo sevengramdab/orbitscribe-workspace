@@ -1,0 +1,127 @@
+{
+  "name": "orbitscribe-swarm",
+  "displayName": "OrbitScribe Swarm",
+  "description": "Agentic swarm chatbot for VS Code — powered by local LLMs and cloud APIs",
+  "version": "1.0.0",
+  "publisher": "orbstudio",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Debuggers",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:orbitscribe.openSwarmPanel",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "orbitscribe.openSwarmPanel",
+        "title": "Open Swarm Panel",
+        "category": "OrbitScribe",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "orbitscribe.openSwarmPanelAsk",
+        "title": "Ask Mode",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.openSwarmPanelPlan",
+        "title": "Plan Mode",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.openSwarmPanelAgent",
+        "title": "Agent Mode",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.openSwarmPanelSwarm",
+        "title": "Agent Swarm",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.voiceInput",
+        "title": "Voice Input",
+        "category": "OrbitScribe",
+        "icon": "$(mic)"
+      },
+      {
+        "command": "orbitscribe.refreshAgents",
+        "title": "Refresh Agents",
+        "category": "OrbitScribe",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "orbitscribe.refreshFiles",
+        "title": "Refresh Files",
+        "category": "OrbitScribe",
+        "icon": "$(refresh)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "orbitscribe-swarm",
+          "title": "OrbitScribe",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "orbitscribe-swarm": [
+        {
+          "id": "swarmAgents",
+          "name": "Agents",
+          "icon": "$(server)"
+        },
+        {
+          "id": "swarmFiles",
+          "name": "Context",
+          "icon": "$(file-code)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "OrbitScribe Swarm",
+      "properties": {
+        "orbitscribe.apiMode": {
+          "type": "string",
+          "default": "hybrid",
+          "enum": ["local_only", "cloud_only", "hybrid"],
+          "description": "API lockout mode: local_only forces Ollama/LM Studio, cloud_only forces Gemini/Copilot, hybrid auto-selects based on task"
+        },
+        "orbitscribe.backendPort": {
+          "type": "number",
+          "default": 58081,
+          "description": "Port for the swarm backend server"
+        },
+        "orbitscribe.ollamaUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Ollama server URL"
+        },
+        "orbitscribe.lmStudioUrl": {
+          "type": "string",
+          "default": "http://localhost:1234",
+          "description": "LM Studio server URL"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "20.x",
+    "typescript": "^5.3.0"
+  }
+}
