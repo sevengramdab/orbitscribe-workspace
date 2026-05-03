@@ -39,8 +39,17 @@ export class SwarmPanel {
         });
 
         this._panel.webview.onDidReceiveMessage(async (message) => {
-            // Forward to extension.ts handler via the panel's webview
-            // This is handled by the WebviewViewProvider in extension.ts
+            switch (message.command) {
+                case 'getWorkspaceContext': {
+                    const ctx = await (await import('../extension')).getWorkspaceContext();
+                    this._panel.webview.postMessage({ command: 'workspaceContext', context: ctx });
+                    break;
+                }
+                case 'triggerVoice': {
+                    this._panel.webview.postMessage({ command: 'triggerVoice' });
+                    break;
+                }
+            }
         });
     }
 
@@ -366,6 +375,13 @@ export class SwarmPanel {
                     document.querySelectorAll('.mode-tab').forEach(t => {
                         t.classList.toggle('active', t.dataset.mode === currentMode);
                     });
+                    break;
+                case 'setAgent':
+                    currentMode = 'agent';
+                    document.querySelectorAll('.mode-tab').forEach(t => {
+                        t.classList.toggle('active', t.dataset.mode === 'agent');
+                    });
+                    addMessage('system', 'Agent selected: ' + msg.agent);
                     break;
                 case 'triggerVoice':
                     addMessage('system', '🎤 Voice input ready — speak into OrbitScribe');
