@@ -5,8 +5,31 @@ import { BackendService } from './services/BackendService';
 
 let backendService: BackendService;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
     backendService = new BackendService();
+
+    // Check Ollama status
+    const hasOllama = await backendService.checkOllama();
+    if (!hasOllama) {
+        const action = await vscode.window.showWarningMessage(
+            '⚠️ Ollama is not running. Local LLMs will be unavailable.',
+            'Start Ollama', 'Use Cloud Only', 'Ignore'
+        );
+        if (action === 'Start Ollama') {
+            try {
+                const { spawn } = require('child_process');
+                spawn('ollama', ['serve'], { detached: true, stdio: 'ignore' });
+                vscode.window.showInformationMessage('Starting Ollama...');
+            } catch {
+                vscode.window.showErrorMessage('Failed to start Ollama. Is it installed?');
+            }
+        } else if (action === 'Use Cloud Only') {
+            await vscode.workspace.getConfiguration('orbitscribe').update('apiMode', 'cloud_only', true);
+            vscode.window.showInformationMessage('Switched to cloud-only mode.');
+        }
+    }
+
+    // Start swarm backend
     backendService.ensureRunning().catch(err => {
         console.error('Failed to start swarm backend:', err);
     });
