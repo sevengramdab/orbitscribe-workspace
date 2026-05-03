@@ -1,0 +1,46 @@
+@echo off
+REM Voice-to-Text Docked Sidebar Launcher
+
+echo.
+echo ================================================
+echo  OrbitScribe — Docked Sidebar
+echo ================================================
+echo.
+
+REM Check Python is available
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Python is not installed or not in PATH.
+    echo.
+    echo Please install Python 3.8+ from https://python.org
+    echo Make sure to check "Add Python to PATH" during installation.
+    echo.
+    pause
+    exit /b 1
+)
+
+REM Quick dependency check
+python -c "import webview" >nul 2>&1
+if errorlevel 1 (
+    echo Installing missing dependency: pywebview...
+    pip install pywebview
+    if errorlevel 1 (
+        echo ERROR: Failed to install pywebview.
+        echo Run setup.bat as Administrator, then try again.
+        pause
+        exit /b 1
+    )
+)
+
+echo Opening docked sidebar on the right edge of your screen...
+echo Keep this window open. Close the sidebar window to exit.
+echo.
+
+python voice_to_text_docked.py
+
+REM If python exited with an error, pause so the user can read it
+if errorlevel 1 (
+    echo.
+    echo The app exited with an error.
+    pause
+)
