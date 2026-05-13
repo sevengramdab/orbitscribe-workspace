@@ -1,0 +1,17 @@
+============================================================
+       ORBITSCRIBE - WEB GUI
+============================================================
+[Initializing microphone...]
+[Found 18 audio device(s)]
+[Auto-calibrated threshold: 238.4]
+[Initializing TTS engine...]
+[TTS] Loaded 2 voice(s)
+
+  Opening browser at: http://127.0.0.1:58080
+  (If it doesn't open, navigate there manually)
+
+  Press Ctrl+C in this window to stop the server
+============================================================
+
+ * Serving Flask app 'voice_to_text_web'
+ * Debug mode: off

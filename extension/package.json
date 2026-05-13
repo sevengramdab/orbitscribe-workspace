@@ -1,9 +1,10 @@
 {
   "name": "orbitscribe-swarm",
-  "displayName": "OrbitScribe Swarm",
-  "description": "Agentic swarm chatbot for VS Code — powered by local LLMs and cloud APIs",
-  "version": "1.0.0",
+  "displayName": "OrbitScribe",
+  "description": "Agentic chatbot for VS Code — powered by local LLMs and cloud APIs",
+  "version": "3.1.1",
   "publisher": "orbstudio",
+  "icon": "logo.png",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -13,7 +14,13 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:orbitscribe.splashView",
     "onCommand:orbitscribe.openSwarmPanel",
+    "onCommand:orbitscribe.diagnoseVoiceBackend",
+    "onCommand:orbitscribe.restartVoiceBackend",
+    "onCommand:orbitscribe.activateMassSwarm",
+    "onCommand:orbitscribe.openCommandViewport",
+    "onCommand:orbitscribe.openJukebox",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -21,7 +28,7 @@
     "commands": [
       {
         "command": "orbitscribe.openSwarmPanel",
-        "title": "Open Swarm Panel",
+        "title": "Open Chat Panel",
         "category": "OrbitScribe",
         "icon": "$(comment-discussion)"
       },
@@ -42,8 +49,26 @@
       },
       {
         "command": "orbitscribe.openSwarmPanelSwarm",
-        "title": "Agent Swarm",
+        "title": "Multi-Agent",
         "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.openCommandViewport",
+        "title": "Open Command Viewport",
+        "category": "OrbitScribe",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "orbitscribe.openCommandDeck",
+        "title": "Open Command Deck",
+        "category": "OrbitScribe",
+        "icon": "$(layout-panel-left)"
+      },
+      {
+        "command": "orbitscribe.openJukebox",
+        "title": "Open Infinite Jukebox",
+        "category": "OrbitScribe",
+        "icon": "$(play-circle)"
       },
       {
         "command": "orbitscribe.voiceInput",
@@ -62,6 +87,45 @@
         "title": "Refresh Files",
         "category": "OrbitScribe",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "orbitscribe.diagnoseVoiceBackend",
+        "title": "Diagnose Voice Backend",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.restartVoiceBackend",
+        "title": "Restart Voice Backend",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.diagnoseSwarmBackend",
+        "title": "Diagnose Backend",
+        "category": "OrbitScribe"
+      },
+      {
+        "command": "orbitscribe.compactContext",
+        "title": "Compact Context",
+        "category": "OrbitScribe",
+        "icon": "$(fold)"
+      },
+      {
+        "command": "orbitscribe.activateMassSwarm",
+        "title": "Activate Multi-Agent",
+        "category": "OrbitScribe",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "orbitscribe.reviewChanges",
+        "title": "Review Agent Changes",
+        "category": "OrbitScribe",
+        "icon": "$(git-pull-request)"
+      },
+      {
+        "command": "orbitscribe.undoLastBatch",
+        "title": "Undo Last Batch",
+        "category": "OrbitScribe",
+        "icon": "$(discard)"
       }
     ],
     "viewsContainers": {
@@ -69,12 +133,17 @@
         {
           "id": "orbitscribe-swarm",
           "title": "OrbitScribe",
-          "icon": "$(comment-discussion)"
+          "icon": "logo.svg"
         }
       ]
     },
     "views": {
       "orbitscribe-swarm": [
+        {
+          "id": "orbitscribe.splashView",
+          "name": "OrbitScribe",
+          "type": "webview"
+        },
         {
           "id": "swarmAgents",
           "name": "Agents",
@@ -88,7 +157,7 @@
       ]
     },
     "configuration": {
-      "title": "OrbitScribe Swarm",
+      "title": "OrbitScribe",
       "properties": {
         "orbitscribe.apiMode": {
           "type": "string",
@@ -99,7 +168,7 @@
         "orbitscribe.backendPort": {
           "type": "number",
           "default": 58081,
-          "description": "Port for the swarm backend server"
+          "description": "Port for the backend server"
         },
         "orbitscribe.ollamaUrl": {
           "type": "string",
@@ -110,6 +179,35 @@
           "type": "string",
           "default": "http://localhost:1234",
           "description": "LM Studio server URL"
+        },
+        "orbitscribe.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to Python executable. Leave empty to auto-detect."
+        },
+        "orbitscribe.voiceStartupMode": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "spawn", "terminal"],
+          "description": "How to start the voice backend: auto detects, spawn launches directly, terminal opens in integrated terminal"
+        },
+        "orbitscribe.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "LLM temperature: 0 = focused/deterministic, 1 = very creative/random"
+        },
+        "orbitscribe.orchestratorModel": {
+          "type": "string",
+          "default": "",
+          "description": "Default orchestrator model (e.g., claude-3-5-sonnet-20241022, gpt-4o, gemini-2.0-flash). Leave empty for auto."
+        },
+        "orbitscribe.subagentMode": {
+          "type": "string",
+          "default": "hybrid",
+          "enum": ["cloud", "local", "hybrid"],
+          "description": "Subagent spawning mode: cloud uses cloud LLMs, local uses Ollama/LM Studio, hybrid auto-selects"
         }
       }
     }

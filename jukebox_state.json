@@ -1,0 +1,24 @@
+{
+  "config.fluid": {
+    "grid_resolution": 128,
+    "viscosity": 0.0,
+    "velocity_dissipation": 0.98,
+    "density_dissipation": 0.99,
+    "pressure_iterations": 20,
+    "curl_strength": 30.0,
+    "splat_radius": 0.003,
+    "timestep": 0.016
+  },
+  "quality": "LOW",
+  "config.render": {
+    "bloom_intensity": 0.3,
+    "bloom_iterations": 8,
+    "sunrays_weight": 1.0,
+    "dither_strength": 0.03,
+    "color_temperature": 6500.0,
+    "exposure": 1.0,
+    "gamma": 2.2
+  },
+  "viewport.PRIMARY.enabled": true,
+  "config.mood": "ambient"
+}

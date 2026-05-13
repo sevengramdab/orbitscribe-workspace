@@ -1,0 +1,1 @@
+kimi -r 0c409a80-6cde-4428-88a9-4e4a7bf59e46 -w "C:\Users\Shadow\voice to text engine"

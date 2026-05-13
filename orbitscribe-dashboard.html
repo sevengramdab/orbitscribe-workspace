@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrbitScribe Command Deck</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --panel: #12121a;
+            --panel-hover: #1a1a28;
+            --border: #2a2a3a;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --online: #22c55e;
+            --online-glow: rgba(34, 197, 94, 0.4);
+            --offline: #ef4444;
+            --offline-glow: rgba(239, 68, 68, 0.4);
+            --warning: #f59e0b;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .header-subtitle {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.3s ease;
+        }
+        .status-pill.online {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.08);
+            color: #4ade80;
+        }
+        .status-pill.offline {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.08);
+            color: #f87171;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--muted);
+            transition: all 0.3s ease;
+        }
+        .status-pill.online .status-dot {
+            background: var(--online);
+            box-shadow: 0 0 6px var(--online-glow);
+            animation: pulse 2s infinite;
+        }
+        .status-pill.offline .status-dot {
+            background: var(--offline);
+            box-shadow: 0 0 6px var(--offline-glow);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Layout */
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Sidebar - Agent Tree */
+        .sidebar {
+            width: 280px;
+            border-right: 1px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.25s ease;
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed {
+            width: 44px;
+        }
+        .sidebar.collapsed .sidebar-header {
+            padding: 16px 4px;
+            justify-content: center;
+        }
+        .sidebar.collapsed .sidebar-header-text {
+            display: none;
+        }
+        .sidebar.collapsed .tree-container {
+            display: none;
+        }
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .tree-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .tree-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 2px;
+        }
+        .tree-node:hover {
+            background: var(--panel-hover);
+        }
+        .tree-node.selected {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        .tree-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--muted);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .tree-led.active { background: var(--online); box-shadow: 0 0 8px var(--online-glow); }
+        .tree-led.idle { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.4); }
+        .tree-led.paused { background: var(--warning); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+        .tree-led.error { background: var(--offline); box-shadow: 0 0 8px var(--offline-glow); animation: flash 0.5s infinite alternate; }
+        .tree-led.queued { background: var(--muted); }
+        .tree-led.committed { background: #8b5cf6; box-shadow: 0 0 8px rgba(139,92,246,0.5); }
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.3; } }
+        .tree-name {
+            font-size: 13px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tree-role {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg);
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .tree-children {
+            margin-left: 16px;
+            border-left: 1px solid var(--border);
+            padding-left: 8px;
+        }
+
+        /* Sidebar Tabs */
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .sidebar-tab:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.03);
+        }
+        .sidebar-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* History Panel */
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .history-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            transition: all 0.15s;
+        }
+        .history-item:hover {
+            background: var(--panel-hover);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+        .history-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+        .history-item-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .history-item-meta {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .history-item-count {
+            font-size: 10px;
+            color: var(--accent);
+        }
+        .history-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .history-actions {
+            padding: 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+        .history-actions button {
+            flex: 1;
+            padding: 6px;
+            font-size: 11px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--muted);
+            cursor: pointer;
+        }
+        .history-actions button:hover {
+            background: var(--panel-hover);
+            color: var(--text);
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            min-width: 0;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+        }
+        .message.assistant {
+            align-self: flex-start;
+            background: var(--panel);
+            border: 1px solid var(--border);
+        }
+        .message.system {
+            align-self: center;
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            font-style: italic;
+        }
+        .message.assistant h3, .message.assistant h4 {
+            margin: 12px 0 6px 0;
+            color: #c4b5fd;
+        }
+        .message.assistant pre {
+            background: #0f0f1a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 8px 0;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .message.assistant code {
+            font-family: var(--font-mono);
+            color: #a5b4fc;
+        }
+        .message.assistant p {
+            margin: 6px 0;
+        }
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .agent-badge.architect { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .agent-badge.researcher { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .agent-badge.coder { background: rgba(34, 197, 94, 0.15); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .agent-badge.tester { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .agent-badge.debugger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .agent-badge.executor { background: rgba(236, 72, 153, 0.15); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        /* Agent Cards */
+        .agent-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin: 12px 0;
+            overflow: hidden;
+            background: var(--panel);
+        }
+        .agent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+        .agent-card-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .agent-card-header .carrot {
+            font-size: 10px;
+            color: var(--muted);
+            transition: transform 0.2s;
+            margin-right: 4px;
+        }
+        .agent-card-header.collapsed .carrot {
+            transform: rotate(-90deg);
+        }
+        .agent-card-header .inline-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--muted);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .agent-card-header .inline-status.active { background: var(--online); box-shadow: 0 0 8px var(--online-glow); }
+        .agent-card-header .inline-status.idle { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.4); }
+        .agent-card-header .inline-status.paused { background: var(--warning); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+        .agent-card-header .inline-status.error { background: var(--offline); box-shadow: 0 0 8px var(--offline-glow); animation: flash 0.5s infinite alternate; }
+        .agent-card-header .inline-status.committed { background: #8b5cf6; box-shadow: 0 0 8px rgba(139,92,246,0.5); }
+        .agent-card-body {
+            padding: 12px 14px;
+        }
+        .agent-card-body.collapsed {
+            display: none;
+        }
+
+        /* Thinking Box */
+        .thinking-box {
+            margin: 8px 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(139,92,246,0.08);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #c4b5fd;
+            user-select: none;
+        }
+        .thinking-header:hover {
+            background: rgba(139,92,246,0.12);
+        }
+        .thinking-header .carrot {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .thinking-header.collapsed .carrot {
+            transform: rotate(-90deg);
+        }
+        .thinking-body {
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text);
+            background: var(--bg);
+        }
+        .thinking-body.collapsed {
+            display: none;
+        }
+
+        /* Tool Summary */
+        .tool-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.2);
+            font-size: 12px;
+        }
+        .tool-summary-icon { font-size: 14px; }
+        .tool-summary-name { font-weight: 600; color: #93c5fd; }
+        .tool-summary-target { color: var(--muted); font-family: var(--font-mono); }
+        .tool-summary.ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); }
+        .tool-summary.ok .tool-summary-name { color: #86efac; }
+        .tool-summary.error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+        .tool-summary.error .tool-summary-name { color: #fca5a5; }
+
+        /* Tool Result Box */
+        .tool-result-box {
+            margin: 4px 0 8px 0;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .tool-result-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--panel-hover);
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--muted);
+            user-select: none;
+        }
+        .tool-result-header .carrot {
+            font-size: 9px;
+            transition: transform 0.2s;
+        }
+        .tool-result-header.collapsed .carrot {
+            transform: rotate(-90deg);
+        }
+        .tool-result-body {
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            background: var(--bg);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .tool-result-body.collapsed {
+            display: none;
+        }
+
+        /* Diff Highlighting */
+        .diff-add {
+            background: rgba(34,197,94,0.15);
+            color: #86efac;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .diff-del {
+            background: rgba(239,68,68,0.15);
+            color: #fca5a5;
+            padding: 1px 4px;
+            border-radius: 3px;
+            text-decoration: line-through;
+        }
+        pre .diff-add, pre .diff-del {
+            display: block;
+            padding: 2px 8px;
+            margin: 0 -12px;
+        }
+
+        /* Action Chips */
+        .action-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .action-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--panel-hover);
+            color: var(--text);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .action-chip:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tool-call {
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .tool-call summary {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            background: var(--panel-hover);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tool-call summary::-webkit-details-marker { display: none; }
+        .tool-call summary::before {
+            content: '▶';
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .tool-call[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .tool-call pre {
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+        .artifact-panel {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.05);
+        }
+        .artifact-panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .artifact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .artifact-item {
+            font-size: 12px;
+            color: var(--text);
+            font-family: var(--font-mono);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--panel);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        .artifact-item:hover {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+        .artifact-item .artifact-hint {
+            margin-left: auto;
+            font-size: 10px;
+            color: var(--muted);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .artifact-item:hover .artifact-hint {
+            opacity: 1;
+        }
+        .artifact-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .artifact-open-btn {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .artifact-open-btn:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+        .chat-input-area {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .chat-input {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            outline: none;
+        }
+        .chat-input:focus {
+            border-color: var(--accent);
+        }
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .send-btn:hover {
+            background: #7c3aed;
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Right Panel - Agent Detail */
+        .detail-panel {
+            width: 320px;
+            border-left: 1px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.25s ease;
+            flex-shrink: 0;
+        }
+        .detail-panel.collapsed {
+            width: 44px;
+        }
+        .detail-panel.collapsed .detail-header {
+            padding: 16px 4px;
+            justify-content: center;
+        }
+        .detail-panel.collapsed .detail-name,
+        .detail-panel.collapsed .detail-status,
+        .detail-panel.collapsed .detail-body {
+            display: none;
+        }
+        .detail-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .detail-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .detail-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .detail-status {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: var(--bg);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .detail-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .detail-section {
+            margin-bottom: 16px;
+        }
+        .detail-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        /* Panel toggles */
+        .sidebar-toggle, .detail-toggle {
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            color: var(--text);
+            font-size: 11px;
+            transition: all 0.15s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .sidebar-toggle:hover, .detail-toggle:hover {
+            background: rgba(255,255,255,0.18);
+            color: var(--accent);
+        }
+        .sidebar.collapsed .sidebar-toggle {
+            transform: rotate(180deg);
+        }
+        .detail-panel.collapsed .detail-toggle {
+            transform: rotate(180deg);
+        }
+
+        /* Resizer handles */
+        .resizer {
+            width: 4px;
+            cursor: col-resize;
+            background: transparent;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .resizer:hover, .resizer.dragging {
+            background: var(--accent);
+        }
+
+        .thought-stream {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .thought-line {
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        .thought-line:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .thought-ts {
+            color: var(--muted);
+            font-size: 11px;
+        }
+        .thought-type {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .telemetry-canvas {
+            width: 100%;
+            height: 100px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: var(--bg);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .task-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .task-badge.active { color: var(--online); }
+        .task-badge.queued { color: var(--muted); }
+        .task-badge.done { color: var(--accent); }
+
+        /* Mode tabs */
+        .mode-bar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .mode-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .mode-btn:hover { color: var(--text); }
+        .mode-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+        .mode-note {
+            padding: 8px 16px;
+            font-size: 12px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .mode-note strong { color: var(--accent); }
+
+        /* Session bar */
+        .session-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .session-id {
+            font-family: var(--font-mono);
+            color: var(--accent);
+        }
+        .workspace-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .workspace-path {
+            font-family: var(--font-mono);
+            color: #86efac;
+            background: rgba(34,197,94,0.08);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(34,197,94,0.2);
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .workspace-path:hover {
+            background: rgba(34,197,94,0.15);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+
+        /* ═════ Tools Panel ═════ */
+        .tools-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: none;
+        }
+        .tools-panel.active {
+            display: block;
+        }
+        .tools-section {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: var(--panel);
+        }
+        .tools-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(139, 92, 246, 0.08);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #c4b5fd;
+            user-select: none;
+        }
+        .tools-section-header:hover {
+            background: rgba(139, 92, 246, 0.12);
+        }
+        .tools-section-header .carrot {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        .tools-section-header.collapsed .carrot {
+            transform: rotate(-90deg);
+        }
+        .tools-section-body {
+            padding: 12px;
+        }
+        .tools-section-body.collapsed {
+            display: none;
+        }
+        .tool-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+        .tool-input, .tool-select, .tool-textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: inherit;
+            margin-bottom: 8px;
+            outline: none;
+        }
+        .tool-input:focus, .tool-select:focus, .tool-textarea:focus {
+            border-color: var(--accent);
+        }
+        .tool-textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .tool-btn {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .tool-btn:hover {
+            background: #7c3aed;
+        }
+        .tool-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .tool-row {
+            display: flex;
+            gap: 8px;
+        }
+        .tool-row .tool-input {
+            flex: 1;
+        }
+        .tool-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .tool-result h4 {
+            color: var(--accent);
+            margin: 0 0 6px 0;
+            font-size: 12px;
+        }
+        .tool-result pre {
+            background: #0f0f1a;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 11px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            color: #c4b5fd;
+            font-size: 11px;
+            margin: 2px;
+            cursor: pointer;
+        }
+        .tag-chip:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+        .vault-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .vault-item:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            background: rgba(139, 92, 246, 0.05);
+        }
+        .vault-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .vault-item-meta {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .vault-item-price {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        .copy-btn {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--muted);
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .copy-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .tools-badge {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">OS</div>
+            <div>
+                <div class="header-title">OrbitScribe</div>
+                <div class="header-subtitle">Command Deck · v3.0.0</div>
+            </div>
+        </div>
+        <div class="status-bar">
+            <div class="status-pill offline" id="enginePill">
+                <div class="status-dot"></div>
+                <span id="engineLabel">Engine</span>
+            </div>
+            <div class="status-pill offline" id="ollamaPill">
+                <div class="status-dot"></div>
+                <span id="ollamaLabel">Ollama</span>
+            </div>
+            <div class="status-pill offline" id="modelPill">
+                <div class="status-dot"></div>
+                <span id="modelLabel">Model</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mode-bar">
+        <button class="mode-btn" data-mode="ask">Ask</button>
+        <button class="mode-btn" data-mode="plan">Plan</button>
+        <button class="mode-btn" data-mode="agent">Agent</button>
+        <button class="mode-btn active" data-mode="swarm">Swarm</button>
+    </div>
+    <div class="mode-note" id="modeNote"><strong>Swarm:</strong> Multi-agent team with tools. Agents will search files and the web.</div>
+
+    <div class="session-bar">
+        <span>Session:</span>
+        <span class="session-id" id="sessionId">—</span>
+        <span style="margin-left:auto;">WS:</span>
+        <span id="wsStatus" style="color:var(--muted);">Offline</span>
+    </div>
+    <div class="workspace-bar">
+        <span>Workspace:</span>
+        <span class="workspace-path" id="workspacePath" title="Click to change">—</span>
+        <button id="workspaceOpenBtn" class="artifact-open-btn" style="margin-left:auto;" title="Open workspace in VS Code:">Open in VS Code:</button>
+    </div>
+
+    <div class="main">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="agents">Agents</button>
+                <button class="sidebar-tab" data-tab="history">History</button>
+                <button class="sidebar-tab" data-tab="tools">Tools <span class="tools-badge">Etsy</span></button>
+            </div>
+            <div class="tree-container" id="treeContainer">
+                <div class="tree-empty">No active swarm. Send a message to spawn agents.</div>
+            </div>
+            <div class="history-list" id="historyContainer" style="display:none;">
+                <div class="history-empty">No history yet. Start a conversation.</div>
+            </div>
+            <div class="history-actions" id="historyActions" style="display:none;">
+                <button id="newSessionBtn">New Session</button>
+                <button id="clearHistoryBtn">Clear All</button>
+            </div>
+
+            <!-- ═════ Etsy Dropshipping Tool Suite ═════ -->
+            <div class="tools-panel" id="toolsContainer">
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>📦 Listing Generator</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <label class="tool-label">Product Name</label>
+                        <input class="tool-input" id="etsyProductName" placeholder="e.g. Custom Engraved Wooden Coasters" />
+                        <label class="tool-label">Category</label>
+                        <input class="tool-input" id="etsyCategory" placeholder="e.g. Home Decor" />
+                        <label class="tool-label">Style / Vibe</label>
+                        <input class="tool-input" id="etsyStyle" placeholder="e.g. Rustic, Minimalist, Boho" />
+                        <label class="tool-label">Keywords (comma separated)</label>
+                        <input class="tool-input" id="etsyKeywords" placeholder="personalized, gift, handmade" />
+                        <label class="tool-label">Tone</label>
+                        <select class="tool-select" id="etsyTone">
+                            <option value="professional">Professional</option>
+                            <option value="playful">Playful</option>
+                            <option value="luxury">Luxury</option>
+                            <option value="rustic">Rustic</option>
+                            <option value="minimal">Minimal</option>
+                        </select>
+                        <button class="tool-btn" id="etsyGenListingBtn" onclick="generateEtsyListing()">Generate Listing</button>
+                        <div class="tool-result" id="etsyListingResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>💰 Profit Calculator</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <div class="tool-row">
+                            <div style="flex:1;">
+                                <label class="tool-label">Selling Price ($)</label>
+                                <input class="tool-input" id="ecPrice" type="number" step="0.01" placeholder="25.00" />
+                            </div>
+                            <div style="flex:1;">
+                                <label class="tool-label">Product Cost ($)</label>
+                                <input class="tool-input" id="ecCost" type="number" step="0.01" placeholder="8.50" />
+                            </div>
+                        </div>
+                        <div class="tool-row">
+                            <div style="flex:1;">
+                                <label class="tool-label">Shipping Cost ($)</label>
+                                <input class="tool-input" id="ecShip" type="number" step="0.01" placeholder="4.99" />
+                            </div>
+                            <div style="flex:1;">
+                                <label class="tool-label">Quantity</label>
+                                <input class="tool-input" id="ecQty" type="number" value="1" />
+                            </div>
+                        </div>
+                        <button class="tool-btn" id="etsyCalcBtn" onclick="calculateEtsyProfit()">Calculate Profit</button>
+                        <div class="tool-result" id="etsyProfitResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>🔍 SEO Keywords</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <label class="tool-label">Niche / Product Type</label>
+                        <input class="tool-input" id="etsyNiche" placeholder="e.g. personalized wedding gifts" />
+                        <button class="tool-btn" id="etsyKeywordsBtn" onclick="generateEtsyKeywords()">Generate Keywords</button>
+                        <div class="tool-result" id="etsyKeywordsResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>📊 Pricing Optimizer</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <div class="tool-row">
+                            <div style="flex:1;">
+                                <label class="tool-label">Product Cost ($)</label>
+                                <input class="tool-input" id="poCost" type="number" step="0.01" placeholder="8.50" />
+                            </div>
+                            <div style="flex:1;">
+                                <label class="tool-label">Shipping ($)</label>
+                                <input class="tool-input" id="poShip" type="number" step="0.01" placeholder="4.99" />
+                            </div>
+                        </div>
+                        <div class="tool-row">
+                            <div style="flex:1;">
+                                <label class="tool-label">Target Margin (%)</label>
+                                <input class="tool-input" id="poMargin" type="number" value="40" />
+                            </div>
+                            <div style="flex:1;">
+                                <label class="tool-label">Competitor Low ($)</label>
+                                <input class="tool-input" id="poCompLow" type="number" step="0.01" placeholder="15.00" />
+                            </div>
+                        </div>
+                        <label class="tool-label">Competitor High ($)</label>
+                        <input class="tool-input" id="poCompHigh" type="number" step="0.01" placeholder="30.00" />
+                        <button class="tool-btn" id="etsyPricingBtn" onclick="optimizeEtsyPricing()">Optimize Price</button>
+                        <div class="tool-result" id="etsyPricingResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>🏷️ Competitor Research</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <label class="tool-label">Search Keyword</label>
+                        <input class="tool-input" id="etsyCompKeyword" placeholder="e.g. custom wood signs" />
+                        <button class="tool-btn" id="etsyCompBtn" onclick="researchEtsyCompetitors()">Research</button>
+                        <div class="tool-result" id="etsyCompResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <div class="tools-section">
+                    <div class="tools-section-header" onclick="toggleToolSection(this)">
+                        <span class="carrot">▼</span>
+                        <span>📋 Product Vault</span>
+                    </div>
+                    <div class="tools-section-body">
+                        <div id="vaultList">
+                            <div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">No saved products yet.</div>
+                        </div>
+                        <button class="tool-btn" style="margin-top:8px;background:#1e1e2e;border:1px solid var(--border);color:var(--muted);" onclick="loadVault()">🔄 Refresh Vault</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="resizer" id="resizerLeft"></div>
+
+        <div class="chat-panel">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask, plan, or run a swarm..."></textarea>
+                <button class="send-btn" id="sendBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="resizer" id="resizerRight"></div>
+
+        <div class="detail-panel" id="detailPanel">
+            <div class="detail-header">
+                <div class="detail-led" style="background:var(--muted);"></div>
+                <div class="detail-name">No agent selected</div>
+                <div class="detail-status" style="color:var(--muted);">—</div>
+                <div class="detail-toggle" id="detailToggle" title="Toggle detail panel">▶</div>
+            </div>
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">Select an agent from the tree to view details</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const API_URL = 'http://127.0.0.1:58081/api';
+        let currentMode = 'swarm';
+        let currentSessionId = 'deck-' + Math.random().toString(36).slice(2, 10);
+        let ws = null;
+        let wsReconnectDelay = 1000;
+        let wsReconnectTimer = null;
+        let treeData = null;
+        let selectedAgentId = null;
+        let agentCache = {};
+        let isStreaming = false;
+
+        const sessionIdEl = document.getElementById('sessionId');
+        const wsStatus = document.getElementById('wsStatus');
+        const treeContainer = document.getElementById('treeContainer');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const detailPanel = document.getElementById('detailPanel');
+        const enginePill = document.getElementById('enginePill');
+        const ollamaPill = document.getElementById('ollamaPill');
+        const modelPill = document.getElementById('modelPill');
+        const engineLabel = document.getElementById('engineLabel');
+        const ollamaLabel = document.getElementById('ollamaLabel');
+        const modelLabel = document.getElementById('modelLabel');
+
+        // ── Chat History Persistence ──
+        const HISTORY_KEY = 'orbitscribe_chat_history';
+        let sessionMessages = []; // in-memory messages for current session
+
+        function loadAllHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch {
+                return {};
+            }
+        }
+
+        function saveAllHistory(history) {
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error('Failed to save history:', e);
+            }
+        }
+
+        function persistCurrentSession() {
+            if (!sessionMessages.length) return;
+            const history = loadAllHistory();
+            const firstUserMsg = sessionMessages.find(m => m.role === 'user');
+            const preview = firstUserMsg ? firstUserMsg.text.slice(0, 60) : 'Session ' + currentSessionId.slice(-6);
+            history[currentSessionId] = {
+                id: currentSessionId,
+                preview: preview,
+                created: history[currentSessionId]?.created || Date.now(),
+                updated: Date.now(),
+                messages: sessionMessages
+            };
+            // Keep only last 50 sessions
+            const keys = Object.keys(history).sort((a, b) => history[b].updated - history[a].updated);
+            if (keys.length > 50) {
+                keys.slice(50).forEach(k => delete history[k]);
+            }
+            saveAllHistory(history);
+            renderHistory();
+        }
+
+        function restoreSession(sessionId) {
+            const history = loadAllHistory();
+            const session = history[sessionId];
+            if (!session) return;
+            currentSessionId = sessionId;
+            sessionIdEl.textContent = currentSessionId;
+            sessionMessages = session.messages ? JSON.parse(JSON.stringify(session.messages)) : [];
+            chatMessages.innerHTML = '';
+            sessionMessages.forEach(m => {
+                renderMessageToDOM(m.text, m.role, false);
+            });
+            renderHistory();
+            // Switch to agents tab so user sees the chat
+            switchSidebarTab('agents');
+        }
+
+        function createNewSession() {
+            persistCurrentSession();
+            currentSessionId = 'deck-' + Math.random().toString(36).slice(2, 10);
+            sessionIdEl.textContent = currentSessionId;
+            sessionMessages = [];
+            chatMessages.innerHTML = '';
+            addMessage('New session started. Select a mode and send a message.', 'system');
+            renderHistory();
+        }
+
+        function clearAllHistory() {
+            if (!confirm('Clear all chat history? This cannot be undone.')) return;
+            localStorage.removeItem(HISTORY_KEY);
+            sessionMessages = [];
+            chatMessages.innerHTML = '';
+            renderHistory();
+            addMessage('History cleared.', 'system');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            const history = loadAllHistory();
+            const sessions = Object.values(history).sort((a, b) => b.updated - a.updated);
+            if (!sessions.length) {
+                container.innerHTML = '<div class="history-empty">No history yet. Start a conversation.</div>';
+                return;
+            }
+            container.innerHTML = sessions.map(s => {
+                const date = new Date(s.updated).toLocaleDateString();
+                const time = new Date(s.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const count = s.messages ? s.messages.length : 0;
+                const isActive = s.id === currentSessionId;
+                return `
+                    <div class="history-item ${isActive ? 'active' : ''}" data-session="${s.id}">
+                        <div class="history-item-title">${escapeHtml(s.preview || 'Untitled')}</div>
+                        <div class="history-item-meta">
+                            <span>${date} ${time}</span>
+                            <span class="history-item-count">${count} msg${count !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.querySelectorAll('.history-item').forEach(el => {
+                el.addEventListener('click', () => restoreSession(el.dataset.session));
+            });
+        }
+
+        function switchSidebarTab(tab) {
+            document.querySelectorAll('.sidebar-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            treeContainer.style.display = tab === 'agents' ? '' : 'none';
+            document.getElementById('historyContainer').style.display = tab === 'history' ? '' : 'none';
+            document.getElementById('historyActions').style.display = tab === 'history' ? '' : 'none';
+            document.getElementById('toolsContainer').style.display = tab === 'tools' ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('.sidebar-tab').forEach(tab => {
+            tab.addEventListener('click', () => switchSidebarTab(tab.dataset.tab));
+        });
+        document.getElementById('newSessionBtn').addEventListener('click', createNewSession);
+        document.getElementById('clearHistoryBtn').addEventListener('click', clearAllHistory);
+
+        // ── End Chat History ──
+        // ═══════════════════════════════════════════════════════
+        // Etsy Dropshipping Tool Suite — Frontend Logic
+        // ═══════════════════════════════════════════════════════
+
+        window.toggleToolSection = function(header) {
+            const body = header.nextElementSibling;
+            const carrot = header.querySelector('.carrot');
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+                carrot.textContent = '▼';
+            } else {
+                body.classList.add('collapsed');
+                header.classList.add('collapsed');
+                carrot.textContent = '▼';
+            }
+        };
+
+        function setToolLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.disabled = loading;
+        }
+
+        function showToolResult(elId, html) {
+            const el = document.getElementById(elId);
+            el.innerHTML = html;
+            el.style.display = 'block';
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+
+        async function generateEtsyListing() {
+            const name = document.getElementById('etsyProductName').value.trim();
+            if (!name) { alert('Enter a product name'); return; }
+            setToolLoading('etsyGenListingBtn', true);
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/listing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_name: name,
+                        category: document.getElementById('etsyCategory').value,
+                        style: document.getElementById('etsyStyle').value,
+                        keywords: document.getElementById('etsyKeywords').value,
+                        tone: document.getElementById('etsyTone').value,
+                    }),
+                    signal: AbortSignal.timeout(120000)
+                });
+                const data = await resp.json();
+                if (data.ok && data.listing) {
+                    const l = data.listing;
+                    let tagsHtml = (l.tags || []).map(t => '<span class="tag-chip" onclick="navigator.clipboard.writeText(\'' + t.replace(/'/g, "\\'") + '\')">' + escapeHtml(t) + ' 📋</span>').join('');
+                    let html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><h4 style="margin:0;">📦 ' + escapeHtml(l.title || name) + '</h4>';
+                    html += '<button class="copy-btn" onclick="copyToClipboard(document.getElementById(\'listing-title-hidden\').value, this)">Copy Title</button>';
+                    html += '<input type="hidden" id="listing-title-hidden" value="' + (l.title || '').replace(/"/g, '&quot;') + '" /></div>';
+                    html += '<div style="margin-bottom:10px;"><strong>Price Suggestion:</strong> <span style="color:#4ade80;font-weight:600;">$' + (l.price_suggestion || '—') + '</span></div>';
+                    html += '<div style="margin-bottom:10px;"><strong>Description:</strong></div><pre id="listing-desc">' + (l.description || '—') + '</pre>';
+                    html += '<button class="copy-btn" style="margin-bottom:10px;" onclick="copyToClipboard(document.getElementById(\'listing-desc\').textContent, this)">Copy Description</button>';
+                    html += '<div style="margin-bottom:6px;"><strong>Tags (' + (l.tags || []).length + '):</strong></div>';
+                    html += '<div style="margin-bottom:10px;">' + tagsHtml + '</div>';
+                    if (l.seo_notes) html += '<div style="font-size:11px;color:var(--muted);"><strong>SEO Notes:</strong> ' + escapeHtml(l.seo_notes) + '</div>';
+                    const safeName = (l.title || name).replace(/'/g, "\\'");
+                    const safeTitle = (l.title || '').replace(/'/g, "\\'");
+                    const safeDesc = (l.description || '').replace(/'/g, "\\'");
+                    html += '<button class="tool-btn" style="margin-top:10px;background:#1e1e2e;border:1px solid var(--border);" onclick="saveListingToVault(\'' + safeName + '\', \'' + safeTitle + '\', \'' + safeDesc + '\', ' + JSON.stringify(l.tags || []) + ', ' + (l.price_suggestion || 0) + ')">💾 Save to Vault</button>';
+                    showToolResult('etsyListingResult', html);
+                } else if (data.listing_raw) {
+                    showToolResult('etsyListingResult', '<pre>' + escapeHtml(data.listing_raw) + '</pre>');
+                } else {
+                    showToolResult('etsyListingResult', '<p style="color:#f87171;">Error: ' + escapeHtml(data.error || 'Unknown error') + '</p>');
+                }
+            } catch (err) {
+                showToolResult('etsyListingResult', '<p style="color:#f87171;">Error: ' + escapeHtml(err.message) + '</p>');
+            }
+            setToolLoading('etsyGenListingBtn', false);
+        }
+
+        async function calculateEtsyProfit() {
+            const price = parseFloat(document.getElementById('ecPrice').value);
+            const cost = parseFloat(document.getElementById('ecCost').value);
+            const ship = parseFloat(document.getElementById('ecShip').value) || 0;
+            const qty = parseInt(document.getElementById('ecQty').value) || 1;
+            if (!price || !cost) { alert('Enter price and cost'); return; }
+            setToolLoading('etsyCalcBtn', true);
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/pricing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_cost: cost, shipping_cost: ship, target_margin: 40 }),
+                    signal: AbortSignal.timeout(10000)
+                });
+                const data = await resp.json();
+                if (data.ok && data.data) {
+                    const d = data.data;
+                    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+                    html += '<div style="background:var(--panel);padding:8px;border-radius:6px;"><div style="font-size:10px;color:var(--muted);">Revenue</div>';
+                    html += '<div style="font-size:16px;font-weight:600;">$' + (d.suggested_price || price) + '</div></div>';
+                    html += '<div style="background:var(--panel);padding:8px;border-radius:6px;"><div style="font-size:10px;color:var(--muted);">Net Profit</div>';
+                    html += '<div style="font-size:16px;font-weight:600;color:#4ade80;">$' + (d.net_profit_per_unit || '—') + '</div></div></div>';
+                    html += '<div style="margin-top:10px;"><strong>Fee Breakdown:</strong></div>';
+                    html += '<pre style="font-size:11px;">' + JSON.stringify(d.fees || {}, null, 2) + '</pre>';
+                    html += '<div style="margin-top:6px;"><strong>Total Costs:</strong> $' + (d.total_costs || '—') + '</div>';
+                    html += '<div><strong>Margin:</strong> ' + (d.actual_margin_pct || '—') + '%</div>';
+                    if (d.pricing_recommendation) html += '<div style="margin-top:8px;font-size:11px;color:#fcd34d;">💡 ' + escapeHtml(d.pricing_recommendation) + '</div>';
+                    showToolResult('etsyProfitResult', html);
+                } else {
+                    showToolResult('etsyProfitResult', '<p style="color:#f87171;">Calculation failed</p>');
+                }
+            } catch (err) {
+                showToolResult('etsyProfitResult', '<p style="color:#f87171;">Error: ' + escapeHtml(err.message) + '</p>');
+            }
+            setToolLoading('etsyCalcBtn', false);
+        }
+
+        async function generateEtsyKeywords() {
+            const niche = document.getElementById('etsyNiche').value.trim();
+            if (!niche) { alert('Enter a niche'); return; }
+            setToolLoading('etsyKeywordsBtn', true);
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/keywords', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ niche, count: 13 }),
+                    signal: AbortSignal.timeout(120000)
+                });
+                const data = await resp.json();
+                if (data.ok && data.keywords) {
+                    const tagsHtml = data.keywords.map(k => {
+                        const s = String(k).replace(/'/g, "\\'");
+                        return '<span class="tag-chip" onclick="navigator.clipboard.writeText(\'' + s + '\')">' + escapeHtml(String(k)) + ' 📋</span>';
+                    }).join('');
+                    showToolResult('etsyKeywordsResult', '<div style="margin-bottom:6px;"><strong>Generated Keywords for &quot;' + escapeHtml(niche) + '&quot;:</strong></div>' + tagsHtml);
+                } else {
+                    showToolResult('etsyKeywordsResult', '<p style="color:#f87171;">Failed to generate keywords</p>');
+                }
+            } catch (err) {
+                showToolResult('etsyKeywordsResult', '<p style="color:#f87171;">Error: ' + escapeHtml(err.message) + '</p>');
+            }
+            setToolLoading('etsyKeywordsBtn', false);
+        }
+
+        async function optimizeEtsyPricing() {
+            const cost = parseFloat(document.getElementById('poCost').value);
+            const ship = parseFloat(document.getElementById('poShip').value) || 0;
+            const margin = parseFloat(document.getElementById('poMargin').value) || 40;
+            const compLow = parseFloat(document.getElementById('poCompLow').value) || 0;
+            const compHigh = parseFloat(document.getElementById('poCompHigh').value) || 0;
+            if (!cost) { alert('Enter product cost'); return; }
+            setToolLoading('etsyPricingBtn', true);
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/pricing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_cost: cost, shipping_cost: ship, target_margin: margin, competitor_low: compLow, competitor_high: compHigh }),
+                    signal: AbortSignal.timeout(10000)
+                });
+                const data = await resp.json();
+                if (data.ok && data.data) {
+                    const d = data.data;
+                    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
+                    html += '<div style="background:var(--panel);padding:8px;border-radius:6px;text-align:center;">';
+                    html += '<div style="font-size:10px;color:var(--muted);">Optimal Price</div>';
+                    html += '<div style="font-size:18px;font-weight:600;color:var(--accent);">$' + d.optimal_price + '</div></div>';
+                    html += '<div style="background:var(--panel);padding:8px;border-radius:6px;text-align:center;">';
+                    html += '<div style="font-size:10px;color:var(--muted);">Suggested Price</div>';
+                    html += '<div style="font-size:18px;font-weight:600;color:#4ade80;">$' + d.suggested_price + '</div></div></div>';
+                    html += '<div><strong>Target Margin:</strong> ' + d.target_margin_pct + '%</div>';
+                    html += '<div><strong>Actual Margin at Optimal:</strong> ' + d.actual_margin_pct + '%</div>';
+                    html += '<div><strong>Net Profit/Unit:</strong> $' + d.net_profit_per_unit + '</div>';
+                    html += '<div style="margin-top:8px;padding:8px;border-radius:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);">';
+                    html += '<strong>💡 Recommendation:</strong> ' + escapeHtml(d.pricing_recommendation) + '</div>';
+                    if (d.competitor_range) html += '<div style="margin-top:6px;font-size:11px;color:var(--muted);">Competitor range: ' + escapeHtml(d.competitor_range) + ' (avg $' + d.competitor_avg + ')</div>';
+                    html += '<div style="margin-top:10px;"><strong>Fee Breakdown:</strong></div>';
+                    html += '<pre style="font-size:11px;">' + JSON.stringify(d.fees, null, 2) + '</pre>';
+                    showToolResult('etsyPricingResult', html);
+                } else {
+                    showToolResult('etsyPricingResult', '<p style="color:#f87171;">Optimization failed</p>');
+                }
+            } catch (err) {
+                showToolResult('etsyPricingResult', '<p style="color:#f87171;">Error: ' + escapeHtml(err.message) + '</p>');
+            }
+            setToolLoading('etsyPricingBtn', false);
+        }
+
+        async function researchEtsyCompetitors() {
+            const keyword = document.getElementById('etsyCompKeyword').value.trim();
+            if (!keyword) { alert('Enter a keyword'); return; }
+            setToolLoading('etsyCompBtn', true);
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/competitors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword, max_results: 5 }),
+                    signal: AbortSignal.timeout(20000)
+                });
+                const data = await resp.json();
+                if (data.ok && data.data && data.data.results) {
+                    const results = data.data.results;
+                    let html = '<div style="margin-bottom:6px;"><strong>Top results for &quot;' + escapeHtml(keyword) + '&quot;:</strong></div>';
+                    results.forEach(r => {
+                        html += '<div style="margin-bottom:8px;padding:8px;background:var(--panel);border-radius:6px;">';
+                        html += '<a href="' + escapeHtml(r.url) + '" target="_blank" style="color:#93c5fd;font-size:12px;font-weight:600;text-decoration:none;">' + escapeHtml(r.title) + '</a>';
+                        html += '<div style="font-size:10px;color:var(--muted);margin-top:2px;word-break:break-all;">' + escapeHtml(r.url) + '</div>';
+                        if (r.snippet) html += '<div style="font-size:11px;color:var(--text);margin-top:4px;">' + escapeHtml(r.snippet) + '</div>';
+                        html += '</div>';
+                    });
+                    showToolResult('etsyCompResult', html);
+                } else {
+                    showToolResult('etsyCompResult', '<p style="color:#f87171;">No results found</p>');
+                }
+            } catch (err) {
+                showToolResult('etsyCompResult', '<p style="color:#f87171;">Error: ' + escapeHtml(err.message) + '</p>');
+            }
+            setToolLoading('etsyCompBtn', false);
+        }
+
+        async function saveListingToVault(name, title, description, tags, price) {
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/vault/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, title, description, tags, price, cost: 0, notes: '' }),
+                    signal: AbortSignal.timeout(10000)
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    alert('Saved to vault: ' + data.entry.id);
+                    loadVault();
+                } else {
+                    alert('Failed to save');
+                }
+            } catch (err) {
+                alert('Error saving: ' + err.message);
+            }
+        }
+
+        async function loadVault() {
+            const listEl = document.getElementById('vaultList');
+            listEl.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">Loading...</div>';
+            try {
+                const resp = await fetch(API_URL + '/tools/etsy/vault/list', { signal: AbortSignal.timeout(10000) });
+                const data = await resp.json();
+                if (data.ok && data.entries && data.entries.length) {
+                    listEl.innerHTML = data.entries.map(e => {
+                        const date = new Date(e.created * 1000).toLocaleDateString();
+                        const safeTitle = (e.title || e.name).replace(/'/g, "\\'");
+                        const tagsStr = (e.tags || []).join(', ').replace(/'/g, "\\'");
+                        return '<div class="vault-item" onclick="alert(\'Title: ' + safeTitle + '\\nPrice: $' + e.price + '\\nTags: ' + tagsStr + '\')"><div class="vault-item-name">' + escapeHtml(e.name) + '</div><div class="vault-item-meta">' + date + ' · <span class="vault-item-price">$' + (e.price || 0) + '</span> · ' + (e.tags || []).length + ' tags</div></div>';
+                    }).join('');
+                } else {
+                    listEl.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">No saved products yet.</div>';
+                }
+            } catch (err) {
+                listEl.innerHTML = '<div style="color:#f87171;font-size:12px;text-align:center;padding:10px;">Failed to load vault</div>';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // End Etsy Tool Suite
+        // ═══════════════════════════════════════════════════════
+
+
+        sessionIdEl.textContent = currentSessionId;
+
+        // ── Mode Switching ──
+        const modeNotes = {
+            ask: '<strong>Ask:</strong> Direct chat with the LLM. No agents, no file access.',
+            plan: '<strong>Plan:</strong> Creates a step-by-step implementation plan.',
+            agent: '<strong>Agent:</strong> Single agent with tool access (files, commands).',
+            swarm: '<strong>Swarm:</strong> Multi-agent team (Architect, Researcher, Coder, Tester, Debugger) with tools.'
+        };
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                const note = document.getElementById('modeNote');
+                if (note) note.innerHTML = modeNotes[currentMode] || '';
+            });
+        });
+
+        // ── Workspace ──
+        const workspacePath = document.getElementById('workspacePath');
+        const workspaceOpenBtn = document.getElementById('workspaceOpenBtn');
+        function updateWorkspaceOpenBtn() {
+            const ws = workspacePath.textContent;
+            if (ws && ws !== '—') {
+                workspaceOpenBtn.onclick = () => openVSCode(ws);
+                workspaceOpenBtn.style.display = '';
+            } else {
+                workspaceOpenBtn.style.display = 'none';
+            }
+        }
+        async function fetchWorkspace() {
+            try {
+                const resp = await fetch(API_URL + '/workspace', { signal: AbortSignal.timeout(3000) });
+                const data = await resp.json();
+                if (data.workspace_root) {
+                    workspacePath.textContent = data.workspace_root;
+                    workspacePath.title = data.workspace_root;
+                    updateWorkspaceOpenBtn();
+                }
+            } catch {
+                workspacePath.textContent = '—';
+                updateWorkspaceOpenBtn();
+            }
+        }
+        workspacePath.addEventListener('click', async () => {
+            const newPath = prompt('Enter workspace directory path:', workspacePath.textContent);
+            if (newPath && newPath !== workspacePath.textContent) {
+                try {
+                    const resp = await fetch(API_URL + '/workspace', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ workspace_root: newPath }),
+                        signal: AbortSignal.timeout(5000)
+                    });
+                    const data = await resp.json();
+                    if (data.ok) {
+                        workspacePath.textContent = data.workspace_root;
+                        workspacePath.title = data.workspace_root;
+                        updateWorkspaceOpenBtn();
+                    }
+                } catch (err) {
+                    alert('Failed to set workspace: ' + err.message);
+                }
+            }
+        });
+
+        // ── Status Polling ──
+        async function updateStatus() {
+            try {
+                const resp = await fetch(API_URL + '/health', { signal: AbortSignal.timeout(5000) });
+                const data = await resp.json();
+                setEngineStatus(true);
+
+                // Check Ollama via backend proxy (avoids CORS from file://)
+                try {
+                    const ollamaResp = await fetch(API_URL + '/health/ollama', { signal: AbortSignal.timeout(5000) });
+                    const ollamaData = await ollamaResp.json();
+                    setOllamaStatus(ollamaData.ok === true);
+                } catch {
+                    setOllamaStatus(false);
+                }
+
+                // Get model
+                try {
+                    const settingsResp = await fetch(API_URL + '/settings', { signal: AbortSignal.timeout(3000) });
+                    const settings = await settingsResp.json();
+                    setModelStatus(settings.local_model || settings.orchestrator_model || 'unknown');
+                } catch {
+                    setModelStatus('unknown');
+                }
+
+                // Get workspace
+                await fetchWorkspace();
+            } catch {
+                setEngineStatus(false);
+                setOllamaStatus(false);
+                setModelStatus('unknown');
+            }
+        }
+
+        function setEngineStatus(online) {
+            enginePill.classList.toggle('online', online);
+            enginePill.classList.toggle('offline', !online);
+            engineLabel.textContent = online ? 'Engine: Online' : 'Engine: Offline';
+        }
+        function setOllamaStatus(online) {
+            ollamaPill.classList.toggle('online', online);
+            ollamaPill.classList.toggle('offline', !online);
+            ollamaLabel.textContent = online ? 'Ollama: Online' : 'Ollama: Offline';
+        }
+        function setModelStatus(model) {
+            const known = model && model !== 'unknown';
+            modelPill.classList.toggle('online', known);
+            modelPill.classList.toggle('offline', !known);
+            modelLabel.textContent = known ? 'Model: ' + model : 'Model: None';
+        }
+
+        updateStatus();
+        setInterval(updateStatus, 10000);
+
+        // ── WebSocket ──
+        function connectWs() {
+            if (ws) { try { ws.close(); } catch(_) {} ws = null; }
+            updateWsStatus('connecting');
+            try {
+                ws = new WebSocket('ws://127.0.0.1:58081/api/ws/dashboard/' + currentSessionId);
+                ws.onopen = () => {
+                    wsReconnectDelay = 1000;
+                    updateWsStatus('connected');
+                };
+                ws.onmessage = (evt) => {
+                    try { handleWsMessage(JSON.parse(evt.data)); } catch(_) {}
+                };
+                ws.onclose = () => {
+                    updateWsStatus('disconnected');
+                    scheduleReconnect();
+                };
+                ws.onerror = () => updateWsStatus('disconnected');
+            } catch (e) {
+                updateWsStatus('disconnected');
+                scheduleReconnect();
+            }
+        }
+
+        function scheduleReconnect() {
+            if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+            wsReconnectTimer = setTimeout(() => {
+                wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+                connectWs();
+            }, wsReconnectDelay);
+        }
+
+        function updateWsStatus(status) {
+            if (!wsStatus) return;
+            const colors = { connected: '#22c55e', connecting: '#f59e0b', disconnected: '#ef4444' };
+            wsStatus.textContent = status;
+            wsStatus.style.color = colors[status] || '#ef4444';
+        }
+
+        connectWs();
+
+        function handleWsMessage(msg) {
+            if (!msg || !msg.type) return;
+            switch (msg.type) {
+                case 'init':
+                    if (msg.tree) { treeData = msg.tree; renderTree(); }
+                    break;
+                case 'agent_update':
+                    if (msg.agent) { 
+                        mergeAgentIntoTree(msg.agent); 
+                        renderTree();
+                        // Update inline status in chat cards
+                        updateInlineStatus(msg.agent.role, msg.agent.status);
+                    }
+                    break;
+                case 'thought':
+                    if (msg.agent_id && msg.thought) {
+                        const cached = agentCache[msg.agent_id];
+                        if (cached && cached.thought_stream) {
+                            cached.thought_stream.push(msg.thought);
+                            if (cached.thought_stream.length > 200) cached.thought_stream = cached.thought_stream.slice(-200);
+                        }
+                        if (selectedAgentId === msg.agent_id) renderDetail(selectedAgentId);
+                    }
+                    break;
+                case 'task_update':
+                    if (msg.agent_id && msg.task) {
+                        const cached = agentCache[msg.agent_id];
+                        if (cached && cached.tasks) {
+                            const idx = cached.tasks.findIndex(t => t.task_id === msg.task.task_id);
+                            if (idx >= 0) cached.tasks[idx] = msg.task;
+                            else cached.tasks.push(msg.task);
+                        }
+                        if (selectedAgentId === msg.agent_id) renderDetail(selectedAgentId);
+                    }
+                    break;
+                case 'circuit_update':
+                    // Could update a global status orb
+                    break;
+            }
+        }
+
+        // ── Tree Rendering ──
+        function mergeAgentIntoTree(agent) {
+            if (!treeData) {
+                // First agent received — treat as root if no parent, otherwise stash for later
+                if (!agent.parent_id) {
+                    treeData = { ...agent, children: [] };
+                }
+                return;
+            }
+            function walk(node) {
+                if (node.agent_id === agent.agent_id) {
+                    const children = node.children;
+                    Object.assign(node, agent);
+                    if (children) node.children = children;
+                    return true;
+                }
+                if (node.children) {
+                    for (const child of node.children) { if (walk(child)) return true; }
+                }
+                return false;
+            }
+            if (!walk(treeData)) {
+                if (agent.parent_id) {
+                    function findParent(node) {
+                        if (node.agent_id === agent.parent_id) return node;
+                        if (node.children) {
+                            for (const child of node.children) { const found = findParent(child); if (found) return found; }
+                        }
+                        return null;
+                    }
+                    const parent = findParent(treeData);
+                    if (parent) {
+                        if (!parent.children) parent.children = [];
+                        // Avoid duplicates
+                        const exists = parent.children.some(c => c.agent_id === agent.agent_id);
+                        if (!exists) parent.children.push(agent);
+                    } else {
+                        // Parent not yet in tree — agent may arrive before its parent broadcast
+                        // Add as child of root as fallback
+                        if (!treeData.children) treeData.children = [];
+                        const exists = treeData.children.some(c => c.agent_id === agent.agent_id);
+                        if (!exists) treeData.children.push(agent);
+                    }
+                } else {
+                    // No parent and not in tree — shouldn't happen, but add to root
+                    if (!treeData.children) treeData.children = [];
+                    const exists = treeData.children.some(c => c.agent_id === agent.agent_id);
+                    if (!exists) treeData.children.push(agent);
+                }
+            }
+        }
+
+        function renderTree() {
+            if (!treeData) {
+                treeContainer.innerHTML = '<div class="tree-empty">No active swarm. Send a message to spawn agents.</div>';
+                return;
+            }
+            const root = document.createElement('div');
+            renderNode(treeData, root, 0);
+            treeContainer.innerHTML = '';
+            treeContainer.appendChild(root);
+        }
+
+        function renderNode(node, container, depth) {
+            const row = document.createElement('div');
+            row.className = 'tree-node' + (selectedAgentId === node.agent_id ? ' selected' : '');
+            row.style.paddingLeft = (4 + depth * 8) + 'px';
+
+            const led = document.createElement('div');
+            led.className = 'tree-led ' + (node.status || 'queued');
+
+            const nameText = node.name || node.role || 'Agent';
+            const roleText = node.role || '';
+
+            const name = document.createElement('div');
+            name.className = 'tree-name';
+            name.textContent = nameText;
+
+            const role = document.createElement('div');
+            role.className = 'tree-role';
+            const showRole = roleText && roleText.toLowerCase() !== nameText.toLowerCase();
+            role.textContent = showRole ? roleText : '';
+            if (!showRole) role.style.display = 'none';
+
+            row.appendChild(led);
+            row.appendChild(name);
+            row.appendChild(role);
+
+            row.addEventListener('click', () => {
+                selectedAgentId = node.agent_id;
+                renderTree();
+                fetchAgentDetail(node.agent_id);
+            });
+
+            container.appendChild(row);
+
+            if (node.children && node.children.length > 0) {
+                const childContainer = document.createElement('div');
+                childContainer.className = 'tree-children';
+                for (const child of node.children) renderNode(child, childContainer, depth + 1);
+                container.appendChild(childContainer);
+            }
+        }
+
+        async function fetchAgentDetail(agentId) {
+            if (agentCache[agentId]) { renderDetail(agentId); return; }
+            try {
+                const resp = await fetch(API_URL + '/agents/' + agentId + '/detail', { signal: AbortSignal.timeout(5000) });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                agentCache[agentId] = data;
+                renderDetail(agentId);
+            } catch (_) {}
+        }
+
+        function renderDetail(agentId) {
+            const agent = agentCache[agentId];
+            if (!agent) return;
+
+            const statusColors = {
+                active: '#22c55e', idle: '#3b82f6', paused: '#f59e0b',
+                error: '#ef4444', queued: '#64748b', committed: '#8b5cf6'
+            };
+
+            detailPanel.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-led" style="background:${statusColors[agent.status] || '#64748b'};box-shadow:0 0 8px ${statusColors[agent.status] || '#64748b'}40;"></div>
+                    <div class="detail-name">${escapeHtml(agent.name || agent.role || 'Agent')}</div>
+                    <div class="detail-status" style="color:${statusColors[agent.status] || '#64748b'};">${(agent.status || 'queued').toUpperCase()}</div>
+                    <div class="detail-toggle" id="detailToggleDynamic" title="Toggle detail panel">▶</div>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-section">
+                        <div class="detail-section-title">Role</div>
+                        <div style="font-size:13px;">${escapeHtml(agent.role || '—')}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">Tasks</div>
+                        <div class="task-list">
+                            ${(agent.tasks || []).length === 0 ? '<div style="color:var(--muted);font-size:12px;">No tasks</div>' :
+                                agent.tasks.map(t => `
+                                    <div class="task-item">
+                                        <span>${escapeHtml(t.description || 'Task')}</span>
+                                        <span class="task-badge ${t.status || 'queued'}">${(t.status || 'queued').toUpperCase()}</span>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">Thought Stream</div>
+                        <div class="thought-stream">
+                            ${(agent.thought_stream || []).length === 0 ? '<div style="color:var(--muted);">Waiting for thoughts...</div>' :
+                                agent.thought_stream.slice(-20).map(t => `
+                                    <div class="thought-line">
+                                        <span class="thought-ts">${new Date(t.timestamp * 1000).toLocaleTimeString()}</span>
+                                        <span class="thought-type">${escapeHtml(t.type)}</span>
+                                        <div>${escapeHtml(t.content)}</div>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Re-attach event listener to dynamically created toggle
+            const dynamicToggle = document.getElementById('detailToggleDynamic');
+            if (dynamicToggle) {
+                dynamicToggle.addEventListener('click', toggleDetailPanel);
+            }
+        }
+
+        // ── Chat ──
+        function renderMessageToDOM(text, role, shouldPersist = true) {
+            const msg = document.createElement('div');
+            msg.className = 'message ' + role;
+            msg.textContent = text;
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (shouldPersist) {
+                sessionMessages.push({ text, role, time: Date.now() });
+                persistCurrentSession();
+            }
+        }
+
+        function addMessage(text, role) {
+            renderMessageToDOM(text, role, true);
+        }
+
+        function formatMarkdown(text) {
+            // Escape HTML first
+            let html = escapeHtml(text);
+            // Bold
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Code blocks
+            html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // Headers
+            html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+            html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+            // Bullet lists
+            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+            // Numbered lists
+            html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+            // Paragraphs (double newline)
+            html = html.replace(/\n\n/g, '</p><p>');
+            // Single newlines
+            html = html.replace(/\n/g, '<br>');
+            return '<p>' + html + '</p>';
+        }
+
+        function renderSwarmOutput(rawText) {
+            // Split into agent sections by **[Agent]** headers
+            const agentPattern = /\*\*\[(Architect|Researcher|Coder|Tester|Debugger|Executor)\]\*\*/g;
+            const parts = rawText.split(agentPattern);
+
+            // parts[0] = preamble (e.g. "🐝 Swarm Activated")
+            // parts[1] = agent name, parts[2] = content, etc.
+
+            let html = '';
+
+            // Render preamble
+            if (parts[0] && parts[0].trim()) {
+                html += renderMarkdownBlock(parts[0]);
+            }
+
+            // Render each agent section as a card
+            for (let i = 1; i < parts.length; i += 2) {
+                const agentName = parts[i];
+                const content = parts[i + 1] || '';
+                html += renderAgentCard(agentName, content);
+            }
+
+            return html || renderMarkdownBlock(rawText);
+        }
+
+        function renderAgentCard(name, content) {
+            const roleClass = name.toLowerCase();
+            const cardId = 'agent-card-' + roleClass;
+
+            // Tokenize content into blocks
+            const blocks = tokenizeAgentContent(content);
+
+            let bodyHtml = '';
+            for (const block of blocks) {
+                bodyHtml += renderBlock(block);
+            }
+
+            return `
+                <div class="agent-card" id="${cardId}" data-role="${roleClass}">
+                    <div class="agent-card-header" onclick="toggleCard(this)">
+                        <span class="carrot">▼</span>
+                        <span class="inline-status queued" data-role="${roleClass}"></span>
+                        <span class="agent-badge ${roleClass}">${name}</span>
+                        <span style="margin-left:auto;font-size:11px;color:var(--muted);" class="agent-status-text">Queued</span>
+                    </div>
+                    <div class="agent-card-body">${bodyHtml}</div>
+                </div>
+            `;
+        }
+
+        function tokenizeAgentContent(text) {
+            const blocks = [];
+            // Extract tool calls
+            const toolPattern = /```tool\s*\n([\s\S]*?)\n```/g;
+            let lastIndex = 0;
+            let match;
+
+            while ((match = toolPattern.exec(text)) !== null) {
+                // Text before tool call
+                if (match.index > lastIndex) {
+                    const txt = text.slice(lastIndex, match.index).trim();
+                    if (txt) blocks.push({type: 'text', content: txt});
+                }
+                // Tool call
+                try {
+                    const data = JSON.parse(match[1].trim());
+                    blocks.push({type: 'tool_call', data});
+                } catch {
+                    blocks.push({type: 'code', lang: 'json', content: match[1].trim()});
+                }
+                lastIndex = match.index + match[0].length;
+            }
+
+            // Remaining text
+            if (lastIndex < text.length) {
+                const txt = text.slice(lastIndex).trim();
+                if (txt) blocks.push({type: 'text', content: txt});
+            }
+
+            return blocks;
+        }
+
+        function renderBlock(block) {
+            switch (block.type) {
+                case 'text':
+                    return renderMarkdownBlock(block.content);
+                case 'tool_call':
+                    return renderToolCall(block.data);
+                case 'code':
+                    return `<pre><code>${escapeHtml(block.content)}</code></pre>`;
+                default:
+                    return '';
+            }
+        }
+
+        function renderToolCall(data) {
+            const tool = data.tool || 'Tool';
+            const args = data.args || {};
+            let target = '';
+            let icon = '🛠️';
+
+            if (tool === 'write_file') {
+                icon = '📝';
+                target = args.path || '';
+            } else if (tool === 'read_file') {
+                icon = '📖';
+                target = args.path || '';
+            } else if (tool === 'list_files') {
+                icon = '📁';
+                target = args.path || '.';
+            } else if (tool === 'run_command') {
+                icon = '⚡';
+                target = args.command || '';
+            } else if (tool === 'search_files') {
+                icon = '🔍';
+                target = args.query || '';
+            } else if (tool === 'web_search') {
+                icon = '🌐';
+                target = args.query || '';
+            }
+
+            const summary = target ? `${tool} → ${target}` : tool;
+
+            return `
+                <div class="tool-summary">
+                    <span class="tool-summary-icon">${icon}</span>
+                    <span class="tool-summary-name">${escapeHtml(tool)}</span>
+                    ${target ? `<span class="tool-summary-target">→ ${escapeHtml(target)}</span>` : ''}
+                </div>
+            `;
+        }
+
+        function renderMarkdownBlock(text) {
+            let html = escapeHtml(text);
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = html.replace(/\n/g, '<br>');
+            return '<p>' + html + '</p>';
+        }
+
+        function updateInlineStatus(role, status) {
+            const card = document.querySelector(`.agent-card[data-role="${role}"]`);
+            if (card) {
+                const dot = card.querySelector('.inline-status');
+                const text = card.querySelector('.agent-status-text');
+                if (dot) {
+                    dot.className = 'inline-status ' + (status || 'queued');
+                }
+                if (text) {
+                    text.textContent = (status || 'queued').toUpperCase();
+                }
+            }
+        }
+
+        // Toggle functions (exposed to window)
+        window.toggleCard = function(header) {
+            const body = header.nextElementSibling;
+            const carrot = header.querySelector('.carrot');
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+                carrot.textContent = '▼';
+            } else {
+                body.classList.add('collapsed');
+                header.classList.add('collapsed');
+                carrot.textContent = '▼';
+            }
+        };
+
+        function resolveArtifactPath(relPath) {
+            const ws = workspacePath.textContent;
+            if (!ws || ws === '—') return relPath;
+            // Normalize relative path
+            let p = relPath.replace(/^\.\//, '').replace(/\//g, '\\');
+            return ws + '\\' + p;
+        }
+
+        async function openVSCode(path) {
+            // If running inside VS Code: webview, use the injected bridge
+            if (typeof window.openVSCodeFile === 'function' && typeof window.openVSCodeFolder === 'function') {
+                // Use heuristic: if path looks like a file (has extension), open as file; else folder
+                const looksLikeFile = /\.[a-zA-Z0-9]{1,10}$/.test(path);
+                if (looksLikeFile) {
+                    window.openVSCodeFile(path);
+                } else {
+                    window.openVSCodeFolder(path);
+                }
+                return;
+            }
+            // Call backend to spawn VS Code: (avoids browser protocol issues)
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 8000);
+                const resp = await fetch(API_URL + '/vscode/open', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path }),
+                    signal: controller.signal
+                });
+                clearTimeout(timer);
+                const data = await resp.json();
+                if (data.ok) {
+                    // success
+                } else {
+                    alert('Could not open VS Code: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('Failed to open VS Code: ' + err.message);
+            }
+        }
+        // Expose to global scope so inline onclick handlers can find it
+        window.openVSCode = openVSCode;
+
+        function extractArtifacts(text) {
+            const artifacts = [];
+            const regex = /```tool\s*\n([\s\S]*?)\n```/g;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                try {
+                    const data = JSON.parse(match[1].trim());
+                    if (data.tool === 'write_file' && data.args && data.args.path && data.args.path !== '.' && data.args.path !== '') {
+                        artifacts.push(data.args.path);
+                    }
+                } catch (_) {}
+            }
+            return [...new Set(artifacts)];
+        }
+
+        function buildArtifactPanel(artifacts) {
+            if (!artifacts.length) return '';
+            const ws = workspacePath.textContent || '.';
+            let html = '<div class="artifact-panel-header">' +
+                '<div class="artifact-panel-title">📁 Files Created</div>' +
+                '<button class="artifact-open-btn" onclick="openVSCode(\'' + escapeHtml(ws).replace(/\\/g, '\\\\') + '\')" title="Open workspace in VS Code:">Open in VS Code:</button>' +
+                '</div><div class="artifact-list">';
+            for (const a of artifacts) {
+                const absPath = resolveArtifactPath(a);
+                html += '<button class="artifact-item" onclick="openVSCode(\'' + escapeHtml(absPath).replace(/\\/g, '\\\\') + '\')" title="Click to open in VS Code:">' +
+                    escapeHtml(a) + '<span class="artifact-hint">Click to open</span></button>';
+            }
+            html += '</div>';
+            return html;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || isStreaming) return;
+            chatInput.value = '';
+            addMessage(text, 'user');
+            isStreaming = true;
+            sendBtn.disabled = true;
+
+            const msgEl = document.createElement('div');
+            msgEl.className = 'message assistant';
+            chatMessages.appendChild(msgEl);
+
+            let rawBuffer = '';
+            let artifactEl = null;
+
+            try {
+                const resp = await fetch(API_URL + '/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, mode: currentMode, session_id: currentSessionId, autonomy_level: currentMode === 'swarm' ? 'autopilot' : 'default' }),
+                    signal: AbortSignal.timeout(600000)
+                });
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed.startsWith('data: ')) continue;
+                        try {
+                            const data = JSON.parse(trimmed.slice(6));
+                            if (data.type === 'text' && data.chunk) {
+                                rawBuffer += data.chunk;
+                                msgEl.innerHTML = renderSwarmOutput(rawBuffer);
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+                            } else if (data.type === 'done') {
+                                isStreaming = false;
+                                sendBtn.disabled = false;
+                                // Persist assistant message
+                                sessionMessages.push({ text: rawBuffer, role: 'assistant', time: Date.now() });
+                                persistCurrentSession();
+                                // Show artifacts
+                                const artifacts = extractArtifacts(rawBuffer);
+                                if (artifacts.length > 0 && !artifactEl) {
+                                    artifactEl = document.createElement('div');
+                                    artifactEl.className = 'artifact-panel';
+                                    artifactEl.innerHTML = buildArtifactPanel(artifacts);
+                                    msgEl.appendChild(artifactEl);
+                                }
+                            } else if (data.type === 'error') {
+                                rawBuffer += '\n[Error: ' + (data.message || 'Unknown') + ']';
+                                msgEl.innerHTML = renderSwarmOutput(rawBuffer);
+                                isStreaming = false;
+                                sendBtn.disabled = false;
+                            }
+                        } catch (_) {}
+                    }
+                }
+            } catch (err) {
+                msgEl.innerHTML = '<p>[Error: ' + escapeHtml(err.message || 'Failed to connect') + ']</p>';
+                isStreaming = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ── Auto-resize textarea ──
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        });
+
+        function escapeHtml(text) {
+            if (text == null) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load existing history or show welcome
+        const existingHistory = loadAllHistory();
+        const lastSessionId = Object.keys(existingHistory).sort((a, b) => existingHistory[b].updated - existingHistory[a].updated)[0];
+        if (lastSessionId && existingHistory[lastSessionId].messages && existingHistory[lastSessionId].messages.length > 0) {
+            restoreSession(lastSessionId);
+        } else {
+            addMessage('OrbitScribe Command Deck is online. Backend is connected. Select a mode and send a message to begin.', 'system');
+        }
+        renderHistory();
+
+        // ── Panel Management: collapse/resize ──
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const detailToggle = document.getElementById('detailToggle');
+        const resizerLeft = document.getElementById('resizerLeft');
+        const resizerRight = document.getElementById('resizerRight');
+
+        window.toggleSidebar = function() {
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            localStorage.setItem('orbit_sidebar_collapsed_v2', isCollapsed);
+            if (!isCollapsed) {
+                const saved = localStorage.getItem('orbit_sidebar_width_v2');
+                if (saved) sidebar.style.width = saved + 'px';
+                else sidebar.style.width = '280px';
+            } else {
+                sidebar.style.width = '';
+            }
+        }
+
+        window.toggleDetailPanel = function() {
+            const isCollapsed = detailPanel.classList.toggle('collapsed');
+            localStorage.setItem('orbit_detail_collapsed_v2', isCollapsed);
+            if (!isCollapsed) {
+                const saved = localStorage.getItem('orbit_detail_width_v2');
+                if (saved) detailPanel.style.width = saved + 'px';
+                else detailPanel.style.width = '320px';
+            } else {
+                detailPanel.style.width = '';
+            }
+        };
+
+        if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+        if (detailToggle) detailToggle.addEventListener('click', toggleDetailPanel);
+
+        // Restore collapse state (default expanded, clear stale keys)
+        localStorage.removeItem('orbit_sidebar_collapsed');
+        localStorage.removeItem('orbit_detail_collapsed');
+        if (localStorage.getItem('orbit_sidebar_collapsed_v2') === 'true') {
+            sidebar.classList.add('collapsed');
+        }
+        if (localStorage.getItem('orbit_detail_collapsed_v2') === 'true') {
+            detailPanel.classList.add('collapsed');
+        }
+
+        // Restore widths
+        const savedSidebarWidth = localStorage.getItem('orbit_sidebar_width_v2');
+        const savedDetailWidth = localStorage.getItem('orbit_detail_width_v2');
+        if (savedSidebarWidth && !sidebar.classList.contains('collapsed')) {
+            sidebar.style.width = savedSidebarWidth + 'px';
+        }
+        if (savedDetailWidth && !detailPanel.classList.contains('collapsed')) {
+            detailPanel.style.width = savedDetailWidth + 'px';
+        }
+
+        // Resizer drag logic
+        let activeResizer = null;
+        let startX = 0;
+        let startWidth = 0;
+        let targetPanel = null;
+
+        function startResize(e, panel, isLeftResizer) {
+            activeResizer = e.target;
+            startX = e.clientX;
+            startWidth = panel.offsetWidth;
+            targetPanel = panel;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            activeResizer.classList.add('dragging');
+            e.preventDefault();
+        }
+
+        function doResize(e) {
+            if (!activeResizer || !targetPanel) return;
+            const delta = e.clientX - startX;
+            const newWidth = activeResizer.id === 'resizerLeft'
+                ? startWidth + delta
+                : startWidth - delta;
+            const minWidth = 44;
+            const maxWidth = 600;
+            if (newWidth >= minWidth && newWidth <= maxWidth) {
+                targetPanel.style.width = newWidth + 'px';
+                // If dragging open while collapsed, uncollapse
+                if (targetPanel.classList.contains('collapsed')) {
+                    targetPanel.classList.remove('collapsed');
+                    localStorage.setItem(
+                        targetPanel.id === 'sidebar' ? 'orbit_sidebar_collapsed_v2' : 'orbit_detail_collapsed_v2',
+                        'false'
+                    );
+                }
+            }
+        }
+
+        function stopResize() {
+            if (!activeResizer) return;
+            if (targetPanel) {
+                const key = targetPanel.id === 'sidebar' ? 'orbit_sidebar_width_v2' : 'orbit_detail_width_v2';
+                localStorage.setItem(key, targetPanel.offsetWidth);
+            }
+            activeResizer.classList.remove('dragging');
+            activeResizer = null;
+            targetPanel = null;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+
+        if (resizerLeft) {
+            resizerLeft.addEventListener('mousedown', (e) => startResize(e, sidebar, true));
+        }
+        if (resizerRight) {
+            resizerRight.addEventListener('mousedown', (e) => startResize(e, detailPanel, false));
+        }
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+
+    })();
+    </script>
+</body>
+</html>

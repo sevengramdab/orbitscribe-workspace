@@ -1,0 +1,22 @@
+[auto_resume] Context loaded (265 chars)
+[auto_resume] Waiting up to 20s for VS Code: window...
+[auto_resume] Window found: 'Welcome - voice to text engine - Visual Studio Code' (1696x1018)
+[auto_resume] Waiting 10s for extensions...
+[auto_resume] Waiting up to 30s for backend...
+[auto_resume] Backend is online.
+[auto_resume] Coordinates: {'history': (280, 100), 'session': (280, 150), 'input': (150, 938), 'kimi_icon': (25, 183)}
+[auto_resume] Opening Kimi via Command Palette...
+[auto_resume] Sent keys: open sidebar command
+[auto_resume] Screenshot: C:\Users\Shadow\voice to text engine\tools\..\screenshots\01_after_open_sidebar.png
+[auto_resume] Clicked History button (attempt 1) at (272, 92)
+[auto_resume] Screenshot: C:\Users\Shadow\voice to text engine\tools\..\screenshots\02_after_history_click_1.png
+[auto_resume] Clicked most recent session at (272, 142)
+[auto_resume] Screenshot: C:\Users\Shadow\voice to text engine\tools\..\screenshots\03_after_session_click.png
+[auto_resume] Focusing Kimi input via Command Palette...
+[auto_resume] Sent keys: focus input command
+[auto_resume] Screenshot: C:\Users\Shadow\voice to text engine\tools\..\screenshots\04_after_input_focus.png
+[auto_resume] Typing context into chat input...
+[auto_resume] Sent keys: context message
+[auto_resume] Message sent!
+[auto_resume] Screenshot: C:\Users\Shadow\voice to text engine\tools\..\screenshots\05_after_send.png
+[auto_resume] Done.

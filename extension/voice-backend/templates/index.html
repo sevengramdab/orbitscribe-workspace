@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>OrbitScribe</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --panel: rgba(26, 29, 38, 0.6);
+            --panel-solid: #1a1d26;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --accent-light: #a78bfa;
+            --accent-dark: #7c3aed;
+            --recording: #f97316;
+            --recording-light: #fb923c;
+            --recording-dark: #ea580c;
+            --recording-glow: rgba(249, 115, 22, 0.4);
+            --success: #22c55e;
+            --border: rgba(45, 49, 66, 0.5);
+            --border-solid: #2d3142;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --splash-from: #0a0c14;
+            --splash-mid: #111320;
+            --splash-to: #0a0c14;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: opacity 0.6s ease;
+            opacity: 0;
+        }
+        .bg-layer.active {
+            opacity: 1;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: none;
+        }
+
+        /* Splash screen */
+        .splash {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--splash-from) 0%, var(--splash-mid) 50%, var(--splash-to) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10000;
+            animation: splashFadeOut 0.8s ease-in-out 5s forwards;
+        }
+
+        .splash-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1.5rem;
+            max-width: 320px;
+            opacity: 0;
+            animation: splashActionsIn 0.5s ease 1.2s forwards;
+        }
+
+        .splash-btn {
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(15, 17, 23, 0.5);
+            color: var(--text);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .splash-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .splash-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            backdrop-filter: none;
+        }
+        .splash-btn.primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #fff;
+        }
+        .splash-btn.swarm {
+            border-color: rgba(236, 72, 153, 0.4);
+            color: #f472b6;
+        }
+        .splash-btn.swarm:hover {
+            border-color: #ec4899;
+            color: #f472b6;
+            box-shadow: 0 0 12px rgba(236, 72, 153, 0.25);
+        }
+
+        @keyframes splashActionsIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            animation: splashPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 16px var(--accent-glow, rgba(139,92,246,0.35)));
+        }
+
+        .splash-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin: 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: splashShine 3s linear infinite;
+        }
+
+        .splash-subtitle {
+            font-size: 0.7rem;
+            color: #475569;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            margin-top: 0.6rem;
+        }
+
+        @keyframes splashFadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        .exit-splash {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--splash-from) 0%, var(--splash-mid) 50%, var(--splash-to) 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10001;
+            animation: exitFadeIn 0.5s ease forwards;
+        }
+        .exit-splash.active {
+            display: flex;
+        }
+        @keyframes exitFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes splashSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+
+        @keyframes splashShine {
+            to { background-position: 200% center; }
+        }
+
+        .mic-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .mic-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .mic-toggle-row .toggle-switch {
+            width: 32px;
+            height: 18px;
+        }
+        .mic-toggle-row .toggle-slider:before {
+            width: 14px;
+            height: 14px;
+            left: 2px;
+            bottom: 2px;
+        }
+        .mic-toggle-row input:checked + .toggle-slider:before {
+            transform: translateX(14px);
+        }
+
+        .mic-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .mic-btn:hover:not(:disabled) {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.45));
+        }
+
+        .mic-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .mic-btn.recording,
+        .mic-btn.recording:hover,
+        .mic-btn.recording:hover:not(:disabled) {
+            animation: pulse 1.4s infinite;
+            filter: drop-shadow(0 0 14px rgba(249, 115, 22, 0.5));
+        }
+
+        .mic-btn.processing,
+        .mic-btn.processing:hover,
+        .mic-btn.processing:hover:not(:disabled) {
+            animation: pulse 1.4s infinite;
+            filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.5));
+        }
+
+        .mic-btn.result,
+        .mic-btn.result:hover,
+        .mic-btn.result:hover:not(:disabled) {
+            filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.45));
+        }
+
+        .mic-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .mic-btn svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .status {
+            display: none;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .panel h2 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+        .settings-toggle:hover {
+            background: var(--panel);
+            color: var(--text);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .settings-panel {
+            margin-bottom: 0.5rem;
+            animation: slideDown 0.25s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Swarm Panel */
+        .swarm-panel {
+            border: 1px solid rgba(236, 72, 153, 0.25);
+            animation: slideDown 0.3s ease;
+        }
+        .swarm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .swarm-header h2 {
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        .swarm-status {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+            font-weight: 600;
+        }
+        .swarm-status.running {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            animation: pulse 1.5s infinite;
+        }
+        .swarm-agents {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 0.6rem;
+        }
+        .swarm-agent-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .swarm-agent-badge.done {
+            background: rgba(34, 197, 94, 0.12);
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+        .swarm-agent-badge.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .swarm-output {
+            font-size: 0.8rem;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            white-space: pre-wrap;
+        }
+        .swarm-output .agent-result {
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .swarm-output .agent-result:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .swarm-output .agent-name {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .latest-result {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            min-height: 3rem;
+            word-break: break-word;
+        }
+
+        .latest-result.empty {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .error-msg {
+            color: var(--recording);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            min-height: 0;
+        }
+        .error-msg:empty {
+            display: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(15, 17, 23, 0.5);
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        .btn.primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #fff;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-track { background: transparent; }
+        .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid var(--border);
+            gap: 0.75rem;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+
+        .history-text {
+            flex: 1;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .history-time {
+            color: var(--muted);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-top: 0.15rem;
+        }
+
+        .empty-history {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-style: italic;
+            padding: 0.5rem 0;
+        }
+
+        /* Toggle switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border);
+            border-radius: 24px;
+            transition: .2s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .2s;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Textarea and select */
+        .form-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(15, 17, 23, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-select {
+            width: 100%;
+            background: rgba(15, 17, 23, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.6rem 0.75rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.4rem 0;
+        }
+
+        .slider-row label {
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .slider-track {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider-track::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--panel);
+        }
+
+        .slider-track::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--panel);
+        }
+
+        .slider-value {
+            font-size: 0.85rem;
+            color: var(--muted);
+            min-width: 3.5rem;
+            text-align: right;
+        }
+
+        .meter-container {
+            width: 100%;
+            max-width: 280px;
+            margin-top: 0.75rem;
+        }
+
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .meter-track {
+            width: 100%;
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+            border-radius: 5px;
+            transition: width 0.08s linear;
+        }
+
+        .meter-threshold {
+            position: relative;
+            width: 100%;
+            height: 0;
+        }
+
+        .meter-threshold-line {
+            position: absolute;
+            top: -10px;
+            width: 2px;
+            height: 10px;
+            background: var(--text);
+            opacity: 0.6;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Theme selector */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .theme-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+        .theme-btn.active {
+            border-color: var(--text);
+            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+        }
+
+        /* Background controls */
+        .bg-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .bg-controls input[type="file"] {
+            display: none;
+        }
+
+        /* Float mode: hide header text */
+        body.float-mode header {
+            display: none;
+        }
+        body.float-mode {
+            padding-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="bgLayer" class="bg-layer"></div>
+    <!-- Splash Screen -->
+    <div id="splash" class="splash">
+        <svg class="splash-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="var(--accent-light)" stop-opacity="0.1"/>
+            </linearGradient>
+          </defs>
+          <circle cx="256" cy="256" r="244" fill="var(--bg)" stroke="var(--accent)" stroke-width="3" opacity="0.9"/>
+          <circle cx="256" cy="256" r="244" fill="url(#glow)" opacity="0.3"/>
+          <g fill="none" stroke="var(--accent-dark)" stroke-width="2.5" opacity="0.8">
+            <g transform="rotate(25 256 256)">
+              <ellipse cx="256" cy="256" rx="220" ry="180">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="24s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+            <g transform="rotate(-15 256 256)">
+              <ellipse cx="256" cy="256" rx="200" ry="190">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="32s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+            <g transform="rotate(45 256 256)">
+              <ellipse cx="256" cy="256" rx="210" ry="170">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="40s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+          </g>
+          <g fill="white">
+            <circle cx="356" cy="166" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="2.4s" repeatCount="indefinite" begin="0s"/>
+            </circle>
+            <circle cx="446" cy="256" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="3.1s" repeatCount="indefinite" begin="0.7s"/>
+            </circle>
+            <circle cx="356" cy="346" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="2.7s" repeatCount="indefinite" begin="1.4s"/>
+            </circle>
+            <circle cx="166" cy="156" r="2.5" opacity="0">
+              <animate attributeName="opacity" values="0;0.7;0" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <circle cx="156" cy="266" r="2" opacity="0">
+              <animate attributeName="opacity" values="0;0.7;0" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+            </circle>
+            <circle cx="176" cy="356" r="2.5" opacity="0">
+              <animate attributeName="opacity" values="0;0.8;0" dur="3.2s" repeatCount="indefinite" begin="2s"/>
+            </circle>
+          </g>
+          <circle cx="356" cy="166" r="4" fill="var(--accent-light)"/>
+          <circle cx="446" cy="256" r="4" fill="var(--accent-light)"/>
+          <circle cx="356" cy="346" r="4" fill="var(--accent-light)"/>
+          <rect x="228" y="168" width="56" height="90" rx="28" fill="white"/>
+          <g stroke="#c8d2e6" stroke-width="1.5" opacity="0.5">
+            <line x1="240" y1="192" x2="272" y2="192"/>
+            <line x1="240" y1="204" x2="272" y2="204"/>
+            <line x1="240" y1="216" x2="272" y2="216"/>
+            <line x1="240" y1="228" x2="272" y2="228"/>
+          </g>
+          <path d="M 212 250 A 44 26 0 0 0 300 250" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+          <line x1="256" y1="276" x2="256" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+          <line x1="238" y1="294" x2="274" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <h1 class="splash-title">OrbitScribe</h1>
+        <p class="splash-subtitle">Created by ORBSTUDIO</p>
+        <div class="splash-actions" id="splashActions">
+            <button class="splash-btn primary" onclick="pickMode('float')">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                Floating
+            </button>
+            <button class="splash-btn" onclick="pickMode('docked_left')">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h4V6H4zm6 0v12h10V6H10z"/></svg>
+                Dock Left
+            </button>
+            <button class="splash-btn" onclick="pickMode('docked_right')">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm10 2v12h6V6h-6zm-8 0v12h4V6H6z"/></svg>
+                Dock Right
+            </button>
+            <button class="splash-btn swarm" onclick="activateSwarm()">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Multi-Agent
+            </button>
+        </div>
+    </div>
+
+    <div id="exitSplash" class="exit-splash">
+        <svg class="splash-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="glowExit" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="var(--accent-light)" stop-opacity="0.1"/>
+            </linearGradient>
+          </defs>
+          <circle cx="256" cy="256" r="244" fill="var(--bg)" stroke="var(--accent)" stroke-width="3" opacity="0.9"/>
+          <circle cx="256" cy="256" r="244" fill="url(#glowExit)" opacity="0.3"/>
+          <g fill="none" stroke="var(--accent-dark)" stroke-width="2.5" opacity="0.8">
+            <g transform="rotate(25 256 256)">
+              <ellipse cx="256" cy="256" rx="220" ry="180">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="24s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+            <g transform="rotate(-15 256 256)">
+              <ellipse cx="256" cy="256" rx="200" ry="190">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="32s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+            <g transform="rotate(45 256 256)">
+              <ellipse cx="256" cy="256" rx="210" ry="170">
+                <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="40s" repeatCount="indefinite"/>
+              </ellipse>
+            </g>
+          </g>
+          <g fill="white">
+            <circle cx="356" cy="166" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="2.4s" repeatCount="indefinite" begin="0s"/>
+            </circle>
+            <circle cx="446" cy="256" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="3.1s" repeatCount="indefinite" begin="0.7s"/>
+            </circle>
+            <circle cx="356" cy="346" r="3" opacity="0">
+              <animate attributeName="opacity" values="0;0.9;0" dur="2.7s" repeatCount="indefinite" begin="1.4s"/>
+            </circle>
+            <circle cx="166" cy="156" r="2.5" opacity="0">
+              <animate attributeName="opacity" values="0;0.7;0" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <circle cx="156" cy="266" r="2" opacity="0">
+              <animate attributeName="opacity" values="0;0.7;0" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+            </circle>
+            <circle cx="176" cy="356" r="2.5" opacity="0">
+              <animate attributeName="opacity" values="0;0.8;0" dur="3.2s" repeatCount="indefinite" begin="2s"/>
+            </circle>
+          </g>
+          <circle cx="356" cy="166" r="4" fill="var(--accent-light)"/>
+          <circle cx="446" cy="256" r="4" fill="var(--accent-light)"/>
+          <circle cx="356" cy="346" r="4" fill="var(--accent-light)"/>
+          <rect x="228" y="168" width="56" height="90" rx="28" fill="white"/>
+          <g stroke="#c8d2e6" stroke-width="1.5" opacity="0.5">
+            <line x1="240" y1="192" x2="272" y2="192"/>
+            <line x1="240" y1="204" x2="272" y2="204"/>
+            <line x1="240" y1="216" x2="272" y2="216"/>
+            <line x1="240" y1="228" x2="272" y2="228"/>
+          </g>
+          <path d="M 212 250 A 44 26 0 0 0 300 250" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+          <line x1="256" y1="276" x2="256" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+          <line x1="238" y1="294" x2="274" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <h1 class="splash-title">See You Soon</h1>
+        <p class="splash-subtitle">OrbitScribe is shutting down</p>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>OrbitScribe</h1>
+            <p>Press the mic button, speak, and your words appear here</p>
+        </header>
+
+        <div class="mic-section">
+            <button id="micBtn" class="mic-btn" title="Click to record">
+                <svg id="micIdle" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="glowIdle" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="var(--accent-light)" stop-opacity="0.1"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="256" cy="256" r="244" fill="var(--bg)" stroke="var(--accent)" stroke-width="3" opacity="0.9"/>
+                  <circle cx="256" cy="256" r="244" fill="url(#glowIdle)" opacity="0.3"/>
+                  <g fill="none" stroke="var(--accent-dark)" stroke-width="2.5" opacity="0.8">
+                    <g transform="rotate(25 256 256)">
+                      <ellipse cx="256" cy="256" rx="220" ry="180">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="24s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                    <g transform="rotate(-15 256 256)">
+                      <ellipse cx="256" cy="256" rx="200" ry="190">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="32s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                    <g transform="rotate(45 256 256)">
+                      <ellipse cx="256" cy="256" rx="210" ry="170">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="40s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                  </g>
+                  <g fill="white">
+                    <circle cx="356" cy="166" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="2.4s" repeatCount="indefinite" begin="0s"/>
+                    </circle>
+                    <circle cx="446" cy="256" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="3.1s" repeatCount="indefinite" begin="0.7s"/>
+                    </circle>
+                    <circle cx="356" cy="346" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="2.7s" repeatCount="indefinite" begin="1.4s"/>
+                    </circle>
+                    <circle cx="166" cy="156" r="2.5" opacity="0">
+                      <animate attributeName="opacity" values="0;0.7;0" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+                    </circle>
+                    <circle cx="156" cy="266" r="2" opacity="0">
+                      <animate attributeName="opacity" values="0;0.7;0" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+                    </circle>
+                    <circle cx="176" cy="356" r="2.5" opacity="0">
+                      <animate attributeName="opacity" values="0;0.8;0" dur="3.2s" repeatCount="indefinite" begin="2s"/>
+                    </circle>
+                  </g>
+                  <circle cx="356" cy="166" r="4" fill="var(--accent-light)"/>
+                  <circle cx="446" cy="256" r="4" fill="var(--accent-light)"/>
+                  <circle cx="356" cy="346" r="4" fill="var(--accent-light)"/>
+                  <rect x="228" y="168" width="56" height="90" rx="28" fill="white"/>
+                  <g stroke="#c8d2e6" stroke-width="1.5" opacity="0.5">
+                    <line x1="240" y1="192" x2="272" y2="192"/>
+                    <line x1="240" y1="204" x2="272" y2="204"/>
+                    <line x1="240" y1="216" x2="272" y2="216"/>
+                    <line x1="240" y1="228" x2="272" y2="228"/>
+                  </g>
+                  <path d="M 212 250 A 44 26 0 0 0 300 250" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                  <line x1="256" y1="276" x2="256" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                  <line x1="238" y1="294" x2="274" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+                <svg id="micRecording" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+                  <defs>
+                    <linearGradient id="glowRec" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="var(--recording)" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="var(--recording-light)" stop-opacity="0.1"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="256" cy="256" r="244" fill="var(--bg)" stroke="var(--recording)" stroke-width="3" opacity="0.9"/>
+                  <circle cx="256" cy="256" r="244" fill="url(#glowRec)" opacity="0.3"/>
+                  <g fill="none" stroke="var(--recording-dark)" stroke-width="2.5" opacity="0.8">
+                    <g transform="rotate(25 256 256)">
+                      <ellipse cx="256" cy="256" rx="220" ry="180">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="24s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                    <g transform="rotate(-15 256 256)">
+                      <ellipse cx="256" cy="256" rx="200" ry="190">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="32s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                    <g transform="rotate(45 256 256)">
+                      <ellipse cx="256" cy="256" rx="210" ry="170">
+                        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="40s" repeatCount="indefinite"/>
+                      </ellipse>
+                    </g>
+                  </g>
+                  <g fill="white">
+                    <circle cx="356" cy="166" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="2.4s" repeatCount="indefinite" begin="0s"/>
+                    </circle>
+                    <circle cx="446" cy="256" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="3.1s" repeatCount="indefinite" begin="0.7s"/>
+                    </circle>
+                    <circle cx="356" cy="346" r="3" opacity="0">
+                      <animate attributeName="opacity" values="0;0.9;0" dur="2.7s" repeatCount="indefinite" begin="1.4s"/>
+                    </circle>
+                    <circle cx="166" cy="156" r="2.5" opacity="0">
+                      <animate attributeName="opacity" values="0;0.7;0" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+                    </circle>
+                    <circle cx="156" cy="266" r="2" opacity="0">
+                      <animate attributeName="opacity" values="0;0.7;0" dur="2.8s" repeatCount="indefinite" begin="1.2s"/>
+                    </circle>
+                    <circle cx="176" cy="356" r="2.5" opacity="0">
+                      <animate attributeName="opacity" values="0;0.8;0" dur="3.2s" repeatCount="indefinite" begin="2s"/>
+                    </circle>
+                  </g>
+                  <circle cx="356" cy="166" r="4" fill="var(--recording-light)"/>
+                  <circle cx="446" cy="256" r="4" fill="var(--recording-light)"/>
+                  <circle cx="356" cy="346" r="4" fill="var(--recording-light)"/>
+                  <rect x="228" y="168" width="56" height="90" rx="28" fill="white"/>
+                  <g stroke="#c8d2e6" stroke-width="1.5" opacity="0.5">
+                    <line x1="240" y1="192" x2="272" y2="192"/>
+                    <line x1="240" y1="204" x2="272" y2="204"/>
+                    <line x1="240" y1="216" x2="272" y2="216"/>
+                    <line x1="240" y1="228" x2="272" y2="228"/>
+                  </g>
+                  <path d="M 212 250 A 44 26 0 0 0 300 250" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                  <line x1="256" y1="276" x2="256" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                  <line x1="238" y1="294" x2="274" y2="294" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <div id="status" class="status">Ready</div>
+            <div id="errorMsg" class="error-msg"></div>
+            <div class="mic-toggle-row">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoTypeMicToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span>Auto-type</span>
+            </div>
+        </div>
+
+        <div class="panel" id="windowPanel" style="display:none;">
+            <h2>Window Mode</h2>
+            <div class="actions">
+                <button class="btn mode-btn" onclick="switchMode('float')">Floating</button>
+                <button class="btn mode-btn" onclick="switchMode('docked_left')">Dock Left</button>
+                <button class="btn mode-btn" onclick="switchMode('docked_right')">Dock Right</button>
+                <button class="btn mode-btn" onclick="switchMode('fullscreen')">Fullscreen</button>
+                <button class="btn" onclick="closeWindow()">Close</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Latest Result</h2>
+            <div id="latestResult" class="latest-result empty">Your transcribed text will appear here...</div>
+            <div class="actions">
+                <button id="copyBtn" class="btn" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    Copy
+                </button>
+                <button id="typeBtn" class="btn" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+                    Type
+                </button>
+                <button id="clearBtn" class="btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- Multi-Agent Panel -->
+        <div class="panel swarm-panel" id="swarmPanel" style="display:none;">
+            <div class="swarm-header">
+                <h2>🐝 Multi-Agent</h2>
+                <span class="swarm-status" id="swarmStatus">Idle</span>
+            </div>
+            <div class="swarm-agents" id="swarmAgents"></div>
+            <div class="swarm-output" id="swarmOutput"></div>
+            <button class="btn secondary" id="swarmCloseBtn" style="margin-top:0.6rem;width:100%;">Close</button>
+        </div>
+
+        <button id="ttsToggle" class="btn settings-toggle">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            Text to Speech
+        </button>
+
+        <div class="panel settings-panel" id="ttsPanel" style="display:none;">
+            <h2>Text to Speech</h2>
+            <select id="voiceSelect" class="form-select">
+                <option value="">Loading voices...</option>
+            </select>
+            <textarea id="ttsText" class="form-textarea" placeholder="Paste or type text here, then click Speak..."></textarea>
+            <div class="actions" style="margin-top:0.5rem;">
+                <button id="speakBtn" class="btn primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    Speak
+                </button>
+            </div>
+        </div>
+
+        <button id="historyToggle" class="btn settings-toggle">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            History
+        </button>
+
+        <div class="panel settings-panel" id="historyPanel" style="display:none;">
+            <h2>History</h2>
+            <ul id="historyList" class="history-list">
+                <li class="empty-history">No transcriptions yet</li>
+            </ul>
+        </div>
+
+        <!-- Settings toggle button at bottom -->
+        <button id="settingsToggle" class="btn settings-toggle">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+            Settings
+        </button>
+
+        <div class="panel settings-panel" id="settingsPanel" style="display:none;">
+            <h2>Settings</h2>
+            <div class="toggle-row">
+                <span class="toggle-label">Auto-copy to clipboard</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoCopyToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <span class="toggle-label">Auto-type into active window</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoTypeToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="slider-row">
+                <label for="sensitivitySlider">Threshold</label>
+                <input type="range" id="sensitivitySlider" class="slider-track" min="50" max="2000" value="300">
+                <span id="sensitivityValue" class="slider-value">300</span>
+            </div>
+            <div class="actions" style="margin-top:0.5rem;">
+                <button id="calibrateBtn" class="btn">Auto Calibrate</button>
+                <span id="calibrateStatus" style="font-size:0.8rem;color:var(--muted);margin-left:auto;"></span>
+            </div>
+
+            <div style="margin-top:0.75rem;">
+                <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.5rem;font-weight:600;">Theme</h2>
+                <div class="theme-grid" id="themeGrid">
+                    <button class="theme-btn active" data-theme="orbit" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);" title="Orbit (Purple)"></button>
+                    <button class="theme-btn" data-theme="neon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);" title="Neon (Cyan)"></button>
+                    <button class="theme-btn" data-theme="ember" style="background:linear-gradient(135deg,#ef4444,#f87171);" title="Ember (Red)"></button>
+                    <button class="theme-btn" data-theme="forest" style="background:linear-gradient(135deg,#22c55e,#4ade80);" title="Forest (Green)"></button>
+                    <button class="theme-btn" data-theme="sunset" style="background:linear-gradient(135deg,#f59e0b,#fb923c);" title="Sunset (Gold)"></button>
+                </div>
+            </div>
+
+            <div style="margin-top:0.75rem;">
+                <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.5rem;font-weight:600;">Background</h2>
+                <div class="bg-controls">
+                    <input type="file" id="bgFileInput" accept="image/*">
+                    <button id="bgChooseBtn" class="btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                        Choose Image
+                    </button>
+                    <button id="bgClearBtn" class="btn">Clear</button>
+                </div>
+            </div>
+
+            <div class="actions" style="margin-top:0.5rem;">
+                <button id="showConsoleBtn" class="btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zM8 10h2v2H8v-2zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5v-2h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+                    Show Console
+                </button>
+                <button id="testTypeBtn" class="btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    Test Type
+                </button>
+                <button id="shutdownSettingsBtn" class="btn" style="color:#ef4444;border-color:#ef4444;">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+                    Shutdown
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            OrbitScribe &middot; Created by ORBSTUDIO
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const statusEl = document.getElementById('status');
+        const latestResultEl = document.getElementById('latestResult');
+        const copyBtn = document.getElementById('copyBtn');
+        const typeBtn = document.getElementById('typeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const historyList = document.getElementById('historyList');
+        const toast = document.getElementById('toast');
+        const autoCopyToggle = document.getElementById('autoCopyToggle');
+        const autoTypeToggle = document.getElementById('autoTypeToggle');
+        const autoTypeMicToggle = document.getElementById('autoTypeMicToggle');
+        const sensitivitySlider = document.getElementById('sensitivitySlider');
+        const sensitivityValue = document.getElementById('sensitivityValue');
+        const errorMsg = document.getElementById('errorMsg');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const ttsText = document.getElementById('ttsText');
+        const speakBtn = document.getElementById('speakBtn');
+        const calibrateBtn = document.getElementById('calibrateBtn');
+        const calibrateStatus = document.getElementById('calibrateStatus');
+
+        let currentText = '';
+        let isRecording = false;
+        let currentMode = 'float';
+
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        settingsToggle.addEventListener('click', () => {
+            const show = settingsPanel.style.display === 'none';
+            settingsPanel.style.display = show ? '' : 'none';
+            settingsToggle.style.opacity = show ? '1' : '0.6';
+        });
+
+        const ttsToggle = document.getElementById('ttsToggle');
+        const ttsPanel = document.getElementById('ttsPanel');
+        ttsToggle.addEventListener('click', () => {
+            const show = ttsPanel.style.display === 'none';
+            ttsPanel.style.display = show ? '' : 'none';
+            ttsToggle.style.opacity = show ? '1' : '0.6';
+        });
+
+        const historyToggle = document.getElementById('historyToggle');
+        const historyPanel = document.getElementById('historyPanel');
+        historyToggle.addEventListener('click', () => {
+            const show = historyPanel.style.display === 'none';
+            historyPanel.style.display = show ? '' : 'none';
+            historyToggle.style.opacity = show ? '1' : '0.6';
+        });
+
+        let toastTimeout;
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function setStatus(state, msg) {
+            if (statusEl) statusEl.className = 'status';
+            if (micBtn) micBtn.classList.remove('recording', 'processing', 'result');
+            if (micBtn) micBtn.disabled = false;
+            if (errorMsg) errorMsg.textContent = '';
+
+            const micIdle = document.getElementById('micIdle');
+            const micRecording = document.getElementById('micRecording');
+            if (micIdle) micIdle.style.display = '';
+            if (micRecording) micRecording.style.display = 'none';
+
+            if (state === 'listening') {
+                if (micBtn) micBtn.classList.add('recording');
+                if (micIdle) micIdle.style.display = 'none';
+                if (micRecording) micRecording.style.display = '';
+                isRecording = true;
+            } else if (state === 'processing') {
+                if (micBtn) micBtn.classList.add('processing');
+                if (micBtn) micBtn.disabled = true;
+                if (micIdle) micIdle.style.display = 'none';
+                if (micRecording) micRecording.style.display = '';
+                isRecording = false;
+            } else if (state === 'result') {
+                if (micBtn) micBtn.classList.add('result');
+                isRecording = false;
+                setTimeout(() => {
+                    if (micBtn) micBtn.classList.remove('result');
+                }, 1500);
+            } else if (state === 'error') {
+                if (errorMsg) errorMsg.textContent = msg || 'Something went wrong';
+                isRecording = false;
+            } else {
+                isRecording = false;
+            }
+        }
+
+        function updateResult(text) {
+            currentText = text;
+            if (text) {
+                latestResultEl.textContent = text;
+                latestResultEl.classList.remove('empty');
+                copyBtn.disabled = false;
+                typeBtn.disabled = false;
+            } else {
+                latestResultEl.textContent = 'Your transcribed text will appear here...';
+                latestResultEl.classList.add('empty');
+                copyBtn.disabled = true;
+                typeBtn.disabled = true;
+            }
+        }
+
+        function renderHistory(items) {
+            if (!items || items.length === 0) {
+                historyList.innerHTML = '<li class="empty-history">No transcriptions yet</li>';
+                return;
+            }
+            historyList.innerHTML = items.map(item => `
+                <li class="history-item">
+                    <span class="history-text">${escapeHtml(item.text)}</span>
+                    <span class="history-time">${escapeHtml(item.time)}</span>
+                </li>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        micBtn.addEventListener('click', async () => {
+            if (isRecording) return;
+            try {
+                const res = await fetch('/api/record', { method: 'POST' });
+                const data = await res.json();
+                if (!data.ok) {
+                    showToast(data.error || 'Could not start recording');
+                }
+            } catch (e) {
+                showToast('Server error');
+            }
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            if (!currentText) return;
+            try {
+                await navigator.clipboard.writeText(currentText);
+                showToast('Copied to clipboard');
+            } catch {
+                const res = await fetch('/api/copy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: currentText })
+                });
+                const data = await res.json();
+                showToast(data.ok ? 'Copied to clipboard' : 'Copy failed');
+            }
+        });
+
+        typeBtn.addEventListener('click', async () => {
+            if (!currentText) return;
+            const res = await fetch('/api/type', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: currentText })
+            });
+            const data = await res.json();
+            showToast(data.ok ? 'Typed into active window' : 'Type failed');
+        });
+
+        clearBtn.addEventListener('click', async () => {
+            await fetch('/api/clear', { method: 'POST' });
+            updateResult('');
+            renderHistory([]);
+        });
+
+        // Auto-copy toggle
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                autoCopyToggle.checked = data.auto_copy;
+                if (autoTypeToggle) autoTypeToggle.checked = data.auto_type;
+                if (autoTypeMicToggle) autoTypeMicToggle.checked = data.auto_type;
+                if (data.energy_threshold) {
+                    sensitivitySlider.value = data.energy_threshold;
+                    sensitivityValue.textContent = data.energy_threshold;
+                }
+                if (data.energy_min) sensitivitySlider.min = data.energy_min;
+                if (data.energy_max) sensitivitySlider.max = data.energy_max;
+                if (data.dynamic_energy !== undefined) {
+                    calibrateStatus.textContent = data.dynamic_energy ? 'Auto mode' : 'Manual mode';
+                }
+            } catch {}
+        }
+
+        autoCopyToggle.addEventListener('change', async () => {
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ auto_copy: autoCopyToggle.checked })
+                });
+            } catch {}
+        });
+
+        async function setAutoType(val) {
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ auto_type: val })
+                });
+            } catch {}
+        }
+
+        if (autoTypeToggle) {
+            autoTypeToggle.addEventListener('change', () => {
+                setAutoType(autoTypeToggle.checked);
+                if (autoTypeMicToggle) autoTypeMicToggle.checked = autoTypeToggle.checked;
+            });
+        }
+
+        if (autoTypeMicToggle) {
+            autoTypeMicToggle.addEventListener('change', () => {
+                setAutoType(autoTypeMicToggle.checked);
+                if (autoTypeToggle) autoTypeToggle.checked = autoTypeMicToggle.checked;
+            });
+        }
+
+        sensitivitySlider.addEventListener('input', () => {
+            sensitivityValue.textContent = sensitivitySlider.value;
+            calibrateStatus.textContent = 'Manual mode';
+        });
+
+        let sensitivityTimeout;
+        sensitivitySlider.addEventListener('change', async () => {
+            clearTimeout(sensitivityTimeout);
+            sensitivityTimeout = setTimeout(async () => {
+                try {
+                    await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ energy_threshold: parseInt(sensitivitySlider.value) })
+                    });
+                    showToast('Sensitivity set to manual');
+                } catch {}
+            }, 200);
+        });
+
+        const showConsoleBtn = document.getElementById('showConsoleBtn');
+        if (showConsoleBtn) {
+            showConsoleBtn.addEventListener('click', async () => {
+                try {
+                    await fetch('/api/console', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'show'})});
+                } catch {}
+            });
+        }
+
+        const testTypeBtn = document.getElementById('testTypeBtn');
+        if (testTypeBtn) {
+            testTypeBtn.addEventListener('click', async () => {
+                try {
+                    const res = await fetch('/api/test-type', {method:'POST'});
+                    const data = await res.json();
+                    showToast(data.ok ? 'Typed "Hello world" into active window' : 'Test type failed');
+                } catch {
+                    showToast('Test type request failed');
+                }
+            });
+        }
+
+        const shutdownSettingsBtn = document.getElementById('shutdownSettingsBtn');
+        if (shutdownSettingsBtn) {
+            shutdownSettingsBtn.addEventListener('click', async () => {
+                if (!confirm('Shut down OrbitScribe?')) return;
+                document.getElementById('exitSplash').classList.add('active');
+                try {
+                    await fetch('/api/shutdown', {method:'POST'});
+                } catch {}
+            });
+        }
+
+        // Theme system
+        const themes = {
+            orbit: {
+                '--bg': '#0f1117',
+                '--panel': 'rgba(26, 29, 38, 0.6)',
+                '--panel-solid': '#1a1d26',
+                '--text': '#e2e8f0',
+                '--muted': '#94a3b8',
+                '--accent': '#8b5cf6',
+                '--accent-hover': '#7c3aed',
+                '--accent-light': '#a78bfa',
+                '--accent-dark': '#7c3aed',
+                '--recording': '#f97316',
+                '--recording-light': '#fb923c',
+                '--recording-dark': '#ea580c',
+                '--recording-glow': 'rgba(249, 115, 22, 0.4)',
+                '--success': '#22c55e',
+                '--border': 'rgba(45, 49, 66, 0.5)',
+                '--border-solid': '#2d3142',
+                '--splash-from': '#0a0c14',
+                '--splash-mid': '#111320',
+                '--splash-to': '#0a0c14',
+                '--accent-glow': 'rgba(139, 92, 246, 0.35)'
+            },
+            neon: {
+                '--bg': '#0a0f14',
+                '--panel': 'rgba(15, 25, 35, 0.6)',
+                '--panel-solid': '#0f1923',
+                '--text': '#e0f2fe',
+                '--muted': '#7dd3fc',
+                '--accent': '#06b6d4',
+                '--accent-hover': '#0891b2',
+                '--accent-light': '#22d3ee',
+                '--accent-dark': '#0e7490',
+                '--recording': '#f43f5e',
+                '--recording-light': '#fb7185',
+                '--recording-dark': '#be123c',
+                '--recording-glow': 'rgba(244, 63, 94, 0.4)',
+                '--success': '#22c55e',
+                '--border': 'rgba(30, 50, 70, 0.5)',
+                '--border-solid': '#1e3246',
+                '--splash-from': '#050f1a',
+                '--splash-mid': '#0a1a2a',
+                '--splash-to': '#050f1a',
+                '--accent-glow': 'rgba(6, 182, 212, 0.35)'
+            },
+            ember: {
+                '--bg': '#140a0a',
+                '--panel': 'rgba(38, 22, 22, 0.6)',
+                '--panel-solid': '#261616',
+                '--text': '#fef2f2',
+                '--muted': '#fca5a5',
+                '--accent': '#ef4444',
+                '--accent-hover': '#dc2626',
+                '--accent-light': '#f87171',
+                '--accent-dark': '#b91c1c',
+                '--recording': '#f59e0b',
+                '--recording-light': '#fbbf24',
+                '--recording-dark': '#d97706',
+                '--recording-glow': 'rgba(245, 158, 11, 0.4)',
+                '--success': '#22c55e',
+                '--border': 'rgba(66, 35, 35, 0.5)',
+                '--border-solid': '#422323',
+                '--splash-from': '#1a0a0a',
+                '--splash-mid': '#2a1010',
+                '--splash-to': '#1a0a0a',
+                '--accent-glow': 'rgba(239, 68, 68, 0.35)'
+            },
+            forest: {
+                '--bg': '#0a140a',
+                '--panel': 'rgba(20, 35, 20, 0.6)',
+                '--panel-solid': '#142314',
+                '--text': '#f0fdf4',
+                '--muted': '#86efac',
+                '--accent': '#22c55e',
+                '--accent-hover': '#16a34a',
+                '--accent-light': '#4ade80',
+                '--accent-dark': '#15803d',
+                '--recording': '#eab308',
+                '--recording-light': '#facc15',
+                '--recording-dark': '#a16207',
+                '--recording-glow': 'rgba(234, 179, 8, 0.4)',
+                '--success': '#3b82f6',
+                '--border': 'rgba(30, 55, 30, 0.5)',
+                '--border-solid': '#1e371e',
+                '--splash-from': '#0a1a0a',
+                '--splash-mid': '#102a10',
+                '--splash-to': '#0a1a0a',
+                '--accent-glow': 'rgba(34, 197, 94, 0.35)'
+            },
+            sunset: {
+                '--bg': '#1a1010',
+                '--panel': 'rgba(35, 28, 20, 0.6)',
+                '--panel-solid': '#231c14',
+                '--text': '#fffbeb',
+                '--muted': '#fcd34d',
+                '--accent': '#f59e0b',
+                '--accent-hover': '#d97706',
+                '--accent-light': '#fbbf24',
+                '--accent-dark': '#b45309',
+                '--recording': '#ec4899',
+                '--recording-light': '#f472b6',
+                '--recording-dark': '#be185d',
+                '--recording-glow': 'rgba(236, 72, 153, 0.4)',
+                '--success': '#22c55e',
+                '--border': 'rgba(60, 50, 35, 0.5)',
+                '--border-solid': '#3c3223',
+                '--splash-from': '#1a1208',
+                '--splash-mid': '#2a1a10',
+                '--splash-to': '#1a1208',
+                '--accent-glow': 'rgba(245, 158, 11, 0.35)'
+            }
+        };
+
+        function applyTheme(name) {
+            const t = themes[name];
+            if (!t) return;
+            const root = document.documentElement;
+            Object.entries(t).forEach(([k, v]) => root.style.setProperty(k, v));
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === name);
+            });
+        }
+
+        function saveTheme(name) {
+            try { localStorage.setItem('orbitscribe_theme', name); } catch {}
+        }
+
+        function loadTheme() {
+            try {
+                const saved = localStorage.getItem('orbitscribe_theme');
+                if (saved && themes[saved]) applyTheme(saved);
+            } catch {}
+        }
+
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.dataset.theme;
+                applyTheme(name);
+                saveTheme(name);
+                showThemePreviewToast(name);
+            });
+        });
+
+        const themeNames = { orbit: 'Orbit', neon: 'Neon', ember: 'Ember', forest: 'Forest', sunset: 'Sunset' };
+        function showThemePreviewToast(name) {
+            showToast(themeNames[name] || name);
+        }
+
+        // Background image
+        const bgLayer = document.getElementById('bgLayer');
+        const bgFileInput = document.getElementById('bgFileInput');
+        const bgChooseBtn = document.getElementById('bgChooseBtn');
+        const bgClearBtn = document.getElementById('bgClearBtn');
+
+        if (bgChooseBtn && bgFileInput) {
+            bgChooseBtn.addEventListener('click', () => bgFileInput.click());
+        }
+
+        if (bgFileInput) {
+            bgFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const dataUrl = ev.target.result;
+                    if (bgLayer) {
+                        bgLayer.style.backgroundImage = `url(${dataUrl})`;
+                        bgLayer.classList.add('active');
+                    }
+                    try { localStorage.setItem('orbitscribe_bg', dataUrl); } catch {}
+                    showToast('Background applied');
+                };
+                reader.readAsDataURL(file);
+                bgFileInput.value = '';
+            });
+        }
+
+        if (bgClearBtn) {
+            bgClearBtn.addEventListener('click', () => {
+                if (bgLayer) {
+                    bgLayer.style.backgroundImage = '';
+                    bgLayer.classList.remove('active');
+                }
+                try { localStorage.removeItem('orbitscribe_bg'); } catch {}
+                showToast('Background cleared');
+            });
+        }
+
+        function loadBackground() {
+            try {
+                const saved = localStorage.getItem('orbitscribe_bg');
+                if (saved && bgLayer) {
+                    bgLayer.style.backgroundImage = `url(${saved})`;
+                    bgLayer.classList.add('active');
+                }
+            } catch {}
+        }
+
+        calibrateBtn.addEventListener('click', async () => {
+            calibrateBtn.disabled = true;
+            calibrateStatus.textContent = 'Calibrating...';
+            try {
+                const res = await fetch('/api/calibrate', { method: 'POST' });
+                const data = await res.json();
+                if (data.ok) {
+                    sensitivitySlider.value = 300;
+                    sensitivityValue.textContent = 300;
+                    calibrateStatus.textContent = 'Auto mode';
+                    showToast('Mic calibrated');
+                } else {
+                    calibrateStatus.textContent = 'Failed';
+                    showToast(data.error || 'Calibration failed');
+                }
+            } catch {
+                calibrateStatus.textContent = 'Error';
+                showToast('Calibration request failed');
+            }
+            calibrateBtn.disabled = false;
+        });
+
+        // TTS voices
+        async function loadVoices() {
+            try {
+                const res = await fetch('/api/tts/voices');
+                const data = await res.json();
+                voiceSelect.innerHTML = '';
+                if (!data.voices || data.voices.length === 0) {
+                    voiceSelect.innerHTML = '<option value="">No voices available</option>';
+                    voiceSelect.disabled = true;
+                    return;
+                }
+                data.voices.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = v.name;
+                    voiceSelect.appendChild(opt);
+                });
+            } catch {
+                voiceSelect.innerHTML = '<option value="">Voices unavailable</option>';
+            }
+        }
+
+        speakBtn.addEventListener('click', async () => {
+            const text = ttsText.value.trim();
+            if (!text) {
+                showToast('Enter some text first');
+                return;
+            }
+            speakBtn.disabled = true;
+            try {
+                const res = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, voice_id: voiceSelect.value })
+                });
+                const data = await res.json();
+                showToast(data.ok ? 'Speaking...' : (data.error || 'TTS failed'));
+            } catch {
+                showToast('TTS request failed');
+            }
+            setTimeout(() => { speakBtn.disabled = false; }, 500);
+        });
+
+        // SSE for real-time updates
+        const evtSource = new EventSource('/api/stream');
+        evtSource.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.ping) return;
+                if (data.status === 'error') {
+                    setStatus('error', data.message);
+                } else {
+                    setStatus(data.status, data.message);
+                }
+                if (data.status === 'result' && data.message) {
+                    updateResult(data.message);
+                    if (swarmActive && data.message !== lastSwarmTask) {
+                        lastSwarmTask = data.message;
+                        runSwarm(data.message);
+                    }
+                }
+            } catch {}
+        };
+
+        // Poll for status and history updates
+        async function pollStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                setStatus(data.status, data.message);
+                if (data.status === 'result' && data.message) {
+                    updateResult(data.message);
+                    if (swarmActive && data.message !== lastSwarmTask) {
+                        lastSwarmTask = data.message;
+                        runSwarm(data.message);
+                    }
+                }
+                renderHistory(data.history);
+            } catch {}
+        }
+        pollStatus();
+        setInterval(pollStatus, 2000);
+        loadSettings();
+        loadVoices();
+        loadTheme();
+        loadBackground();
+
+        // Splash screen removal
+        setTimeout(() => {
+            const splash = document.getElementById('splash');
+            if (splash) splash.remove();
+        }, 6000);
+
+        window.pickMode = async function(mode) {
+            const splash = document.getElementById('splash');
+            if (splash) {
+                splash.style.animation = 'none';
+                splash.style.opacity = '0';
+                splash.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => splash.remove(), 350);
+            }
+            await switchMode(mode);
+        };
+
+        // Swarm state
+        let swarmActive = false;
+        let swarmAbort = null;
+        let lastSwarmTask = '';
+        const swarmPanel = document.getElementById('swarmPanel');
+        const swarmStatus = document.getElementById('swarmStatus');
+        const swarmAgents = document.getElementById('swarmAgents');
+        const swarmOutput = document.getElementById('swarmOutput');
+        const swarmCloseBtn = document.getElementById('swarmCloseBtn');
+
+        function setSwarmStatus(status) {
+            swarmStatus.textContent = status;
+            swarmStatus.className = 'swarm-status' + (status === 'Running...' ? ' running' : '');
+        }
+
+        function addAgentBadge(name, state) {
+            const badge = document.createElement('span');
+            badge.className = 'swarm-agent-badge ' + state;
+            badge.textContent = name;
+            badge.id = 'badge-' + name;
+            swarmAgents.appendChild(badge);
+        }
+
+        function updateAgentBadge(name, state) {
+            const badge = document.getElementById('badge-' + name);
+            if (badge) badge.className = 'swarm-agent-badge ' + state;
+        }
+
+        function addSwarmResult(agentName, text) {
+            const div = document.createElement('div');
+            div.className = 'agent-result';
+            div.innerHTML = '<div class="agent-name">' + escapeHtml(agentName) + '</div>' + escapeHtml(text);
+            swarmOutput.appendChild(div);
+            swarmOutput.scrollTop = swarmOutput.scrollHeight;
+        }
+
+        function clearSwarm() {
+            swarmAgents.innerHTML = '';
+            swarmOutput.innerHTML = '';
+        }
+
+        async function runSwarm(task) {
+            if (!swarmActive) return;
+            setSwarmStatus('Running...');
+            clearSwarm();
+            showToast('🐝 Processing: ' + task.substring(0, 40) + (task.length > 40 ? '...' : ''));
+
+            try {
+                const ctrl = new AbortController();
+                swarmAbort = ctrl;
+                const resp = await fetch('http://127.0.0.1:58081/api/swarm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: task, mode: 'ask' }),
+                    signal: ctrl.signal
+                });
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.selected_agents) {
+                                    data.selected_agents.forEach(a => addAgentBadge(a, ''));
+                                }
+                                if (data.agent && data.status === 'started') {
+                                    // orchestrator started
+                                }
+                                if (data.agent && data.status === 'done' && data.result) {
+                                    updateAgentBadge(data.agent, 'done');
+                                    addSwarmResult(data.agent, data.result);
+                                }
+                                if (data.agent && data.status === 'error') {
+                                    updateAgentBadge(data.agent, 'error');
+                                    addSwarmResult(data.agent, '[Error: ' + (data.error || 'unknown') + ']');
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+                setSwarmStatus('Done');
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    setSwarmStatus('Aborted');
+                } else {
+                    setSwarmStatus('Error');
+                    addSwarmResult('System', 'Failed to reach backend. Is it running on port 58081?');
+                }
+            }
+            swarmAbort = null;
+        }
+
+        window.activateSwarm = function() {
+            const splash = document.getElementById('splash');
+            if (splash) {
+                splash.style.animation = 'none';
+                splash.style.opacity = '0';
+                splash.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => splash.remove(), 350);
+            }
+            swarmActive = true;
+            swarmPanel.style.display = '';
+            showToast('Multi-Agent activated! Speak a command.');
+            document.body.style.animation = 'swarmPulse 0.4s ease 3';
+            setTimeout(() => { document.body.style.animation = ''; }, 1500);
+        };
+
+        swarmCloseBtn.addEventListener('click', () => {
+            swarmActive = false;
+            lastSwarmTask = '';
+            if (swarmAbort) swarmAbort.abort();
+            swarmPanel.style.display = 'none';
+            clearSwarm();
+            showToast('Deactivated');
+        });
+
+        // swarmPulse keyframes injected dynamically
+        const swarmStyle = document.createElement('style');
+        swarmStyle.textContent = `
+            @keyframes swarmPulse {
+                0%, 100% { filter: brightness(1); }
+                50% { filter: brightness(1.3) saturate(1.2); }
+            }
+        `;
+        document.head.appendChild(swarmStyle);
+
+        // Float mode styling
+        const isFloatMode = window.location.search.includes('float=1');
+        if (isFloatMode) {
+            document.body.classList.add('float-mode');
+        }
+
+        // Window mode controls
+        const windowPanel = document.getElementById('windowPanel');
+        if (windowPanel && isFloatMode) {
+            windowPanel.style.display = '';
+        }
+
+        window.switchMode = async function(mode) {
+            showToast('Switching to ' + mode.replace('_', ' ') + '...');
+            try {
+                const res = await fetch('/api/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showToast('Switched to ' + mode.replace('_', ' '));
+                } else {
+                    showToast('Mode switch failed');
+                }
+            } catch (e) {
+                showToast('Mode switch error: ' + e.message);
+            }
+        };
+
+        window.closeWindow = async function() {
+            showToast('Closing...');
+            try {
+                await fetch('/api/close', { method: 'POST' });
+            } catch (e) {
+                showToast('Close error: ' + e.message);
+            }
+        };
+    </script>
+</body>
+</html>

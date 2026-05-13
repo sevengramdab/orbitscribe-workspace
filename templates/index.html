@@ -898,7 +898,7 @@
             </button>
             <button class="splash-btn swarm" onclick="activateSwarm()">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                Mass Agent Swarm
+                Multi-Agent
             </button>
         </div>
     </div>
@@ -1135,18 +1135,23 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     Clear
                 </button>
+                <input type="file" id="loadFileInput" accept=".txt,.md,.py,.js,.ts,.json,.html,.css" style="display:none;">
+                <button id="loadFileBtn" class="btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                    Load File
+                </button>
             </div>
         </div>
 
-        <!-- Swarm Panel -->
+        <!-- Multi-Agent Panel -->
         <div class="panel swarm-panel" id="swarmPanel" style="display:none;">
             <div class="swarm-header">
-                <h2>🐝 Agent Swarm</h2>
+                <h2>🐝 Multi-Agent</h2>
                 <span class="swarm-status" id="swarmStatus">Idle</span>
             </div>
             <div class="swarm-agents" id="swarmAgents"></div>
             <div class="swarm-output" id="swarmOutput"></div>
-            <button class="btn secondary" id="swarmCloseBtn" style="margin-top:0.6rem;width:100%;">Close Swarm</button>
+            <button class="btn secondary" id="swarmCloseBtn" style="margin-top:0.6rem;width:100%;">Close</button>
         </div>
 
         <button id="ttsToggle" class="btn settings-toggle">
@@ -1220,6 +1225,8 @@
                     <button class="theme-btn" data-theme="ember" style="background:linear-gradient(135deg,#ef4444,#f87171);" title="Ember (Red)"></button>
                     <button class="theme-btn" data-theme="forest" style="background:linear-gradient(135deg,#22c55e,#4ade80);" title="Forest (Green)"></button>
                     <button class="theme-btn" data-theme="sunset" style="background:linear-gradient(135deg,#f59e0b,#fb923c);" title="Sunset (Gold)"></button>
+                    <button class="theme-btn" data-theme="midnight" style="background:linear-gradient(135deg,#1e293b,#475569);" title="Midnight (Slate)"></button>
+                    <button class="theme-btn" data-theme="cyber" style="background:linear-gradient(135deg,#00ff41,#003b00);" title="Cyber (Matrix)"></button>
                 </div>
             </div>
 
@@ -1416,13 +1423,25 @@
 
         typeBtn.addEventListener('click', async () => {
             if (!currentText) return;
-            const res = await fetch('/api/type', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: currentText })
-            });
-            const data = await res.json();
-            showToast(data.ok ? 'Typed into active window' : 'Type failed');
+            try {
+                const res = await fetch('/api/type', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: currentText })
+                });
+                if (!res.ok) {
+                    showToast('Type request failed: server error');
+                    return;
+                }
+                const data = await res.json();
+                if (data.ok) {
+                    showToast('Typed into active window');
+                } else {
+                    showToast('Type failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (e) {
+                showToast('Type request failed: ' + (e.message || 'Network error'));
+            }
         });
 
         clearBtn.addEventListener('click', async () => {
@@ -1505,6 +1524,29 @@
             }, 200);
         });
 
+        const loadFileInput = document.getElementById('loadFileInput');
+        const loadFileBtn = document.getElementById('loadFileBtn');
+        if (loadFileBtn && loadFileInput) {
+            loadFileBtn.addEventListener('click', () => loadFileInput.click());
+            loadFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const text = ev.target.result;
+                    updateResult(text);
+                    showToast('Loaded: ' + file.name);
+                    if (swarmActive && text !== lastSwarmTask) {
+                        lastSwarmTask = text;
+                        runSwarm(text);
+                    }
+                };
+                reader.onerror = () => showToast('Failed to read file');
+                reader.readAsText(file);
+                loadFileInput.value = '';
+            });
+        }
+
         const showConsoleBtn = document.getElementById('showConsoleBtn');
         if (showConsoleBtn) {
             showConsoleBtn.addEventListener('click', async () => {
@@ -1519,10 +1561,18 @@
             testTypeBtn.addEventListener('click', async () => {
                 try {
                     const res = await fetch('/api/test-type', {method:'POST'});
+                    if (!res.ok) {
+                        showToast('Test type failed: server error');
+                        return;
+                    }
                     const data = await res.json();
-                    showToast(data.ok ? 'Typed "Hello world" into active window' : 'Test type failed');
-                } catch {
-                    showToast('Test type request failed');
+                    if (data.ok) {
+                        showToast('Typed "Hello world" into active window');
+                    } else {
+                        showToast('Test type failed: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    showToast('Test type request failed: ' + (e.message || 'Network error'));
                 }
             });
         }
@@ -1649,6 +1699,50 @@
                 '--splash-mid': '#2a1a10',
                 '--splash-to': '#1a1208',
                 '--accent-glow': 'rgba(245, 158, 11, 0.35)'
+            },
+            midnight: {
+                '--bg': '#020617',
+                '--panel': 'rgba(15, 23, 42, 0.6)',
+                '--panel-solid': '#0f172a',
+                '--text': '#e2e8f0',
+                '--muted': '#94a3b8',
+                '--accent': '#64748b',
+                '--accent-hover': '#475569',
+                '--accent-light': '#cbd5e1',
+                '--accent-dark': '#334155',
+                '--recording': '#f59e0b',
+                '--recording-light': '#fbbf24',
+                '--recording-dark': '#d97706',
+                '--recording-glow': 'rgba(245, 158, 11, 0.4)',
+                '--success': '#22c55e',
+                '--border': 'rgba(30, 41, 59, 0.5)',
+                '--border-solid': '#1e293b',
+                '--splash-from': '#020617',
+                '--splash-mid': '#0f172a',
+                '--splash-to': '#020617',
+                '--accent-glow': 'rgba(100, 116, 139, 0.35)'
+            },
+            cyber: {
+                '--bg': '#000000',
+                '--panel': 'rgba(0, 30, 0, 0.6)',
+                '--panel-solid': '#001a00',
+                '--text': '#00ff41',
+                '--muted': '#008f11',
+                '--accent': '#00ff41',
+                '--accent-hover': '#00cc33',
+                '--accent-light': '#80ff9f',
+                '--accent-dark': '#005500',
+                '--recording': '#ff003c',
+                '--recording-light': '#ff4d79',
+                '--recording-dark': '#b3002a',
+                '--recording-glow': 'rgba(255, 0, 60, 0.4)',
+                '--success': '#00ff41',
+                '--border': 'rgba(0, 80, 0, 0.5)',
+                '--border-solid': '#003b00',
+                '--splash-from': '#000000',
+                '--splash-mid': '#001500',
+                '--splash-to': '#000000',
+                '--accent-glow': 'rgba(0, 255, 65, 0.35)'
             }
         };
 
@@ -1682,7 +1776,7 @@
             });
         });
 
-        const themeNames = { orbit: 'Orbit', neon: 'Neon', ember: 'Ember', forest: 'Forest', sunset: 'Sunset' };
+        const themeNames = { orbit: 'Orbit', neon: 'Neon', ember: 'Ember', forest: 'Forest', sunset: 'Sunset', midnight: 'Midnight', cyber: 'Cyber' };
         function showThemePreviewToast(name) {
             showToast(themeNames[name] || name);
         }
@@ -1908,7 +2002,7 @@
             if (!swarmActive) return;
             setSwarmStatus('Running...');
             clearSwarm();
-            showToast('🐝 Swarm processing: ' + task.substring(0, 40) + (task.length > 40 ? '...' : ''));
+            showToast('🐝 Processing: ' + task.substring(0, 40) + (task.length > 40 ? '...' : ''));
 
             try {
                 const ctrl = new AbortController();
@@ -1916,7 +2010,7 @@
                 const resp = await fetch('http://127.0.0.1:58081/api/swarm', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: task, mode: 'swarm' }),
+                    body: JSON.stringify({ message: task, mode: 'ask' }),
                     signal: ctrl.signal
                 });
 
@@ -1959,7 +2053,7 @@
                     setSwarmStatus('Aborted');
                 } else {
                     setSwarmStatus('Error');
-                    addSwarmResult('System', 'Failed to reach swarm backend. Is it running on port 58081?');
+                    addSwarmResult('System', 'Failed to reach backend. Is it running on port 58081?');
                 }
             }
             swarmAbort = null;
@@ -1975,7 +2069,7 @@
             }
             swarmActive = true;
             swarmPanel.style.display = '';
-            showToast('Agent swarm activated! Speak a command.');
+            showToast('Multi-Agent activated! Speak a command.');
             document.body.style.animation = 'swarmPulse 0.4s ease 3';
             setTimeout(() => { document.body.style.animation = ''; }, 1500);
         };
@@ -1986,7 +2080,7 @@
             if (swarmAbort) swarmAbort.abort();
             swarmPanel.style.display = 'none';
             clearSwarm();
-            showToast('Swarm deactivated');
+            showToast('Deactivated');
         });
 
         // swarmPulse keyframes injected dynamically

@@ -19,26 +19,21 @@ import json
 import struct
 import math
 
-# Fix Windows console encoding for Unicode
+EXTENSION_MODE = os.environ.get("ORBITSCRIBE_EXTENSION_MODE") == "1"
+
+# Fix Windows console encoding for Unicode — defensive, never fails
 if sys.platform == "win32":
-    import ctypes
-    kernel32 = ctypes.windll.kernel32
-    kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-    sys.stdout.reconfigure(encoding="utf-8")
+    try:
+        import ctypes
+        _kernel32 = ctypes.windll.kernel32
+        _kernel32.SetConsoleMode(_kernel32.GetStdHandle(-11), 7)
+    except Exception:
+        pass
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
-
-def hide_console():
-    if sys.platform == "win32":
-        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
-        if hwnd:
-            ctypes.windll.user32.ShowWindow(hwnd, 0)
-
-
-def show_console():
-    if sys.platform == "win32":
-        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
-        if hwnd:
-            ctypes.windll.user32.ShowWindow(hwnd, 1)
 
 # ---------------------------------------------------------------------------
 # Dependency check with helpful error messages
@@ -60,10 +55,20 @@ try:
 except ImportError:
     MISSING.append("pyperclip")
 
-try:
-    import pyautogui
-except ImportError:
-    MISSING.append("pyautogui")
+# pyautogui is optional — only needed for AUTO_TYPE mode.
+# Do NOT import at module level to avoid AV heuristics.
+_pyautogui = None
+
+def _get_pyautogui():
+    global _pyautogui
+    if _pyautogui is None:
+        try:
+            import pyautogui as pg
+            _pyautogui = pg
+        except Exception as e:
+            print(f"[WARN] pyautogui import failed: {e}")
+            _pyautogui = False
+    return _pyautogui
 
 try:
     import flask
@@ -87,11 +92,23 @@ if MISSING:
     print("    setup.bat")
     print()
     print("Or manually with pip:")
-    print("    pip install SpeechRecognition PyAudio pyperclip pyautogui Flask pyttsx3")
+    print("    pip install SpeechRecognition PyAudio pyperclip Flask pyttsx3")
+    if EXTENSION_MODE:
+        print("    pip install pyautogui  (optional, for auto-type)")
     print("=" * 60)
     sys.exit(1)
 
 from flask import Flask, render_template, jsonify, request, Response
+
+# ---------------------------------------------------------------------------
+# Infinite Jukebox Integration
+# ---------------------------------------------------------------------------
+try:
+    from infinite_jukebox.server import register_with_app
+    _JUKEBOX_AVAILABLE = True
+except Exception as _jukebox_err:
+    print(f"[WARN] Infinite Jukebox not available: {_jukebox_err}")
+    _JUKEBOX_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -105,7 +122,7 @@ DYNAMIC_ENERGY_ADJUSTMENT = True
 ENERGY_THRESHOLD_MIN = 50
 ENERGY_THRESHOLD_MAX = 2000
 AUTO_COPY = True               # Automatically copy transcribed text to clipboard
-AUTO_TYPE = True
+AUTO_TYPE = not EXTENSION_MODE # Disable auto-type when spawned by extension (avoids AV flags)
 BEEP_ON_START = True
 BEEP_ON_STOP = True
 HOST = "127.0.0.1"
@@ -123,44 +140,96 @@ def sanitize_for_typewrite(text):
         '\u2014': '-',   # em dash
         '\u2026': '...', # ellipsis
         '\u00a0': ' ',   # non-breaking space
-        '\u2018': "'",   # smart single open
-        '\u2019': "'",   # smart single close
-        '\u201c': '"',   # smart double open
-        '\u201d': '"',   # smart double close
     }
     for uni, ascii_ch in replacements.items():
         text = text.replace(uni, ascii_ch)
     return text
 
 
+def format_transcription(text):
+    """Capitalize first letter and add ending punctuation for dictated text."""
+    if not isinstance(text, str):
+        text = str(text) if text is not None else ""
+    text = sanitize_for_typewrite(text).strip()
+    if not text:
+        return text
+    # Capitalize first letter
+    text = text[0].upper() + text[1:]
+    # Add period if no ending punctuation
+    if not text.endswith(('.', '!', '?', '\n')):
+        text += '.'
+    return text
+
+
 def paste_text(text):
-    """Type text into the active window using pyautogui.
-    Switches to previous window with Alt+Tab if OrbitScribe is foreground.
-    Uses slower interval (0.04) to prevent dropped/reordered keys."""
+    """Type text into the active window. Tries multiple strategies for reliability.
+    GUI automation is allowed in all modes; only AUTO_TYPE defaults to off in
+    EXTENSION_MODE to avoid unexpected typing."""
+    pg = _get_pyautogui()
+    if not pg:
+        print("[WARN] pyautogui not available, skipping auto-type")
+        return False
+
+    clean = format_transcription(text)
+    if not clean:
+        return False
+
+    # Ensure separation from previous text
+    if not clean.startswith((" ", "\n")):
+        clean = " " + clean
+
     try:
+        # Defensive window check — if OrbitScribe window is active, alt-tab away
         if sys.platform == "win32":
             try:
-                hwnd = ctypes.windll.user32.GetForegroundWindow()
-                buf = ctypes.create_unicode_buffer(256)
-                ctypes.windll.user32.GetWindowTextW(hwnd, buf, 256)
-                if "OrbitScribe" in buf.value:
-                    try:
-                        import keyboard
-                        keyboard.send('alt+tab')
-                    except Exception:
-                        pyautogui.keyDown('alt')
-                        pyautogui.keyDown('tab')
-                        pyautogui.keyUp('tab')
-                        pyautogui.keyUp('alt')
-                    time.sleep(0.3)
+                import ctypes
+                _user32 = ctypes.windll.user32
+                hwnd = _user32.GetForegroundWindow()
+                if hwnd:
+                    buf = ctypes.create_unicode_buffer(256)
+                    _user32.GetWindowTextW(hwnd, buf, 256)
+                    if "OrbitScribe" in buf.value:
+                        try:
+                            import keyboard
+                            keyboard.send('alt+tab')
+                        except Exception:
+                            pg.keyDown('alt')
+                            pg.keyDown('tab')
+                            pg.keyUp('tab')
+                            pg.keyUp('alt')
+                        time.sleep(0.3)
             except Exception:
                 pass
 
-        pyautogui.FAILSAFE = False
-        clean = sanitize_for_typewrite(text)
-        if clean and not clean.endswith((" ", "\n")):
-            clean += " "
-        pyautogui.typewrite(clean, interval=0.04)
+        # Strategy 1: Use keyboard module if available (fastest, most reliable)
+        try:
+            import keyboard
+            keyboard.write(clean)
+            print("[TYPED] Used keyboard module")
+            return True
+        except Exception:
+            pass
+
+        # Strategy 2: Clipboard paste (accurate, handles all characters)
+        try:
+            original = pyperclip.paste()
+            pyperclip.copy(clean)
+            pg.keyDown('ctrl')
+            pg.keyDown('v')
+            pg.keyUp('v')
+            pg.keyUp('ctrl')
+            time.sleep(0.15)
+            if original is not None:
+                pyperclip.copy(original)
+            print("[TYPED] Used clipboard paste")
+            return True
+        except Exception as e:
+            print(f"[WARN] Clipboard paste failed: {e}")
+
+        # Strategy 3: Fall back to pyautogui.typewrite
+        pg.FAILSAFE = False
+        pg.typewrite(clean, interval=0.01)
+        print("[TYPED] Used pyautogui.typewrite")
         return True
     except Exception as e:
         print(f"[WARN] Type error: {e}")
@@ -172,6 +241,8 @@ def paste_text(text):
 # ---------------------------------------------------------------------------
 tts_engine = None
 tts_voices = []
+tts_current_engine = None
+tts_lock = threading.Lock()
 
 def init_tts():
     global tts_engine, tts_voices
@@ -180,40 +251,78 @@ def init_tts():
         tts_voices = []
         for v in tts_engine.getProperty("voices"):
             tts_voices.append({"id": v.id, "name": v.name})
-        # Pick a Microsoft voice if available
+        # Pick highest quality voice: prefer Microsoft Natural voices, then Microsoft, then first available
+        preferred_voice = None
         for v in tts_voices:
-            if "microsoft" in v["name"].lower():
-                tts_engine.setProperty("voice", v["id"])
+            name = v["name"].lower()
+            if "natural" in name:
+                preferred_voice = v["id"]
                 break
+        if not preferred_voice:
+            for v in tts_voices:
+                if "microsoft" in v["name"].lower():
+                    preferred_voice = v["id"]
+                    break
+        if preferred_voice:
+            tts_engine.setProperty("voice", preferred_voice)
         print(f"[TTS] Loaded {len(tts_voices)} voice(s)")
     except Exception as e:
         print(f"[WARN] TTS init failed: {e}")
 
 
-def speak_text(text: str, voice_id: str = None):
+def speak_text(text: str, voice_id: str = None, rate: int = None):
     def _speak():
+        global tts_current_engine
         try:
             engine = pyttsx3.init()
             if voice_id:
                 engine.setProperty("voice", voice_id)
             elif tts_engine:
                 engine.setProperty("voice", tts_engine.getProperty("voice"))
+            if rate is not None:
+                engine.setProperty("rate", int(rate))
+            with tts_lock:
+                tts_current_engine = engine
             engine.say(text)
             engine.runAndWait()
+            with tts_lock:
+                if tts_current_engine is engine:
+                    tts_current_engine = None
             engine.stop()
         except Exception as e:
             print(f"[ERROR] TTS failed: {e}")
+            with tts_lock:
+                tts_current_engine = None
     threading.Thread(target=_speak, daemon=True).start()
+
+
+def stop_tts():
+    global tts_current_engine
+    with tts_lock:
+        if tts_current_engine:
+            try:
+                tts_current_engine.stop()
+            except Exception:
+                pass
+            tts_current_engine = None
 
 # ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 
+# Register Infinite Jukebox visualizer blueprint at import time
+if _JUKEBOX_AVAILABLE:
+    try:
+        register_with_app(app)
+    except Exception as _jukebox_reg_err:
+        print(f"[WARN] Jukebox blueprint registration failed: {_jukebox_reg_err}")
+
 recognizer = sr.Recognizer()
 microphone = sr.Microphone()
 
 recording_event = threading.Event()
+record_lock = threading.Lock()
 audio_queue = queue.Queue()
 shutdown_event = threading.Event()
 
@@ -287,8 +396,8 @@ def api_meter():
 def beep(freq=800, duration=150):
     """Play a simple Windows beep."""
     if sys.platform == "win32":
-        import winsound
         try:
+            import winsound
             winsound.Beep(freq, duration)
         except Exception:
             pass
@@ -373,11 +482,11 @@ def _rms(data_bytes):
 
 def record_once():
     """Record a single utterance using speech_recognition and enqueue for transcription."""
-    if recording_event.is_set():
-        speak_text("Already recording")
-        print("[INFO] Already recording — ignoring duplicate request")
-        return
-    recording_event.set()
+    # Note: recording_event is now set inside api_record() under record_lock
+    # before the thread starts, so the guard below is a safety net only.
+    global latest_result
+    with status_lock:
+        latest_result = None
     set_status("listening")
 
     if BEEP_ON_START:
@@ -401,7 +510,8 @@ def record_once():
         print(f"[ERROR] Recording error: {e}")
         set_status("error", f"Recording error: {e}")
     finally:
-        recording_event.clear()
+        with record_lock:
+            recording_event.clear()
         if BEEP_ON_STOP:
             beep(600, 100)
 
@@ -426,9 +536,11 @@ def api_status():
 
 @app.route("/api/record", methods=["POST"])
 def api_record():
-    if recording_event.is_set():
-        speak_text("Already recording")
-        return jsonify({"ok": False, "error": "Already recording"})
+    with record_lock:
+        if recording_event.is_set():
+            speak_text("Already recording")
+            return jsonify({"ok": False, "error": "Already recording"})
+        recording_event.set()
     t = threading.Thread(target=record_once, daemon=True)
     t.start()
     return jsonify({"ok": True})
@@ -458,9 +570,7 @@ def api_close():
 
 @app.route("/api/console", methods=["POST"])
 def api_console():
-    data = request.get_json(force=True, silent=True) or {}
-    if sys.platform == "win32" and data.get("action") == "show":
-        show_console()
+    # Console show/hide removed for AV safety. Endpoint kept for backward compat.
     return jsonify({"ok": True})
 
 
@@ -607,16 +717,8 @@ def api_shutdown():
                 close_callback()
             except Exception as e:
                 print(f"[Shutdown] Window close error: {e}")
-        # Close the console window
-        if sys.platform == "win32":
-            try:
-                hwnd = ctypes.windll.kernel32.GetConsoleWindow()
-                if hwnd:
-                    ctypes.windll.kernel32.FreeConsole()
-            except Exception:
-                pass
-        time.sleep(0.3)
-        os._exit(0)
+        # Do NOT call FreeConsole or os._exit here — both trigger AV heuristics.
+        # Let the natural Python shutdown proceed.
     threading.Thread(target=_shutdown, daemon=True).start()
     return jsonify({"ok": True})
 
@@ -626,11 +728,18 @@ def api_tts():
     data = request.get_json(force=True, silent=True) or {}
     text = data.get("text", "").strip()
     voice_id = data.get("voice_id")
+    rate = data.get("rate")
     if not text:
         return jsonify({"ok": False, "error": "No text provided"})
     if not tts_voices:
         return jsonify({"ok": False, "error": "TTS not available"})
-    speak_text(text, voice_id)
+    speak_text(text, voice_id, rate)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/tts/stop", methods=["POST"])
+def api_tts_stop():
+    stop_tts()
     return jsonify({"ok": True})
 
 
@@ -671,7 +780,6 @@ def init_server():
 
 
 def main():
-    hide_console()
     init_server()
 
     url = f"http://{HOST}:{PORT}"
@@ -684,11 +792,12 @@ def main():
     print()
 
     # Give server a moment to start, then open browser
-    def open_browser():
-        time.sleep(1.2)
-        webbrowser.open(url)
+    if os.environ.get("ORBITSCRIBE_NO_BROWSER") != "1":
+        def open_browser():
+            time.sleep(1.2)
+            webbrowser.open(url)
 
-    threading.Thread(target=open_browser, daemon=True).start()
+        threading.Thread(target=open_browser, daemon=True).start()
 
     try:
         app.run(host=HOST, port=PORT, threaded=True, debug=False)
