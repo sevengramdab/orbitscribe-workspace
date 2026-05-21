@@ -67,6 +67,7 @@ class MainBreakerDashboard {
         this.gpuList = document.getElementById('gpu-list');
         this.gpuFills = [];
         this.gpuPcts = [];
+        this.gpuVrams = [];
 
         this.sparkCanvas = document.getElementById('frame-sparkline');
         this.sparkCtx = this.sparkCanvas.getContext('2d');
@@ -375,6 +376,13 @@ class MainBreakerDashboard {
                         this.gpuFills[idx].style.width = `${clamped}%`;
                         this.gpuPcts[idx].textContent = `${Math.round(clamped)}%`;
                     });
+                    if (data.gpu_profiles) {
+                        Object.values(data.gpu_profiles).forEach((profile, idx) => {
+                            if (idx >= this.gpuVrams.length) return;
+                            const vram = profile.vram_used || 0;
+                            this.gpuVrams[idx].textContent = `${vram.toFixed(1)} GB`;
+                        });
+                    }
                 }
             } catch (err) {}
         }, 500);
@@ -442,6 +450,7 @@ class MainBreakerDashboard {
         this.gpuList.innerHTML = '';
         this.gpuFills = [];
         this.gpuPcts = [];
+        this.gpuVrams = [];
         for (let i = 0; i < count; i++) {
             const row = document.createElement('div');
             row.className = 'gpu-row';
@@ -449,10 +458,12 @@ class MainBreakerDashboard {
                 <span class="gpu-name">GPU${i}</span>
                 <div class="gpu-track"><div class="gpu-fill" id="gpu-${i}" style="width:0%"></div></div>
                 <span class="gpu-pct" id="gpu-${i}-pct">0%</span>
+                <span class="gpu-vram" id="gpu-${i}-vram">-- GB</span>
             `;
             this.gpuList.appendChild(row);
             this.gpuFills.push(row.querySelector(`#gpu-${i}`));
             this.gpuPcts.push(row.querySelector(`#gpu-${i}-pct`));
+            this.gpuVrams.push(row.querySelector(`#gpu-${i}-vram`));
         }
     }
 
@@ -466,6 +477,13 @@ class MainBreakerDashboard {
                 this.gpuFills[idx].style.width = `${clamped}%`;
                 this.gpuPcts[idx].textContent = `${Math.round(clamped)}%`;
             });
+            if (data.gpu_profiles) {
+                Object.values(data.gpu_profiles).forEach((profile, idx) => {
+                    if (idx >= this.gpuVrams.length) return;
+                    const vram = profile.vram_used || 0;
+                    this.gpuVrams[idx].textContent = `${vram.toFixed(1)} GB`;
+                });
+            }
         }
 
         if (typeof data.frame_time_ms === 'number') {

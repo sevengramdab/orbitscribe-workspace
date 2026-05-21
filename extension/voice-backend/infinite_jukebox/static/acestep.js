@@ -36,6 +36,7 @@ class AceStepController {
             <div class="control-row">
                 <div class="control-label"><span>Music Caption</span></div>
                 <textarea id="acestep-caption" rows="2" style="width:100%;background:rgba(6,10,14,0.8);border:1px solid var(--jet-panel-border);color:var(--jet-text);font-family:var(--jet-font);font-size:0.75rem;padding:0.4rem;resize:vertical;">A peaceful acoustic guitar melody with soft vocals</textarea>
+                <button id="btn-acestep-prompt" class="breaker-reset" style="border-color:var(--jet-magenta);color:var(--jet-magenta);width:100%;margin-top:0.3rem;font-size:0.7rem;">✨ Generate Prompt</button>
             </div>
 
             <div class="control-row">
@@ -71,8 +72,8 @@ class AceStepController {
             </div>
 
             <div class="control-row">
-                <div class="control-label"><span>DiT Steps</span><span id="val-acestep-steps" class="control-value">50</span></div>
-                <input type="range" id="slider-acestep-steps" min="1" max="200" value="50">
+                <div class="control-label"><span>DiT Steps</span><span id="val-acestep-steps" class="control-value">8</span></div>
+                <input type="range" id="slider-acestep-steps" min="1" max="20" value="8">
             </div>
 
             <div class="control-row">
@@ -105,6 +106,9 @@ class AceStepController {
                 <button id="btn-acestep-autodj" class="breaker-reset" style="border-color:var(--jet-green);color:var(--jet-green);">Auto DJ</button>
             </div>
 
+            <div id="acestep-launch-row" class="auto-dj-row" style="margin-top:0.5rem;display:none;">
+                <button id="btn-acestep-launch" class="breaker-reset" style="border-color:var(--jet-yellow);color:var(--jet-yellow);width:100%;">Install & Launch ACE-Step Studio</button>
+            </div>
             <div id="acestep-result" style="margin-top:0.5rem;font-family:var(--jet-mono);font-size:0.65rem;color:var(--jet-muted);min-height:1.2em;"></div>
             <audio id="acestep-player" controls style="width:100%;margin-top:0.5rem;display:none;" crossorigin="anonymous"></audio>
         `;
@@ -149,8 +153,12 @@ class AceStepController {
         // Buttons
         const genBtn = document.getElementById('btn-acestep-generate');
         const autoBtn = document.getElementById('btn-acestep-autodj');
+        const launchBtn = document.getElementById('btn-acestep-launch');
+        const promptBtn = document.getElementById('btn-acestep-prompt');
         if (genBtn) genBtn.addEventListener('click', () => this._generate());
         if (autoBtn) autoBtn.addEventListener('click', () => this._autoDJ());
+        if (launchBtn) launchBtn.addEventListener('click', () => this._launchStudio());
+        if (promptBtn) promptBtn.addEventListener('click', () => this._generatePrompt());
 
         // Check status
         this._checkStatus();
@@ -166,7 +174,7 @@ class AceStepController {
             lyrics: document.getElementById('acestep-lyrics')?.value || '',
             bpm: parseFloat(document.getElementById('slider-acestep-bpm')?.value || 120),
             key: document.getElementById('select-acestep-key')?.value || '',
-            dit_inference_steps: parseFloat(document.getElementById('slider-acestep-steps')?.value || 50),
+            dit_inference_steps: parseFloat(document.getElementById('slider-acestep-steps')?.value || 8),
             dit_guidance_scale: parseFloat(document.getElementById('slider-acestep-guidance')?.value || 70) * 0.1,
             lm_codes_strength: parseFloat(document.getElementById('slider-acestep-lm')?.value || 100) * 0.01,
             audio_duration: parseFloat(document.getElementById('slider-acestep-duration')?.value || 20),
@@ -180,18 +188,24 @@ class AceStepController {
     // ------------------------------------------------------------------
     async _checkStatus() {
         const statusEl = document.getElementById('acestep-status');
+        const launchRow = document.getElementById('acestep-launch-row');
         try {
             const resp = await fetch(`${this.host}/jukebox/api/acestep/status`);
             const data = await resp.json();
             if (statusEl) {
-                statusEl.textContent = data.available
-                    ? '● Studio Online — ACE-Step V1.5 ready'
-                    : '○ Studio Offline — ACE-Step not reachable';
-                statusEl.style.color = data.available ? 'var(--jet-green)' : 'var(--jet-red)';
+                if (data.available) {
+                    statusEl.textContent = `● Studio Online — ACE-Step V1.5 ready (${data.host})`;
+                    statusEl.style.color = 'var(--jet-green)';
+                    if (launchRow) launchRow.style.display = 'none';
+                } else {
+                    statusEl.textContent = `○ Studio Offline — ACE-Step not reachable at ${data.host}`;
+                    statusEl.style.color = 'var(--jet-red)';
+                    if (launchRow) launchRow.style.display = 'flex';
+                }
             }
         } catch (e) {
             if (statusEl) {
-                statusEl.textContent = '○ Studio Offline — ACE-Step not reachable';
+                statusEl.textContent = '○ Studio Offline — Jukebox backend unreachable';
                 statusEl.style.color = 'var(--jet-red)';
             }
         }
@@ -230,6 +244,80 @@ class AceStepController {
             if (resultEl) resultEl.textContent = 'Error: ' + String(e);
         } finally {
             this._pending = false;
+        }
+    }
+
+    async _launchStudio() {
+        const resultEl = document.getElementById('acestep-result');
+        const launchBtn = document.getElementById('btn-acestep-launch');
+        if (launchBtn) { launchBtn.disabled = true; launchBtn.textContent = 'Launching...'; }
+        if (resultEl) resultEl.textContent = 'Installing & starting ACE-Step. This may take 2-5 minutes on first run...';
+        try {
+            const resp = await fetch(`${this.host}/jukebox/api/acestep/launch`, { method: 'POST' });
+            const data = await resp.json();
+            if (data.ok) {
+                if (resultEl) resultEl.textContent = data.message;
+                // Poll status every 5s for up to 5 min
+                let attempts = 0;
+                const poll = setInterval(async () => {
+                    attempts++;
+                    await this._checkStatus();
+                    const statusEl = document.getElementById('acestep-status');
+                    if (statusEl && statusEl.textContent.includes('Online')) {
+                        clearInterval(poll);
+                        if (resultEl) resultEl.textContent = 'ACE-Step is online!';
+                        if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+                    }
+                    if (attempts > 60) {
+                        clearInterval(poll);
+                        if (resultEl) resultEl.textContent = 'Timed out waiting for ACE-Step. Check server logs.';
+                        if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+                    }
+                }, 5000);
+            } else {
+                if (resultEl) resultEl.textContent = 'Launch failed: ' + (data.error || 'unknown');
+                if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+            }
+        } catch (e) {
+            if (resultEl) resultEl.textContent = 'Launch error: ' + String(e);
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+        }
+    }
+
+    async _generatePrompt() {
+        const resultEl = document.getElementById('acestep-result');
+        const captionEl = document.getElementById('acestep-caption');
+        const bpmSlider = document.getElementById('slider-acestep-bpm');
+        const bpmReadout = document.getElementById('val-acestep-bpm');
+        const keySelect = document.getElementById('select-acestep-key');
+        const durationSlider = document.getElementById('slider-acestep-duration');
+        const durationReadout = document.getElementById('val-acestep-duration');
+
+        if (resultEl) resultEl.textContent = 'Generating creative prompt...';
+        try {
+            const resp = await fetch(`${this.host}/jukebox/api/acestep/generate_prompt`, { method: 'POST' });
+            const data = await resp.json();
+            if (data.ok && data.prompt) {
+                const p = data.prompt;
+                if (captionEl) captionEl.value = p.caption;
+                if (bpmSlider && bpmReadout) { bpmSlider.value = p.bpm; bpmReadout.textContent = p.bpm; }
+                if (keySelect) keySelect.value = p.key;
+                if (durationSlider && durationReadout) { durationSlider.value = p.duration; durationReadout.textContent = p.duration; }
+                if (resultEl) {
+                    resultEl.innerHTML = `<span style="color:var(--jet-green)">Prompt generated:</span> ${p.mood} ${p.genre} · ${p.bpm} BPM · ${p.key} · ${p.duration}s`;
+                }
+                // Auto-save params to backend
+                const params = this._gatherParams();
+                await fetch(`${this.host}/jukebox/api/acestep/params`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+            } else {
+                if (resultEl) resultEl.textContent = 'Prompt generation failed: ' + (data.error || 'unknown');
+            }
+        } catch (e) {
+            if (resultEl) resultEl.textContent = 'Prompt error: ' + String(e);
         }
     }
 

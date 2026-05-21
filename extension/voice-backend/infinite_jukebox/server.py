@@ -57,6 +57,10 @@ from infinite_jukebox.audio_backends.web_audio import WebAudioBackend
 from infinite_jukebox.audio_backends.comfyui import ComfyUIBackend
 # Like pulling the Wi-Fi thermostat app configuration off the touchscreen.
 from infinite_jukebox.comfyui.client import ComfyUIConfig
+from infinite_jukebox.gpu.detector import detect_gpus, gpu_count, primary_gpu_name
+# Like the Dante bridge that connects the ACE-Step studio to the jukebox cockpit.
+from infinite_jukebox.acestep_bridge import get_acestep_bridge, AceStepBridge
+from infinite_jukebox.prompt_generator import generate_prompt
 
 
 # =============================================================================
@@ -110,8 +114,20 @@ def jukebox_index():
     Main visualizer page — like the primary touchscreen in the lobby
     that shows the pretty fluid graphics.
     """
-    # Like loading the lobby touchscreen with the fluid-graphics screensaver.
-    return render_template("jukebox.html")
+    gpus = detect_gpus()
+    response = render_template(
+        "jukebox.html",
+        gpu_name=gpus[0]["name"] if gpus else "CPU Render",
+        gpu_count=len(gpus),
+        gpu_memory=f"{gpus[0]['memory_mb'] // 1024} GB" if gpus else "N/A",
+        gpu_util=gpus[0]["utilization"] if gpus else 0,
+        gpu_temp=gpus[0]["temperature"] if gpus else 0,
+    )
+    resp = Response(response)
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 @infinite_jukebox_bp.route("/api/status")
@@ -156,8 +172,12 @@ def api_status():
         ],
         # Like the Lutron keypad button that is currently illuminated: ambient, energetic, dark, chaos, or minimal.
         "mood": engine.model.mood.value,
-        # Like the thermal-camera snapshots from each of the five electrical rooms.
+        # Like the thermal-camera snapshots from each GPU electrical room.
         "gpu_profiles": perf_report.get("gpu_profiles", {}),
+        "gpu_utilization": [
+            g.get("utilization", 0)
+            for g in perf_report.get("gpu_profiles", {}).values()
+        ],
     })
 
 
@@ -310,10 +330,19 @@ def api_stream():
                     # Like the keyed-switch position.
                     "lock_state": engine.model.lock_state.value,
                 },
-                # Like the thermal camera pointed at each of the five electrical rooms.
+                # Like the thermal camera pointed at each GPU electrical room.
                 "gpu_temps": {
                     # Like reading the temperature display on each panel and writing it down.
                     k: v.get("temperature", 0.0)
+                    for k, v in perf.get("gpu_profiles", {}).items()
+                },
+                # Like the sub-meter readings for each GPU's memory usage.
+                "gpu_profiles": {
+                    k: {
+                        "utilization": v.get("utilization", 0.0),
+                        "vram_used": v.get("vram_used", 0.0),
+                        "temperature": v.get("temperature", 0.0),
+                    }
                     for k, v in perf.get("gpu_profiles", {}).items()
                 },
             })
@@ -702,6 +731,182 @@ def api_system_optimize():
             pass
 
     return jsonify({"ok": True, "freed": freed})
+
+
+# =============================================================================
+# ACE-STEP INTEGRATION — Connect the music generation studio
+# =============================================================================
+
+@infinite_jukebox_bp.route("/api/acestep/status")
+def api_acestep_status():
+    """
+    Check if ACE-Step V1.5 is online and reachable.
+    Like calling the studio control room to see if the engineer is at the desk.
+    """
+    bridge = get_acestep_bridge()
+    available = bridge.is_available()
+    return jsonify({
+        "ok": True,
+        "available": available,
+        "host": bridge.host,
+        "pending": bridge.is_pending,
+    })
+
+
+@infinite_jukebox_bp.route("/api/acestep/diagnostics")
+def api_acestep_diagnostics():
+    """
+    Detailed ACE-Step connection diagnostics for troubleshooting.
+    Like running a full systems-check on the studio intercom line.
+    """
+    bridge = get_acestep_bridge()
+    return jsonify({
+        "ok": True,
+        "diagnostics": bridge.get_diagnostics(),
+    })
+
+
+@infinite_jukebox_bp.route("/api/acestep/launch", methods=["POST"])
+def api_acestep_launch():
+    """
+    Auto-install and launch ACE-Step V1.5 if it's not running.
+    Like pressing the 'START STUDIO GENERATOR' button on the wall.
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    bridge = get_acestep_bridge()
+    if bridge.is_available():
+        return jsonify({"ok": True, "message": "ACE-Step is already running."})
+
+    launcher = Path(__file__).parent.parent / "tools" / "launch_acestep.py"
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, str(launcher)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+        )
+        return jsonify({
+            "ok": True,
+            "message": "ACE-Step launcher started. It will clone, install, and start the server. Give it 2-5 minutes on first run.",
+            "pid": proc.pid,
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@infinite_jukebox_bp.route("/api/acestep/params", methods=["GET", "POST"])
+def api_acestep_params():
+    """
+    Read or update ACE-Step generation parameters.
+    Like the remote-control panel that lets the pilot adjust the studio mixing desk.
+    """
+    bridge = get_acestep_bridge()
+    if request.method == "GET":
+        return jsonify({"ok": True, "params": bridge.get_params_dict()})
+
+    data = request.get_json(force=True, silent=True) or {}
+    bridge.update_params(data)
+    return jsonify({"ok": True, "params": bridge.get_params_dict()})
+
+
+@infinite_jukebox_bp.route("/api/acestep/generate", methods=["POST"])
+def api_acestep_generate():
+    """
+    Trigger ACE-Step music generation.
+    Like the pilot pressing the 'REQUEST TRACK' button on the intercom.
+    """
+    bridge = get_acestep_bridge()
+    data = request.get_json(force=True, silent=True) or {}
+
+    caption = data.get("caption") or data.get("music_caption", "")
+    lyrics = data.get("lyrics", "")
+    duration = float(data.get("duration", -1))
+
+    result = bridge.generate(caption=caption, lyrics=lyrics, duration=duration)
+    return jsonify({
+        "ok": result.ok,
+        "audio_path": result.audio_path,
+        "audio_url": result.audio_url,
+        "error": result.error,
+    })
+
+
+@infinite_jukebox_bp.route("/api/acestep/result")
+def api_acestep_result():
+    """
+    Get the latest generation result.
+    Like the studio messenger running down the hall with the finished tape reel.
+    """
+    bridge = get_acestep_bridge()
+    result = bridge.latest_result
+    if result is None:
+        return jsonify({"ok": False, "error": "No generation has been run yet"}), 404
+    return jsonify({
+        "ok": result.ok,
+        "audio_path": result.audio_path,
+        "audio_url": result.audio_url,
+        "metadata": result.metadata,
+        "error": result.error,
+    })
+
+
+@infinite_jukebox_bp.route("/api/acestep/generate_prompt", methods=["POST"])
+def api_acestep_generate_prompt():
+    """
+    Generate a creative music prompt/caption automatically.
+    Like asking the ship's AI to brainstorm a track concept.
+    """
+    data = request.get_json(force=True, silent=True) or {}
+    result = generate_prompt(
+        include_vocals=data.get("include_vocals"),
+        custom_mood=data.get("mood"),
+        custom_genre=data.get("genre"),
+    )
+    return jsonify({"ok": True, "prompt": result})
+
+
+@infinite_jukebox_bp.route("/api/acestep/auto_dj", methods=["POST"])
+def api_acestep_auto_dj():
+    """
+    Trigger ACE-Step with randomized auto-dj parameters.
+    Like the autopilot randomly selecting a flight path and radioing the studio.
+    """
+    import random
+    bridge = get_acestep_bridge()
+
+    moods = [
+        {"caption": "A peaceful acoustic guitar melody with soft vocals", "bpm": 90, "key": "G major"},
+        {"caption": "Energetic electronic dance music with driving bass", "bpm": 128, "key": "F minor"},
+        {"caption": "Dark cinematic orchestral score with haunting strings", "bpm": 110, "key": "D minor"},
+        {"caption": "Chaotic industrial noise rock with distorted guitars", "bpm": 140, "key": "A minor"},
+        {"caption": "Minimal ambient drone with subtle piano textures", "bpm": 70, "key": "C major"},
+    ]
+    mood = random.choice(moods)
+
+    bridge.update_params({
+        "music_caption": mood["caption"],
+        "bpm": mood["bpm"],
+        "key": mood["key"],
+        "dit_inference_steps": random.choice([5, 8, 10, 15, 20]),
+        "dit_guidance_scale": round(random.uniform(5.0, 9.0), 1),
+        "lm_codes_strength": round(random.uniform(0.5, 1.0), 2),
+        "audio_duration": random.choice([15, 20, 30]),
+        "shift": round(random.uniform(2.0, 4.0), 1),
+        "lm_temperature": round(random.uniform(0.7, 1.0), 2),
+    })
+
+    result = bridge.generate()
+    return jsonify({
+        "ok": result.ok,
+        "audio_path": result.audio_path,
+        "audio_url": result.audio_url,
+        "mood": mood,
+        "error": result.error,
+    })
 
 
 # =============================================================================

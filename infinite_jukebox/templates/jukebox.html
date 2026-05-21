@@ -526,6 +526,17 @@
             flex-shrink: 0;
         }
 
+        .gpu-vram {
+            font-family: var(--jet-mono);
+            font-size: 0.62rem;
+            color: var(--jet-cyan);
+            text-shadow: 0 0 4px var(--jet-cyan-dim);
+            width: 3.5rem;
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 0.3rem;
+        }
+
         /* ---- Sparkline ---- */
         .sparkline-wrap {
             width: 100%;
@@ -825,11 +836,17 @@
     <script src="{{ url_for('infinite_jukebox.static', filename='audio_engine.js') }}?v=4"></script>
     <script src="{{ url_for('infinite_jukebox.static', filename='themes.js') }}?v=11"></script>
     <script src="{{ url_for('infinite_jukebox.static', filename='jukebox.js') }}?v=22"></script>
-    <script src="{{ url_for('infinite_jukebox.static', filename='dashboard.js') }}?v=4"></script>
+    <script src="{{ url_for('infinite_jukebox.static', filename='dashboard.js') }}?v=6"></script>
     <script src="{{ url_for('infinite_jukebox.static', filename='acestep.js') }}?v=1"></script>
     <script>
         window.addEventListener('load', () => {
             setTimeout(() => document.getElementById('loader').classList.add('hidden'), 400);
+            setTimeout(() => {
+                const panel = document.getElementById('dash-panel');
+                const toggle = document.getElementById('dash-toggle');
+                if (panel) { panel.classList.add('open'); }
+                if (toggle) { toggle.classList.add('active'); }
+            }, 1500);
         });
         const _errs = [];
         const origErr = console.error;

@@ -105,6 +105,9 @@ class AceStepController {
                 <button id="btn-acestep-autodj" class="breaker-reset" style="border-color:var(--jet-green);color:var(--jet-green);">Auto DJ</button>
             </div>
 
+            <div id="acestep-launch-row" class="auto-dj-row" style="margin-top:0.5rem;display:none;">
+                <button id="btn-acestep-launch" class="breaker-reset" style="border-color:var(--jet-yellow);color:var(--jet-yellow);width:100%;">Install & Launch ACE-Step Studio</button>
+            </div>
             <div id="acestep-result" style="margin-top:0.5rem;font-family:var(--jet-mono);font-size:0.65rem;color:var(--jet-muted);min-height:1.2em;"></div>
             <audio id="acestep-player" controls style="width:100%;margin-top:0.5rem;display:none;" crossorigin="anonymous"></audio>
         `;
@@ -149,8 +152,10 @@ class AceStepController {
         // Buttons
         const genBtn = document.getElementById('btn-acestep-generate');
         const autoBtn = document.getElementById('btn-acestep-autodj');
+        const launchBtn = document.getElementById('btn-acestep-launch');
         if (genBtn) genBtn.addEventListener('click', () => this._generate());
         if (autoBtn) autoBtn.addEventListener('click', () => this._autoDJ());
+        if (launchBtn) launchBtn.addEventListener('click', () => this._launchStudio());
 
         // Check status
         this._checkStatus();
@@ -180,18 +185,24 @@ class AceStepController {
     // ------------------------------------------------------------------
     async _checkStatus() {
         const statusEl = document.getElementById('acestep-status');
+        const launchRow = document.getElementById('acestep-launch-row');
         try {
             const resp = await fetch(`${this.host}/jukebox/api/acestep/status`);
             const data = await resp.json();
             if (statusEl) {
-                statusEl.textContent = data.available
-                    ? '● Studio Online — ACE-Step V1.5 ready'
-                    : '○ Studio Offline — ACE-Step not reachable';
-                statusEl.style.color = data.available ? 'var(--jet-green)' : 'var(--jet-red)';
+                if (data.available) {
+                    statusEl.textContent = `● Studio Online — ACE-Step V1.5 ready (${data.host})`;
+                    statusEl.style.color = 'var(--jet-green)';
+                    if (launchRow) launchRow.style.display = 'none';
+                } else {
+                    statusEl.textContent = `○ Studio Offline — ACE-Step not reachable at ${data.host}`;
+                    statusEl.style.color = 'var(--jet-red)';
+                    if (launchRow) launchRow.style.display = 'flex';
+                }
             }
         } catch (e) {
             if (statusEl) {
-                statusEl.textContent = '○ Studio Offline — ACE-Step not reachable';
+                statusEl.textContent = '○ Studio Offline — Jukebox backend unreachable';
                 statusEl.style.color = 'var(--jet-red)';
             }
         }
@@ -230,6 +241,43 @@ class AceStepController {
             if (resultEl) resultEl.textContent = 'Error: ' + String(e);
         } finally {
             this._pending = false;
+        }
+    }
+
+    async _launchStudio() {
+        const resultEl = document.getElementById('acestep-result');
+        const launchBtn = document.getElementById('btn-acestep-launch');
+        if (launchBtn) { launchBtn.disabled = true; launchBtn.textContent = 'Launching...'; }
+        if (resultEl) resultEl.textContent = 'Installing & starting ACE-Step. This may take 2-5 minutes on first run...';
+        try {
+            const resp = await fetch(`${this.host}/jukebox/api/acestep/launch`, { method: 'POST' });
+            const data = await resp.json();
+            if (data.ok) {
+                if (resultEl) resultEl.textContent = data.message;
+                // Poll status every 5s for up to 5 min
+                let attempts = 0;
+                const poll = setInterval(async () => {
+                    attempts++;
+                    await this._checkStatus();
+                    const statusEl = document.getElementById('acestep-status');
+                    if (statusEl && statusEl.textContent.includes('Online')) {
+                        clearInterval(poll);
+                        if (resultEl) resultEl.textContent = 'ACE-Step is online!';
+                        if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+                    }
+                    if (attempts > 60) {
+                        clearInterval(poll);
+                        if (resultEl) resultEl.textContent = 'Timed out waiting for ACE-Step. Check server logs.';
+                        if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+                    }
+                }, 5000);
+            } else {
+                if (resultEl) resultEl.textContent = 'Launch failed: ' + (data.error || 'unknown');
+                if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
+            }
+        } catch (e) {
+            if (resultEl) resultEl.textContent = 'Launch error: ' + String(e);
+            if (launchBtn) { launchBtn.disabled = false; launchBtn.textContent = 'Install & Launch ACE-Step Studio'; }
         }
     }
 

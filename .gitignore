@@ -25,3 +25,35 @@ Thumbs.db
 # Build artifacts
 build/
 *.egg-info/
+
+# Runtime / logs
+*.log
+backend_*.log
+auto_resume_*.log
+inspector.log
+jukebox_server.*
+test_*.log
+movetest.log
+stdout.log
+stderr.log
+
+# Runtime state
+jukebox_state.json
+tools/.kimi-last-session
+tools/.orbitscribe-heartbeat
+tools/.orbitscribe-resume-debug.log
+tools/.watchdog.pid
+tools/.reload-lock
+tools/.reload-resume-lock
+
+# Temp / scratch files
+tmp_*.py
+
+# Screenshots (debug artifacts)
+screenshots/
+chrome_*.png
+vscode_*.png
+test_typed.png
+
+# pytest
+.pytest_cache/

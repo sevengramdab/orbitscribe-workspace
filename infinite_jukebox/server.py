@@ -60,6 +60,7 @@ from infinite_jukebox.comfyui.client import ComfyUIConfig
 from infinite_jukebox.gpu.detector import detect_gpus, gpu_count, primary_gpu_name
 # Like the Dante bridge that connects the ACE-Step studio to the jukebox cockpit.
 from infinite_jukebox.acestep_bridge import get_acestep_bridge, AceStepBridge
+from infinite_jukebox.prompt_generator import generate_prompt
 
 
 # =============================================================================
@@ -333,6 +334,15 @@ def api_stream():
                 "gpu_temps": {
                     # Like reading the temperature display on each panel and writing it down.
                     k: v.get("temperature", 0.0)
+                    for k, v in perf.get("gpu_profiles", {}).items()
+                },
+                # Like the sub-meter readings for each GPU's memory usage.
+                "gpu_profiles": {
+                    k: {
+                        "utilization": v.get("utilization", 0.0),
+                        "vram_used": v.get("vram_used", 0.0),
+                        "temperature": v.get("temperature", 0.0),
+                    }
                     for k, v in perf.get("gpu_profiles", {}).items()
                 },
             })
@@ -743,6 +753,51 @@ def api_acestep_status():
     })
 
 
+@infinite_jukebox_bp.route("/api/acestep/diagnostics")
+def api_acestep_diagnostics():
+    """
+    Detailed ACE-Step connection diagnostics for troubleshooting.
+    Like running a full systems-check on the studio intercom line.
+    """
+    bridge = get_acestep_bridge()
+    return jsonify({
+        "ok": True,
+        "diagnostics": bridge.get_diagnostics(),
+    })
+
+
+@infinite_jukebox_bp.route("/api/acestep/launch", methods=["POST"])
+def api_acestep_launch():
+    """
+    Auto-install and launch ACE-Step V1.5 if it's not running.
+    Like pressing the 'START STUDIO GENERATOR' button on the wall.
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    bridge = get_acestep_bridge()
+    if bridge.is_available():
+        return jsonify({"ok": True, "message": "ACE-Step is already running."})
+
+    launcher = Path(__file__).parent.parent / "tools" / "launch_acestep.py"
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, str(launcher)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+        )
+        return jsonify({
+            "ok": True,
+            "message": "ACE-Step launcher started. It will clone, install, and start the server. Give it 2-5 minutes on first run.",
+            "pid": proc.pid,
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @infinite_jukebox_bp.route("/api/acestep/params", methods=["GET", "POST"])
 def api_acestep_params():
     """
@@ -799,6 +854,21 @@ def api_acestep_result():
     })
 
 
+@infinite_jukebox_bp.route("/api/acestep/generate_prompt", methods=["POST"])
+def api_acestep_generate_prompt():
+    """
+    Generate a creative music prompt/caption automatically.
+    Like asking the ship's AI to brainstorm a track concept.
+    """
+    data = request.get_json(force=True, silent=True) or {}
+    result = generate_prompt(
+        include_vocals=data.get("include_vocals"),
+        custom_mood=data.get("mood"),
+        custom_genre=data.get("genre"),
+    )
+    return jsonify({"ok": True, "prompt": result})
+
+
 @infinite_jukebox_bp.route("/api/acestep/auto_dj", methods=["POST"])
 def api_acestep_auto_dj():
     """
@@ -821,7 +891,7 @@ def api_acestep_auto_dj():
         "music_caption": mood["caption"],
         "bpm": mood["bpm"],
         "key": mood["key"],
-        "dit_inference_steps": random.choice([30, 50, 75]),
+        "dit_inference_steps": random.choice([5, 8, 10, 15, 20]),
         "dit_guidance_scale": round(random.uniform(5.0, 9.0), 1),
         "lm_codes_strength": round(random.uniform(0.5, 1.0), 2),
         "audio_duration": random.choice([15, 20, 30]),
