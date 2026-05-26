@@ -429,6 +429,30 @@ def execute_tool(tool: str, args: Dict[str, Any]) -> Dict[str, Any]:
             except Exception as e:
                 return {"status": "error", "data": None, "error": f"Pricing optimization error: {str(e)}"}
 
+        elif tool == "route_intent":
+            """Classify user intent and return the best execution mode/roles.
+            Args: message (str), session_id (str, optional)
+            """
+            try:
+                from core.intent_router import classify_intent
+                message = args.get("message", "")
+                if not message:
+                    return {"status": "error", "data": None, "error": "Missing required argument: message. Use args={\"message\": \"<user request>\"}"}
+                result = classify_intent(message)
+                return {
+                    "status": "ok",
+                    "data": {
+                        "intent": result.intent.value,
+                        "confidence": round(result.confidence, 2),
+                        "target_mode": result.target_mode,
+                        "target_roles": result.target_roles,
+                        "reasoning": result.reasoning,
+                    },
+                    "error": "",
+                }
+            except Exception as e:
+                return {"status": "error", "data": None, "error": f"Intent routing error: {str(e)}"}
+
         elif tool == "etsy_listing_template":
             """Return a structured Etsy listing template for a product."""
             product_name = args.get("product_name", "")

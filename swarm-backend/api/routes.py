@@ -2,6 +2,7 @@
 
 import json
 import os
+import uuid
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
@@ -18,13 +19,18 @@ from modes.plan_mode import plan, execute_step
 from modes.agent_mode import agent_run
 from modes.swarm_mode import swarm_run
 from agents.swarm_orchestrator import orchestrator
+from core.remote_client import get_remote_pool
+from modes.auto_mode import auto_run
+from modes.plan_creator_mode import get_plan_creator
+from modes.aquaculture_mesh_mode import aquaculture_mesh_run
+from core.discovery import get_discovery_service
 
 router = APIRouter()
 
 
 class ChatRequest(BaseModel):
     message: str
-    mode: str = "ask"  # ask | plan | agent | swarm
+    mode: str = "ask"  # ask | plan | agent | swarm | mesh | auto
     history: Optional[list] = None
     workspace_context: str = ""
     workspace_path: Optional[str] = None  # Absolute workspace root for tool execution
@@ -89,6 +95,29 @@ class AgentCreateRequest(BaseModel):
     role: str
     name: str
     system_prompt: str = ""
+
+
+class PlanOptionsRequest(BaseModel):
+    goal: str
+    model: Optional[str] = None
+    temperature: Optional[float] = 0.4
+
+
+class SelectOptionRequest(BaseModel):
+    plan_id: str
+    option_id: str
+
+
+class RegisterNodeRequest(BaseModel):
+    node_id: str
+    base_url: str
+    name: str = ""
+    tier: str = "shadow"
+
+
+class ForwardTaskRequest(BaseModel):
+    goal: str
+    prefer_large_model: bool = False
 
 
 @router.get("/health")
@@ -310,6 +339,33 @@ async def chat(req: ChatRequest):
             session_id=req.session_id,
         )
         return StreamingResponse(_stream_structured(gen), media_type="text/event-stream")
+    elif mode == "auto":
+        gen = auto_run(
+            task=req.message,
+            workspace_context=req.workspace_context,
+            stream=True,
+            autonomy_level=autonomy,
+            batch_mode=req.batch_mode,
+            temperature=req.temperature,
+            model=req.model,
+            orchestrator_model=req.orchestrator_model,
+            subagent_mode=req.subagent_mode,
+            session_id=req.session_id,
+        )
+        return StreamingResponse(_stream_structured(gen), media_type="text/event-stream")
+    elif mode == "mesh":
+        async def mesh_gen():
+            yield SSEEvent("status", {"message": "Booting aquaculture mesh..."})
+            try:
+                await aquaculture_mesh_run(
+                    session_id=req.session_id or f"mesh-{uuid.uuid4().hex[:8]}",
+                    task=req.message,
+                    max_cycles=5,
+                )
+                yield SSEEvent("status", {"message": "Mesh cycle complete. Node dormant."})
+            except Exception as e:
+                yield SSEEvent("error", {"message": str(e)})
+        return StreamingResponse(_stream_structured(mesh_gen()), media_type="text/event-stream")
     else:
         async def error_gen():
             yield SSEEvent("error", {"message": f"Unknown mode: {mode}"})
@@ -889,3 +945,114 @@ async def agent_endpoint(req: ChatRequest):
     """Run a specific agent."""
     req.mode = "agent"
     return await chat(req)
+
+
+# ---------------------------------------------------------------------------
+# Plan Creator — multi-option interactive planning (from SimpleSwarm)
+# ---------------------------------------------------------------------------
+
+@router.post("/plan/options")
+async def create_plan_options(req: PlanOptionsRequest):
+    """Generate 3-4 different approaches to a goal."""
+    creator = get_plan_creator()
+    plan = await creator.create_plan(req.goal, model=req.model, temperature=req.temperature)
+    return creator.to_dict(plan)
+
+
+@router.get("/plan/options/{plan_id}")
+async def get_plan_options(plan_id: str):
+    """Retrieve a previously created multi-option plan."""
+    creator = get_plan_creator()
+    plan = creator.get_plan(plan_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    return creator.to_dict(plan)
+
+
+@router.post("/plan/options/select")
+async def select_plan_option(req: SelectOptionRequest):
+    """Select one option from a multi-option plan."""
+    creator = get_plan_creator()
+    plan = creator.select_option(req.plan_id, req.option_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan or option not found")
+    return creator.to_dict(plan)
+
+
+# ---------------------------------------------------------------------------
+# Remote Node Mesh — distributed task routing (from SimpleSwarm)
+# ---------------------------------------------------------------------------
+
+@router.get("/nodes")
+async def list_nodes():
+    """List all registered remote nodes."""
+    pool = get_remote_pool()
+    return {"nodes": pool.health_summary(), "local_tasks": pool.local_task_count, "remote_tasks": pool.remote_task_count}
+
+
+@router.post("/nodes/register")
+async def register_node(req: RegisterNodeRequest):
+    """Register a new remote node."""
+    pool = get_remote_pool()
+    client = pool.register(req.node_id, req.base_url, name=req.name, tier=req.tier)
+    return {"success": True, "node": client.to_dict()}
+
+
+@router.delete("/nodes/{node_id}")
+async def deregister_node(node_id: str):
+    """Remove a remote node from the pool."""
+    pool = get_remote_pool()
+    if pool.deregister(node_id):
+        return {"success": True, "message": f"Node {node_id} deregistered"}
+    raise HTTPException(status_code=404, detail="Node not found")
+
+
+@router.get("/nodes/health")
+async def health_check_nodes():
+    """Run health checks on all registered nodes."""
+    pool = get_remote_pool()
+    healthy = pool.get_healthy_nodes()
+    return {
+        "success": True,
+        "healthy_count": len(healthy),
+        "total_count": len(pool.nodes),
+        "nodes": [n.to_dict() for n in healthy],
+    }
+
+
+@router.post("/nodes/forward")
+async def forward_task(req: ForwardTaskRequest):
+    """Forward a task to the best available remote node."""
+    pool = get_remote_pool()
+    node = pool.get_best_node(prefer_large_model=req.prefer_large_model)
+    if not node:
+        raise HTTPException(status_code=503, detail="No healthy remote nodes available")
+    result = node.submit_task(req.goal)
+    pool.record_remote_task()
+    return {"success": result.get("success"), "node_id": node.node_id, "result": result}
+
+
+@router.get("/nodes/discover")
+async def discover_nodes(timeout: float = 3.0):
+    """Broadcast a UDP discovery request to find local OrbitScribe nodes."""
+    discovery = get_discovery_service()
+    if not discovery:
+        raise HTTPException(status_code=503, detail="Discovery service not initialized")
+    peers = discovery.discover(timeout=timeout)
+    # Auto-register discovered nodes
+    pool = get_remote_pool()
+    for peer in peers:
+        node_id = peer.get("node_id")
+        endpoint = peer.get("endpoint") or f"http://{peer.get('ip', '127.0.0.1')}:58081"
+        if node_id and not pool.nodes.get(node_id):
+            pool.register(node_id, endpoint, name=peer.get("name", node_id), tier=peer.get("tier", "shadow"))
+    return {"success": True, "discovered": len(peers), "nodes": peers}
+
+
+@router.get("/nodes/discovered")
+async def list_discovered_nodes():
+    """List nodes discovered via passive listening."""
+    discovery = get_discovery_service()
+    if not discovery:
+        return {"success": True, "nodes": []}
+    return {"success": True, "nodes": discovery.get_discovered()}

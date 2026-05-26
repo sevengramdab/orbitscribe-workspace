@@ -162,6 +162,73 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                         console.log('[OrbitScribe] Sidebar webview reported ready');
                         break;
                     }
+                    case 'createPlanOptions': {
+                        try {
+                            const resp = await httpPost('http://127.0.0.1:58081/api/plan/options', { goal: message.goal });
+                            const data = await resp.json();
+                            webviewView.webview.postMessage({ command: 'planOptionsCreated', success: data.plan_id !== undefined, plan: data, error: data.error });
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'planOptionsCreated', success: false, error: e.message || 'Backend unreachable' });
+                        }
+                        break;
+                    }
+                    case 'selectPlanOption': {
+                        try {
+                            const resp = await httpPost('http://127.0.0.1:58081/api/plan/options/select', { plan_id: message.plan_id, option_id: message.option_id });
+                            const data = await resp.json();
+                            webviewView.webview.postMessage({ command: 'planOptionSelected', success: data.status === 'selected', plan: data });
+                            // Open the swarm panel in plan mode with the goal
+                            const { SwarmPanel } = await import('./SwarmPanel');
+                            SwarmPanel.createOrShow(this._extensionUri, 'plan');
+                            setTimeout(() => {
+                                SwarmPanel.currentPanel?.sendMessage({ command: 'sendText', text: message.goal, mode: 'plan' });
+                            }, 400);
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'planOptionSelected', success: false, error: e.message || 'Backend unreachable' });
+                        }
+                        break;
+                    }
+                    case 'getNodes': {
+                        try {
+                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes');
+                            const data = await resp.json();
+                            webviewView.webview.postMessage({ command: 'nodesList', nodes: data.nodes || [] });
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'nodesList', nodes: [] });
+                        }
+                        break;
+                    }
+                    case 'discoverNodes': {
+                        try {
+                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes/discover?timeout=3');
+                            const data = await resp.json();
+                            webviewView.webview.postMessage({ command: 'nodesDiscovered', success: data.success, discovered: data.discovered, nodes: data.nodes || [], error: data.error });
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'nodesDiscovered', success: false, error: e.message || 'Backend unreachable' });
+                        }
+                        break;
+                    }
+                    case 'forwardTask': {
+                        try {
+                            const resp = await httpPost('http://127.0.0.1:58081/api/nodes/forward', { goal: message.goal, prefer_large_model: false });
+                            const data = await resp.json();
+                            webviewView.webview.postMessage({ command: 'taskForwarded', success: data.success, node_id: data.node_id, error: data.error });
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'taskForwarded', success: false, error: e.message || 'Backend unreachable' });
+                        }
+                        break;
+                    }
+                    case 'checkNodeHealth': {
+                        try {
+                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes/health');
+                            const data = await resp.json();
+                            const node = (data.nodes || []).find((n: any) => n.node_id === message.node_id);
+                            webviewView.webview.postMessage({ command: 'nodeHealth', node_id: message.node_id, healthy: !!node });
+                        } catch (e: any) {
+                            webviewView.webview.postMessage({ command: 'nodeHealth', node_id: message.node_id, healthy: false });
+                        }
+                        break;
+                    }
                 }
             } catch (handlerErr: any) {
                 console.error('[OrbitScribe] Message handler error:', handlerErr);
@@ -467,6 +534,34 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
         }
         .history-panel { display: none; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 12px; max-height: 240px; overflow-y: auto; }
         .history-panel.active { display: block; }
+        .plan-options-panel { display: none; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 12px; max-height: 400px; overflow-y: auto; }
+        .plan-options-panel.active { display: block; }
+        .plan-options-panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+        .empty-plan { color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
+        .plan-option { padding: 10px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: rgba(15,17,23,0.4); cursor: pointer; transition: all 0.15s; }
+        .plan-option:hover { border-color: var(--accent); background: rgba(139,92,246,0.08); }
+        .plan-option.selected { border-color: var(--accent); background: rgba(139,92,246,0.12); }
+        .plan-option-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .plan-option-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 6px; }
+        .plan-option-meta { display: flex; gap: 8px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+        .plan-option-meta span { background: rgba(45,49,66,0.5); padding: 2px 6px; border-radius: 4px; }
+        .remote-nodes-panel { display: none; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 12px; max-height: 300px; overflow-y: auto; }
+        .remote-nodes-panel.active { display: block; }
+        .remote-nodes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .remote-nodes-header h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+        .remote-nodes-refresh { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
+        .remote-nodes-refresh:hover { background: var(--accent-hover); }
+        .empty-nodes { color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
+        .node-item { padding: 8px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: rgba(15,17,23,0.4); }
+        .node-item.online { border-color: rgba(34,197,94,0.4); }
+        .node-item.offline { border-color: rgba(239,68,68,0.4); opacity: 0.7; }
+        .node-name { font-size: 12px; font-weight: 600; color: var(--text); }
+        .node-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .node-actions { display: flex; gap: 6px; margin-top: 6px; }
+        .node-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 11px; cursor: pointer; }
+        .node-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .node-btn.forward { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .node-btn.forward:hover { background: var(--accent-hover); }
         .history-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.4; word-break: break-word; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .history-item:last-child { border-bottom: none; }
         .history-item:hover { color: var(--accent-light); }
@@ -583,6 +678,17 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
         History
     </button>
 
+    <button class="feature-btn" id="planOptionsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+        Plan Options
+    </button>
+
+    <div class="plan-options-panel" id="planOptionsPanel">
+        <h2>Choose an Approach</h2>
+        <div class="empty-plan" id="planOptionsEmpty">Enter a goal above and click Plan Options to generate approaches.</div>
+        <div id="planOptionsList"></div>
+    </div>
+
     <div class="settings-panel" id="settingsPanel">
         <h2>Settings</h2>
         <div class="setting-row">
@@ -639,6 +745,20 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
 
 
 
+    <button class="feature-btn" id="remoteNodesBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        Remote Nodes
+    </button>
+
+    <div class="remote-nodes-panel" id="remoteNodesPanel">
+        <div class="remote-nodes-header">
+            <h2>Mesh Nodes</h2>
+            <button class="remote-nodes-refresh" id="discoverNodesBtn">Discover</button>
+        </div>
+        <div class="empty-nodes" id="remoteNodesEmpty">No remote nodes registered.</div>
+        <div id="remoteNodesList"></div>
+    </div>
+
     <button class="feature-btn" id="settingsBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         Settings
@@ -672,6 +792,15 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
             const settingsBtn = document.getElementById('settingsBtn');
             const settingsPanel = document.getElementById('settingsPanel');
             const backendStatus = document.getElementById('backendStatus');
+            const planOptionsBtn = document.getElementById('planOptionsBtn');
+            const planOptionsPanel = document.getElementById('planOptionsPanel');
+            const planOptionsList = document.getElementById('planOptionsList');
+            const planOptionsEmpty = document.getElementById('planOptionsEmpty');
+            const remoteNodesBtn = document.getElementById('remoteNodesBtn');
+            const remoteNodesPanel = document.getElementById('remoteNodesPanel');
+            const remoteNodesList = document.getElementById('remoteNodesList');
+            const remoteNodesEmpty = document.getElementById('remoteNodesEmpty');
+            const discoverNodesBtn = document.getElementById('discoverNodesBtn');
             const tempSlider = document.getElementById('tempSlider');
             const tempValue = document.getElementById('tempValue');
             const toast = document.getElementById('toast');
@@ -972,6 +1101,102 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                 });
             }
 
+            if (planOptionsBtn) {
+                planOptionsBtn.addEventListener('click', () => {
+                    const text = chatInput ? chatInput.value.trim() : '';
+                    if (!text) {
+                        showToast('Enter a goal first');
+                        return;
+                    }
+                    if (planOptionsPanel) planOptionsPanel.classList.add('active');
+                    if (planOptionsEmpty) planOptionsEmpty.textContent = 'Generating approaches...';
+                    if (planOptionsList) planOptionsList.innerHTML = '';
+                    vscode.postMessage({ command: 'createPlanOptions', goal: text });
+                });
+            }
+
+            if (remoteNodesBtn) {
+                remoteNodesBtn.addEventListener('click', () => {
+                    if (remoteNodesPanel) remoteNodesPanel.classList.toggle('active');
+                    if (remoteNodesPanel && remoteNodesPanel.classList.contains('active')) {
+                        vscode.postMessage({ command: 'getNodes' });
+                    }
+                });
+            }
+
+            if (discoverNodesBtn) {
+                discoverNodesBtn.addEventListener('click', () => {
+                    if (remoteNodesEmpty) remoteNodesEmpty.textContent = 'Scanning local network...';
+                    vscode.postMessage({ command: 'discoverNodes' });
+                });
+            }
+
+            function renderNodes(nodes) {
+                if (!remoteNodesList || !remoteNodesEmpty) return;
+                remoteNodesEmpty.style.display = 'none';
+                remoteNodesList.innerHTML = '';
+                if (!nodes || nodes.length === 0) {
+                    remoteNodesEmpty.style.display = 'block';
+                    remoteNodesEmpty.textContent = 'No remote nodes registered.';
+                    return;
+                }
+                nodes.forEach((node) => {
+                    const div = document.createElement('div');
+                    div.className = 'node-item ' + (node.status === 'online' ? 'online' : 'offline');
+                    div.innerHTML = '<div class="node-name">' + escapeHtml(node.name || node.node_id) + '</div>' +
+                        '<div class="node-meta">' + escapeHtml(node.endpoint || '') + ' · ' + escapeHtml(node.tier || 'shadow') + ' · ' + (node.latency_ms < 9999 ? node.latency_ms + 'ms' : 'offline') + '</div>' +
+                        '<div class="node-actions">' +
+                            '<button class="node-btn forward" data-node-id="' + escapeHtml(node.node_id) + '">Forward Task</button>' +
+                            '<button class="node-btn health-btn" data-node-id="' + escapeHtml(node.node_id) + '">Health</button>' +
+                        '</div>';
+                    div.querySelector('.forward').addEventListener('click', () => {
+                        const text = chatInput ? chatInput.value.trim() : '';
+                        if (!text) {
+                            showToast('Enter a goal first');
+                            return;
+                        }
+                        vscode.postMessage({ command: 'forwardTask', node_id: node.node_id, goal: text });
+                    });
+                    div.querySelector('.health-btn').addEventListener('click', () => {
+                        vscode.postMessage({ command: 'checkNodeHealth', node_id: node.node_id });
+                    });
+                    remoteNodesList.appendChild(div);
+                });
+            }
+
+            function renderPlanOptions(plan) {
+                if (!planOptionsList || !planOptionsEmpty) return;
+                planOptionsEmpty.style.display = 'none';
+                planOptionsList.innerHTML = '';
+                if (!plan.options || plan.options.length === 0) {
+                    planOptionsEmpty.style.display = 'block';
+                    planOptionsEmpty.textContent = 'No options generated.';
+                    return;
+                }
+                plan.options.forEach((opt) => {
+                    const div = document.createElement('div');
+                    div.className = 'plan-option';
+                    div.dataset.optionId = opt.option_id;
+                    div.innerHTML = '<div class="plan-option-title">' + escapeHtml(opt.title) + '</div>' +
+                        '<div class="plan-option-desc">' + escapeHtml(opt.description) + '</div>' +
+                        '<div class="plan-option-meta">' +
+                            '<span>' + escapeHtml(opt.complexity) + '</span>' +
+                            '<span>' + opt.estimated_files + ' files</span>' +
+                            '<span>' + escapeHtml(opt.approach) + '</span>' +
+                        '</div>';
+                    div.addEventListener('click', () => {
+                        document.querySelectorAll('.plan-option').forEach(el => el.classList.remove('selected'));
+                        div.classList.add('selected');
+                        vscode.postMessage({ command: 'selectPlanOption', plan_id: plan.plan_id, option_id: opt.option_id, goal: plan.goal });
+                        showToast('Selected: ' + opt.title);
+                        setTimeout(() => {
+                            if (planOptionsPanel) planOptionsPanel.classList.remove('active');
+                        }, 400);
+                    });
+                    planOptionsList.appendChild(div);
+                });
+            }
+
 
 
             const themes = {
@@ -1210,6 +1435,45 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                                 stopPolling();
                                 if (micStatus) micStatus.textContent = 'Voice engine offline';
                             }
+                            break;
+                        case 'planOptionsCreated':
+                            if (msg.success && msg.plan) {
+                                renderPlanOptions(msg.plan);
+                                showToast('Generated ' + msg.plan.options.length + ' approaches');
+                            } else {
+                                if (planOptionsEmpty) {
+                                    planOptionsEmpty.style.display = 'block';
+                                    planOptionsEmpty.textContent = msg.error || 'Failed to generate options';
+                                }
+                            }
+                            break;
+                        case 'planOptionSelected':
+                            if (msg.success) {
+                                showToast('Opening plan panel...');
+                            } else {
+                                showToast(msg.error || 'Failed to select option');
+                            }
+                            break;
+                        case 'nodesList':
+                            renderNodes(msg.nodes);
+                            break;
+                        case 'nodesDiscovered':
+                            if (msg.success) {
+                                renderNodes(msg.nodes);
+                                showToast('Discovered ' + msg.discovered + ' nodes');
+                            } else {
+                                showToast(msg.error || 'Discovery failed');
+                            }
+                            break;
+                        case 'taskForwarded':
+                            if (msg.success) {
+                                showToast('Task forwarded to ' + (msg.node_id || 'remote node'));
+                            } else {
+                                showToast(msg.error || 'Forward failed');
+                            }
+                            break;
+                        case 'nodeHealth':
+                            showToast((msg.node_id || 'Node') + ' is ' + (msg.healthy ? 'healthy' : 'unreachable'));
                             break;
                     }
                 } catch (handlerErr) {

@@ -4,14 +4,38 @@ FastAPI service for multi-agent LLM orchestration.
 """
 import os
 import socket
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router as api_router
 from core import config
+from core.discovery import get_discovery_service
 
-app = FastAPI(title="OrbitScribe Swarm", version="3.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage startup and shutdown lifecycle events."""
+    # Startup
+    discovery = get_discovery_service({
+        "node_id": f"orbitscribe-local-{config.PORT}",
+        "name": "Local OrbitScribe",
+        "endpoint": f"http://{config.HOST}:{config.PORT}",
+        "tier": "shadow",
+        "version": "3.0.0",
+    })
+    discovery.start()
+    print(f"[Discovery] UDP broadcast listener started on port {discovery.port}")
+    yield
+    # Shutdown
+    discovery = get_discovery_service()
+    if discovery:
+        discovery.stop()
+        print("[Discovery] UDP broadcast listener stopped")
+
+
+app = FastAPI(title="OrbitScribe Swarm", version="3.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -57,3 +57,12 @@ test_typed.png
 
 # pytest
 .pytest_cache/
+
+# Rust
+aoe/supervisor/target/
+aoe/supervisor/Cargo.lock
+
+simpleswarm/.git/
+
+simpleswarm/
+

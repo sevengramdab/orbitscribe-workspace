@@ -235,7 +235,7 @@ export class SwarmPanel {
     }
 
     public static getHtml(webview: vscode.Webview, extensionUri: vscode.Uri, initialMode?: string): string {
-        const mode = initialMode || 'ask';
+        const mode = initialMode || 'auto';
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'out', 'panels', 'swarm-panel-webview.js'));
 
         return `<!DOCTYPE html>
@@ -664,6 +664,7 @@ export class SwarmPanel {
         <button class="autonomy-btn" data-level="autopilot">Autopilot</button>
     </div>
     <div class="mode-tabs">
+        <button class="mode-tab ${mode === 'auto' ? 'active' : ''}" data-mode="auto">Auto</button>
         <button class="mode-tab ${mode === 'ask' ? 'active' : ''}" data-mode="ask">Ask</button>
         <button class="mode-tab ${mode === 'plan' ? 'active' : ''}" data-mode="plan">Plan</button>
         <button class="mode-tab ${mode === 'agent' ? 'active' : ''}" data-mode="agent">Agent</button>

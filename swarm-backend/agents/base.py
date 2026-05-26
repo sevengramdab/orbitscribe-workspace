@@ -78,10 +78,36 @@ Context: {context}
 Break down into steps, files, and dependencies."""
         )
 
+class DiagramAgent(Agent):
+    def __init__(self):
+        super().__init__(
+            name="Diagram",
+            role="Generate architecture diagrams from codebase structure",
+            prompt_template="""You are a technical diagrammer. Generate Mermaid or PlantUML diagrams.
+
+Task: {task}
+Context: {context}""",
+        )
+
+
+class ResearchAgent(Agent):
+    def __init__(self):
+        super().__init__(
+            name="Research",
+            role="Investigate codebase, find files, and summarize architecture",
+            prompt_template="""You are a senior researcher. Investigate thoroughly and report findings.
+
+Task: {task}
+Context: {context}""",
+        )
+
+
 AGENT_REGISTRY = {
     "code": CodeAgent(),
     "review": ReviewAgent(),
     "test": TestAgent(),
     "doc": DocAgent(),
     "plan": PlanAgent(),
+    "diagram": DiagramAgent(),
+    "research": ResearchAgent(),
 }

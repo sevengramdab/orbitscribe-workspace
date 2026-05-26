@@ -53,7 +53,8 @@ TOOL_SYSTEM_PROMPT = (
     '- etsy_profit_calculator: args={"selling_price": 25.00, "product_cost": 8.50, "shipping_cost": 4.99, "quantity": 1, "offsite_ads_rate": 0}\n'
     '- etsy_research: args={"query": "trending Etsy products 2024", "max_results": 5}\n'
     '- etsy_pricing_optimizer: args={"product_cost": 8.50, "shipping_cost": 4.99, "target_margin": 40, "competitor_low": 15.00, "competitor_high": 30.00}\n'
-    '- etsy_listing_template: args={"product_name": "Custom Wood Sign", "category": "Home Decor"}\n\n'
+    '- etsy_listing_template: args={"product_name": "Custom Wood Sign", "category": "Home Decor"}\n'
+    '- route_intent: args={"message": "build an app that does X", "session_id": "abc123"}\n\n'
     "RULES: Output ONLY tool JSON blocks. No explanations. No summaries. No markdown essays. "
     "After a tool result, output the NEXT tool JSON block immediately. Be CONCISE."
 )

@@ -1,6 +1,8 @@
 """FastAPI routes for the swarm backend."""
 
 import json
+import os
+import uuid
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
@@ -17,13 +19,18 @@ from modes.plan_mode import plan, execute_step
 from modes.agent_mode import agent_run
 from modes.swarm_mode import swarm_run
 from agents.swarm_orchestrator import orchestrator
+from core.remote_client import get_remote_pool
+from modes.auto_mode import auto_run
+from modes.plan_creator_mode import get_plan_creator
+from modes.aquaculture_mesh_mode import aquaculture_mesh_run
+from core.discovery import get_discovery_service
 
 router = APIRouter()
 
 
 class ChatRequest(BaseModel):
     message: str
-    mode: str = "ask"  # ask | plan | agent | swarm
+    mode: str = "ask"  # ask | plan | agent | swarm | mesh | auto
     history: Optional[list] = None
     workspace_context: str = ""
     workspace_path: Optional[str] = None  # Absolute workspace root for tool execution
@@ -90,9 +97,44 @@ class AgentCreateRequest(BaseModel):
     system_prompt: str = ""
 
 
+class PlanOptionsRequest(BaseModel):
+    goal: str
+    model: Optional[str] = None
+    temperature: Optional[float] = 0.4
+
+
+class SelectOptionRequest(BaseModel):
+    plan_id: str
+    option_id: str
+
+
+class RegisterNodeRequest(BaseModel):
+    node_id: str
+    base_url: str
+    name: str = ""
+    tier: str = "shadow"
+
+
+class ForwardTaskRequest(BaseModel):
+    goal: str
+    prefer_large_model: bool = False
+
+
 @router.get("/health")
 async def health():
     return {"status": "ok", "api_mode": cfg.API_MODE}
+
+
+@router.get("/health/ollama")
+async def health_ollama():
+    """Proxy Ollama health check to avoid CORS issues from file:// dashboards."""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get("http://127.0.0.1:11434/api/tags")
+            return {"ok": resp.status_code == 200, "status_code": resp.status_code}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 @router.get("/models")
@@ -170,6 +212,64 @@ async def update_workspace(update: WorkspaceUpdate):
         raise HTTPException(status_code=400, detail="workspace_root is required")
 
 
+class VSCodeOpenRequest(BaseModel):
+    path: Optional[str] = None  # file or folder to open; defaults to workspace root
+
+
+@router.post("/vscode/open")
+async def open_vscode(req: VSCodeOpenRequest):
+    """Open a file or folder in VS Code: (spawns process to avoid browser protocol issues)."""
+    import os
+    import subprocess
+    import platform
+
+    target = req.path or cfg.WORKSPACE_ROOT
+    if not target or not os.path.exists(target):
+        raise HTTPException(status_code=404, detail="Path does not exist")
+
+    workspace_root = cfg.WORKSPACE_ROOT
+
+    # Just open the folder directly — .code-workspace files can cause extension/env issues
+    # Keep target as the folder path (or file path if a specific file was requested)
+
+    # Find VS Code: executable
+    system = platform.system()
+    candidates = []
+    if system == "Windows":
+        candidates = ["code.cmd", "code"]
+        # Common Windows install paths
+        local_appdata = os.environ.get("LOCALAPPDATA", "")
+        program_files = os.environ.get("ProgramFiles", "")
+        program_files_x86 = os.environ.get("ProgramFiles(x86)", "")
+        if local_appdata:
+            candidates.append(os.path.join(local_appdata, "Programs", "Microsoft VS Code:", "bin", "code.cmd"))
+        if program_files:
+            candidates.append(os.path.join(program_files, "Microsoft VS Code:", "bin", "code.cmd"))
+        if program_files_x86:
+            candidates.append(os.path.join(program_files_x86, "Microsoft VS Code:", "bin", "code.cmd"))
+    else:
+        candidates = ["code"]
+
+    vscode_path = None
+    for c in candidates:
+        try:
+            result = subprocess.run([c, "--version"], capture_output=True, timeout=5)
+            if result.returncode == 0:
+                vscode_path = c
+                break
+        except Exception:
+            continue
+
+    if not vscode_path:
+        raise HTTPException(status_code=500, detail="VS Code: not found. Is it installed and in PATH?")
+
+    try:
+        subprocess.Popen([vscode_path, target], shell=False)
+        return {"ok": True, "path": target, "vscode": vscode_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to open VS Code: {e}")
+
+
 async def _stream_structured(generator):
     """Helper to stream structured SSE events."""
     yield f"data: {json.dumps({'type': 'status', 'message': 'Thinking...'})}\n\n"
@@ -239,6 +339,33 @@ async def chat(req: ChatRequest):
             session_id=req.session_id,
         )
         return StreamingResponse(_stream_structured(gen), media_type="text/event-stream")
+    elif mode == "auto":
+        gen = auto_run(
+            task=req.message,
+            workspace_context=req.workspace_context,
+            stream=True,
+            autonomy_level=autonomy,
+            batch_mode=req.batch_mode,
+            temperature=req.temperature,
+            model=req.model,
+            orchestrator_model=req.orchestrator_model,
+            subagent_mode=req.subagent_mode,
+            session_id=req.session_id,
+        )
+        return StreamingResponse(_stream_structured(gen), media_type="text/event-stream")
+    elif mode == "mesh":
+        async def mesh_gen():
+            yield SSEEvent("status", {"message": "Booting aquaculture mesh..."})
+            try:
+                await aquaculture_mesh_run(
+                    session_id=req.session_id or f"mesh-{uuid.uuid4().hex[:8]}",
+                    task=req.message,
+                    max_cycles=5,
+                )
+                yield SSEEvent("status", {"message": "Mesh cycle complete. Node dormant."})
+            except Exception as e:
+                yield SSEEvent("error", {"message": str(e)})
+        return StreamingResponse(_stream_structured(mesh_gen()), media_type="text/event-stream")
     else:
         async def error_gen():
             yield SSEEvent("error", {"message": f"Unknown mode: {mode}"})
@@ -286,6 +413,39 @@ async def compact_session(req: CompactRequest):
     """Compact a swarm session to free up context/memory."""
     result = store.compact(req.session_id, req.summary)
     return result
+
+
+@router.post("/sessions/{session_id}/stop")
+async def stop_session(session_id: str):
+    """Signal a running session to stop."""
+    ok = store.stop(session_id)
+    if not ok:
+        return {"ok": False, "error": "Session not found"}
+    return {"ok": True, "session_id": session_id, "status": "stopped"}
+
+
+@router.post("/sessions/{session_id}/save")
+async def save_session(session_id: str):
+    """Save a session's chat history to disk."""
+    return store.save(session_id)
+
+
+@router.post("/sessions/{session_id}/load")
+async def load_session(session_id: str):
+    """Load a previously saved session."""
+    return store.load(session_id)
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """Delete a session from memory and disk."""
+    return store.delete_saved(session_id)
+
+
+@router.get("/sessions")
+async def list_sessions():
+    """List all saved sessions on disk."""
+    return {"sessions": store.list_saved()}
 
 
 @router.post("/sessions/{session_id}/steer")
@@ -480,6 +640,18 @@ async def undo_batch(batch_id: str, req: BatchUndoRequest):
     return {"ok": True, "batch_id": batch_id, "stats": batch.stats()}
 
 
+@router.get("/batches/{batch_id}/changes/{change_id}")
+async def get_batch_change(batch_id: str, change_id: str):
+    """Get a single change from a batch."""
+    batch = tracker.get_batch(batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    for change in batch.changes:
+        if change.change_id == change_id:
+            return change.to_dict()
+    raise HTTPException(status_code=404, detail="Change not found")
+
+
 @router.post("/batches/{batch_id}/status")
 async def set_batch_status(batch_id: str, status: str):
     """Set batch status (open, reviewing, applying, etc.)."""
@@ -491,6 +663,260 @@ async def set_batch_status(batch_id: str, status: str):
     except ValueError:
         return {"ok": False, "error": f"Invalid status: {status}"}
     return {"ok": True, "batch_id": batch_id, "status": batch.status.value}
+
+
+# ═══════════════════════════════════════════════════════
+# Etsy Dropshipping Tool Suite
+# ═══════════════════════════════════════════════════════
+
+import re
+
+
+def _repair_json(text: str) -> str:
+    """Fix common LLM JSON issues: unescaped newlines inside string values."""
+    # Find the outermost JSON object/array
+    json_start = text.find("{")
+    json_end = text.rfind("}")
+    if json_start < 0 or json_end <= json_start:
+        json_start = text.find("[")
+        json_end = text.rfind("]")
+    if json_start >= 0 and json_end > json_start:
+        text = text[json_start:json_end + 1]
+
+    # Replace literal newlines inside JSON string values with \n
+    result = []
+    in_string = False
+    escape_next = False
+    for ch in text:
+        if escape_next:
+            result.append(ch)
+            escape_next = False
+            continue
+        if ch == "\\":
+            result.append(ch)
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            result.append(ch)
+            continue
+        if in_string and ch == "\n":
+            result.append("\\n")
+            continue
+        if in_string and ch == "\t":
+            result.append("\\t")
+            continue
+        result.append(ch)
+    return "".join(result)
+
+
+def _parse_llm_json(text: str):
+    """Try to parse JSON from LLM output, with repair fallback."""
+    repaired = _repair_json(text)
+    try:
+        return json.loads(repaired)
+    except json.JSONDecodeError:
+        return None
+
+class EtsyListingRequest(BaseModel):
+    product_name: str
+    category: str = ""
+    style: str = ""
+    keywords: str = ""
+    tone: str = "professional"
+    model: Optional[str] = None
+
+
+class EtsyKeywordsRequest(BaseModel):
+    niche: str
+    count: int = 13
+    model: Optional[str] = None
+
+
+class EtsyCompetitorsRequest(BaseModel):
+    keyword: str
+    max_results: int = 5
+
+
+class EtsyPricingRequest(BaseModel):
+    product_cost: float
+    shipping_cost: float = 0
+    target_margin: float = 40
+    competitor_low: float = 0
+    competitor_high: float = 0
+
+
+class EtsyVaultSaveRequest(BaseModel):
+    name: str
+    title: str = ""
+    description: str = ""
+    tags: list = []
+    price: float = 0
+    cost: float = 0
+    notes: str = ""
+
+
+VAULT_FILE = os.path.join(os.path.dirname(__file__), "..", "etsy_vault.json")
+
+
+def _load_vault() -> list:
+    try:
+        if os.path.exists(VAULT_FILE):
+            with open(VAULT_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return []
+
+
+def _save_vault(vault: list):
+    try:
+        os.makedirs(os.path.dirname(VAULT_FILE), exist_ok=True)
+        with open(VAULT_FILE, "w", encoding="utf-8") as f:
+            json.dump(vault, f, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save vault: {e}")
+
+
+@router.post("/tools/etsy/listing")
+async def generate_etsy_listing(req: EtsyListingRequest):
+    """Generate a complete Etsy listing (title, description, tags) using LLM."""
+    from core.model_router import chat_completion
+    prompt = f"""You are an expert Etsy SEO copywriter with 10+ years of experience. Generate a complete, high-converting Etsy listing.
+
+Product: {req.product_name}
+Category: {req.category or 'General Handmade'}
+Style/Vibe: {req.style or 'Modern'}
+Tone: {req.tone}
+Additional keywords to include: {req.keywords or 'none'}
+
+Requirements:
+- Title must be under 140 characters and packed with high-value keywords
+- Description should be 4-6 paragraphs, HTML-formatted with <p> tags, emotional and persuasive
+- Include care instructions, shipping info placeholder, and personalization call-to-action
+- Tags must be exactly 13 tags, each under 20 characters, highly relevant
+- Suggest a competitive price based on typical handmade margins
+
+Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
+{{
+  "title": "...",
+  "description": "<p>...</p><p>...</p>",
+  "tags": ["tag1", "tag2", ...],
+  "attributes": {{"occasion": "...", "material": "..."}},
+  "price_suggestion": 29.99,
+  "seo_notes": "brief explanation of keyword choices"
+}}"""
+    messages = [{"role": "user", "content": prompt}]
+    result = ""
+    async for chunk in chat_completion(messages, model=req.model, stream=False, temperature=0.8):
+        result += chunk
+
+    # Extract JSON from response
+    data = _parse_llm_json(result)
+    if data:
+        return {"ok": True, "listing": data}
+    # Fallback: return raw text
+    return {"ok": True, "listing_raw": result, "note": "Could not parse JSON, returned raw"}
+
+
+@router.post("/tools/etsy/keywords")
+async def generate_etsy_keywords(req: EtsyKeywordsRequest):
+    """Generate SEO-optimized Etsy tags/keywords for a niche."""
+    from core.model_router import chat_completion
+    prompt = f"""You are an Etsy SEO expert. Generate {req.count} high-performing Etsy tags for this niche.
+
+Niche: {req.niche}
+
+Rules:
+- Each tag must be under 20 characters (Etsy's limit)
+- Mix of broad and long-tail keywords
+- Include seasonal/gifting keywords where relevant
+- Tags should be what buyers actually type in search
+
+Return ONLY a JSON array of strings (no markdown, no explanation):
+["tag1", "tag2", ...]"""
+    messages = [{"role": "user", "content": prompt}]
+    result = ""
+    async for chunk in chat_completion(messages, model=req.model, stream=False, temperature=0.7):
+        result += chunk
+
+    data = _parse_llm_json(result)
+    if data and isinstance(data, list):
+        return {"ok": True, "niche": req.niche, "keywords": data}
+    # Fallback: split by lines
+    lines = [l.strip("-\"' ") for l in result.split("\n") if l.strip() and not l.strip().startswith("[") and not l.strip().startswith("]")]
+    return {"ok": True, "niche": req.niche, "keywords": lines[:req.count], "note": "Parsed from raw text"}
+
+
+@router.post("/tools/etsy/competitors")
+async def research_etsy_competitors(req: EtsyCompetitorsRequest):
+    """Research Etsy competitors for a keyword using web search."""
+    from core.tool_executor import _web_search
+    search_query = f"site:etsy.com {req.keyword}"
+    results = _web_search(search_query, req.max_results)
+    return {"ok": results.get("status") == "ok", "keyword": req.keyword, **results}
+
+
+@router.post("/tools/etsy/pricing")
+async def optimize_etsy_pricing(req: EtsyPricingRequest):
+    """Calculate optimal Etsy pricing with fee breakdown."""
+    from core.tool_executor import execute_tool
+    result = execute_tool("etsy_pricing_optimizer", {
+        "product_cost": req.product_cost,
+        "shipping_cost": req.shipping_cost,
+        "target_margin": req.target_margin,
+        "competitor_low": req.competitor_low,
+        "competitor_high": req.competitor_high,
+    })
+    return {"ok": result.get("status") == "ok", **result}
+
+
+@router.post("/tools/etsy/vault/save")
+async def save_to_vault(req: EtsyVaultSaveRequest):
+    """Save a product listing to the local product vault."""
+    vault = _load_vault()
+    entry = {
+        "id": f"vault-{len(vault) + 1:03d}",
+        "name": req.name,
+        "title": req.title,
+        "description": req.description,
+        "tags": req.tags,
+        "price": req.price,
+        "cost": req.cost,
+        "notes": req.notes,
+        "created": int(__import__('time').time()),
+    }
+    vault.insert(0, entry)
+    _save_vault(vault)
+    return {"ok": True, "entry": entry}
+
+
+@router.get("/tools/etsy/vault/list")
+async def list_vault():
+    """List all saved products in the vault."""
+    vault = _load_vault()
+    return {"ok": True, "count": len(vault), "entries": vault}
+
+
+@router.get("/tools/etsy/vault/{entry_id}")
+async def get_vault_entry(entry_id: str):
+    """Get a specific vault entry."""
+    vault = _load_vault()
+    for entry in vault:
+        if entry.get("id") == entry_id:
+            return {"ok": True, "entry": entry}
+    raise HTTPException(status_code=404, detail="Vault entry not found")
+
+
+@router.delete("/tools/etsy/vault/{entry_id}")
+async def delete_vault_entry(entry_id: str):
+    """Delete a vault entry."""
+    vault = _load_vault()
+    new_vault = [e for e in vault if e.get("id") != entry_id]
+    if len(new_vault) == len(vault):
+        raise HTTPException(status_code=404, detail="Vault entry not found")
+    _save_vault(new_vault)
+    return {"ok": True, "deleted_id": entry_id}
 
 
 # Legacy compatibility endpoints for OrbitScribe HTML
@@ -519,3 +945,114 @@ async def agent_endpoint(req: ChatRequest):
     """Run a specific agent."""
     req.mode = "agent"
     return await chat(req)
+
+
+# ---------------------------------------------------------------------------
+# Plan Creator — multi-option interactive planning (from SimpleSwarm)
+# ---------------------------------------------------------------------------
+
+@router.post("/plan/options")
+async def create_plan_options(req: PlanOptionsRequest):
+    """Generate 3-4 different approaches to a goal."""
+    creator = get_plan_creator()
+    plan = await creator.create_plan(req.goal, model=req.model, temperature=req.temperature)
+    return creator.to_dict(plan)
+
+
+@router.get("/plan/options/{plan_id}")
+async def get_plan_options(plan_id: str):
+    """Retrieve a previously created multi-option plan."""
+    creator = get_plan_creator()
+    plan = creator.get_plan(plan_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    return creator.to_dict(plan)
+
+
+@router.post("/plan/options/select")
+async def select_plan_option(req: SelectOptionRequest):
+    """Select one option from a multi-option plan."""
+    creator = get_plan_creator()
+    plan = creator.select_option(req.plan_id, req.option_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan or option not found")
+    return creator.to_dict(plan)
+
+
+# ---------------------------------------------------------------------------
+# Remote Node Mesh — distributed task routing (from SimpleSwarm)
+# ---------------------------------------------------------------------------
+
+@router.get("/nodes")
+async def list_nodes():
+    """List all registered remote nodes."""
+    pool = get_remote_pool()
+    return {"nodes": pool.health_summary(), "local_tasks": pool.local_task_count, "remote_tasks": pool.remote_task_count}
+
+
+@router.post("/nodes/register")
+async def register_node(req: RegisterNodeRequest):
+    """Register a new remote node."""
+    pool = get_remote_pool()
+    client = pool.register(req.node_id, req.base_url, name=req.name, tier=req.tier)
+    return {"success": True, "node": client.to_dict()}
+
+
+@router.delete("/nodes/{node_id}")
+async def deregister_node(node_id: str):
+    """Remove a remote node from the pool."""
+    pool = get_remote_pool()
+    if pool.deregister(node_id):
+        return {"success": True, "message": f"Node {node_id} deregistered"}
+    raise HTTPException(status_code=404, detail="Node not found")
+
+
+@router.get("/nodes/health")
+async def health_check_nodes():
+    """Run health checks on all registered nodes."""
+    pool = get_remote_pool()
+    healthy = pool.get_healthy_nodes()
+    return {
+        "success": True,
+        "healthy_count": len(healthy),
+        "total_count": len(pool.nodes),
+        "nodes": [n.to_dict() for n in healthy],
+    }
+
+
+@router.post("/nodes/forward")
+async def forward_task(req: ForwardTaskRequest):
+    """Forward a task to the best available remote node."""
+    pool = get_remote_pool()
+    node = pool.get_best_node(prefer_large_model=req.prefer_large_model)
+    if not node:
+        raise HTTPException(status_code=503, detail="No healthy remote nodes available")
+    result = node.submit_task(req.goal)
+    pool.record_remote_task()
+    return {"success": result.get("success"), "node_id": node.node_id, "result": result}
+
+
+@router.get("/nodes/discover")
+async def discover_nodes(timeout: float = 3.0):
+    """Broadcast a UDP discovery request to find local OrbitScribe nodes."""
+    discovery = get_discovery_service()
+    if not discovery:
+        raise HTTPException(status_code=503, detail="Discovery service not initialized")
+    peers = discovery.discover(timeout=timeout)
+    # Auto-register discovered nodes
+    pool = get_remote_pool()
+    for peer in peers:
+        node_id = peer.get("node_id")
+        endpoint = peer.get("endpoint") or f"http://{peer.get('ip', '127.0.0.1')}:58081"
+        if node_id and not pool.nodes.get(node_id):
+            pool.register(node_id, endpoint, name=peer.get("name", node_id), tier=peer.get("tier", "shadow"))
+    return {"success": True, "discovered": len(peers), "nodes": peers}
+
+
+@router.get("/nodes/discovered")
+async def list_discovered_nodes():
+    """List nodes discovered via passive listening."""
+    discovery = get_discovery_service()
+    if not discovery:
+        return {"success": True, "nodes": []}
+    return {"success": True, "nodes": discovery.get_discovered()}
