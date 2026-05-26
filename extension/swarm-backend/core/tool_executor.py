@@ -490,6 +490,97 @@ def execute_tool(tool: str, args: Dict[str, Any]) -> Dict[str, Any]:
         elif tool == "get_time_at_location":
             return {"status": "error", "data": None, "error": "Time tool not available in backend."}
 
+        elif tool == "mesh_status":
+            """Run an aquaculture mesh telemetry cycle and return sensor status.
+            Args: cycles (int, optional, default=1)
+            """
+            try:
+                import asyncio
+                from agents.aquaculture.telemetry_agent import TelemetryAgent
+                from agents.aquaculture.ph_evaluator_agent import PhEvaluatorAgent
+                from agents.aquaculture.volume_evaluator_agent import VolumeEvaluatorAgent
+                from agents.aquaculture.dag_router_agent import DAGRouterAgent
+                from agents.aquaculture.mesh_network_agent import MeshNetworkAgent
+                from agents.aquaculture.types import ActionTarget
+
+                cycles = int(args.get("cycles", 1))
+                telemetry = TelemetryAgent()
+                ph_eval = PhEvaluatorAgent()
+                vol_eval = VolumeEvaluatorAgent()
+                router = DAGRouterAgent()
+                mesh_net = MeshNetworkAgent()
+
+                async def _run_cycle():
+                    payload = await telemetry.fetch_telemetry()
+                    ph_target = await ph_eval.evaluate(payload)
+                    vol_target = await vol_eval.evaluate(payload)
+                    route = await router.execute_routing(payload)
+                    peers = await mesh_net.discover_peers()
+                    topology = await mesh_net.gossip_topology()
+
+                    return {
+                        "node_id": payload.node_id,
+                        "ph_level": round(payload.ph_level, 2),
+                        "ph_threshold": 6.5,
+                        "ph_ok": ph_target == ActionTarget.STEADY_STATE,
+                        "fluid_volume_liters": round(payload.fluid_volume_liters, 2),
+                        "volume_threshold": 900.0,
+                        "volume_ok": vol_target == ActionTarget.STEADY_STATE,
+                        "status": payload.status.value,
+                        "route_action": route.value,
+                        "peers_discovered": len(peers),
+                        "topology_version": topology["topology_version"],
+                    }
+
+                results = [asyncio.run(_run_cycle()) for _ in range(cycles)]
+
+                return {
+                    "status": "ok",
+                    "data": {
+                        "cycles": cycles,
+                        "results": results,
+                        "summary": {
+                            "all_ph_ok": all(r["ph_ok"] for r in results),
+                            "all_volume_ok": all(r["volume_ok"] for r in results),
+                            "actions_taken": list(set(r["route_action"] for r in results)),
+                        },
+                    },
+                    "error": "",
+                }
+            except Exception as e:
+                return {"status": "error", "data": None, "error": f"Mesh status error: {str(e)}"}
+
+        elif tool == "mesh_broadcast":
+            """Broadcast a message to all discovered mesh peers.
+            Args: message (str)
+            """
+            try:
+                import asyncio
+                from agents.aquaculture.mesh_network_agent import MeshNetworkAgent
+
+                message = args.get("message", "")
+                if not message:
+                    return {"status": "error", "data": None, "error": "Missing required argument: message"}
+
+                mesh_net = MeshNetworkAgent()
+                peers = asyncio.run(mesh_net.discover_peers())
+                routed = []
+                for peer in peers:
+                    result = asyncio.run(mesh_net.route_to_peer(peer["node_id"], {"msg": message}))
+                    routed.append(result)
+
+                return {
+                    "status": "ok",
+                    "data": {
+                        "message": message,
+                        "peers_reached": len(routed),
+                        "routes": routed,
+                    },
+                    "error": "",
+                }
+            except Exception as e:
+                return {"status": "error", "data": None, "error": f"Mesh broadcast error: {str(e)}"}
+
         else:
             return {"status": "error", "data": None, "error": f"Unknown tool: {tool}"}
 

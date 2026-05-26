@@ -19,6 +19,7 @@ from agents.aquaculture.failsafe_agent import FailsafeAgent
 from agents.aquaculture.state_wipe_agent import StateWipeAgent
 from agents.aquaculture.lifecycle_coordinator_agent import LifecycleCoordinatorAgent
 from agents.aquaculture.network_relay_agent import NetworkRelayAgent
+from agents.aquaculture.mesh_network_agent import MeshNetworkAgent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -91,6 +92,7 @@ class EphemeralMeshOrchestrator:
         self.dispatcher = ActuatorDispatchAgent()
         self.wiper = StateWipeAgent()
         self.network = NetworkRelayAgent()
+        self.mesh_net = MeshNetworkAgent()
         self.failsafe = FailsafeAgent()
         self._agents: Dict[str, Any] = {}
         self._spawn_dashboard_nodes()
@@ -173,7 +175,12 @@ class EphemeralMeshOrchestrator:
             dispatch_local = await self.dispatcher.dispatch(action_target)
             logger.info("[DAG ROUTE OPTIMIZED: %s]", action_target.value.upper())
 
-            # 5. Encrypted local mesh broadcast (pre-actuation or post-actuation ack)
+            # 5a. Mesh topology gossip (inter-node discovery)
+            peers = await self.mesh_net.discover_peers()
+            topology = await self.mesh_net.gossip_topology()
+            logger.info("[MESH TOPOLOGY] %d peers known, version %d", topology["peer_count"], topology["topology_version"])
+
+            # 5b. Encrypted local mesh broadcast (pre-actuation or post-actuation ack)
             encrypted_broadcast = await self.network.broadcast({
                 "action": action_target.value,
                 "relay_closed": action_target == ActionTarget.FAILSAFE,
@@ -190,6 +197,7 @@ class EphemeralMeshOrchestrator:
             for role_key in (
                 "telemetry", "dag_router", "ph_evaluator",
                 "volume_evaluator", "actuator_dispatch", "network_relay",
+                "mesh_network",
             ):
                 node = self._agents.get(role_key)
                 if node:
