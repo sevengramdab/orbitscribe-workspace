@@ -9,8 +9,8 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -80,8 +80,21 @@ def _write_json(path: str, data):
 
 
 @app.get("/")
-def root():
+def root(request: Request):
+    accept = request.headers.get("accept", "")
+    user_agent = request.headers.get("user-agent", "").lower()
+    # If accessed by a browser (not curl/api client), redirect to dashboard
+    if "text/html" in accept and "curl" not in user_agent and "wget" not in user_agent:
+        return RedirectResponse(url="/monetization", status_code=302)
     return {"node_id": NODE_ID, "name": NODE_NAME, "role": NODE_ROLE}
+
+
+@app.get("/monetization", response_class=HTMLResponse)
+def monetization_redirect():
+    index_path = os.path.join(_BASE_DIR, "static", "monetization", "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    return HTMLResponse("<h1>Monetization Dashboard</h1><p>index.html not found.</p>", status_code=404)
 
 
 @app.post("/ping")
@@ -260,28 +273,32 @@ def delete_file(req: PathRequest, x_token: Optional[str] = Header(None)):
 
 # --- Monetization Dashboard Routes ---
 
-@app.get("/monetization")
-def monetization_dashboard():
-    index_path = os.path.join(_BASE_DIR, "static", "monetization", "index.html")
-    if os.path.isfile(index_path):
-        return FileResponse(index_path)
-    return HTMLResponse("<h1>Monetization Dashboard</h1><p>index.html not found.</p>", status_code=404)
-
-
 @app.get("/monetization/api/status")
 def monetization_api_status():
     try:
         vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
         if vault:
-            return {"ok": True, **vault}
+            # Normalize vault fields to match dashboard JS expectations
+            return {
+                "ok": True,
+                "active_agents": vault.get("agents_online", vault.get("active_agents", 0)),
+                "queue_depth": vault.get("queue_depth", 0),
+                "revenue_today": vault.get("revenue_today", vault.get("revenue", 0.0)),
+                "revenue_month": vault.get("revenue_month", 0.0),
+                "uptime_pct": vault.get("uptime_pct", 99.9),
+                "last_event": vault.get("last_event", "System active"),
+                **vault,
+            }
     except Exception as e:
         return {"ok": False, "error": str(e)}
     return {
         "ok": True,
-        "status": "active",
-        "revenue": 0.0,
-        "agents_online": 0,
-        "last_update": datetime.now(timezone.utc).isoformat(),
+        "active_agents": 0,
+        "queue_depth": 0,
+        "revenue_today": 0.0,
+        "revenue_month": 0.0,
+        "uptime_pct": 99.9,
+        "last_event": "System active — no data yet",
     }
 
 
