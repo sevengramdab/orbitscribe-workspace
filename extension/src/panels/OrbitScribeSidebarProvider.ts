@@ -632,6 +632,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
         <button class="mode-tab" data-mode="plan">Plan</button>
         <button class="mode-tab" data-mode="agent">Agent</button>
         <button class="mode-tab" data-mode="swarm">Swarm</button>
+        <button class="mode-tab" data-mode="monetization" style="background:linear-gradient(135deg,#10b981,#34d399);color:#fff;border-color:#10b981;font-size:11px;">Monetize</button>
     </div>
 
     <div class="result-panel">

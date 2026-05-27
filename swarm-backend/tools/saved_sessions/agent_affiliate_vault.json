@@ -1,0 +1,106 @@
+{
+  "agent_name": "affiliate",
+  "updated_at": "2026-05-27T14:17:15.869032",
+  "ledger": {
+    "agent_name": "affiliate",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 5,
+    "decisions_executed": 5,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "ce193385",
+      "agent_name": "affiliate",
+      "decision_type": "join_program",
+      "rationale": "No affiliate programs in vault. Start by researching programs in the software niche.",
+      "action_payload": {
+        "niche": "software",
+        "auto_join_first": true
+      },
+      "estimated_revenue_impact": 50.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:16:35.762923",
+      "result_summary": "{\n  \"status\": \"ok\",\n  \"message\": \"Found 0 potential affiliate programs for 'software'\",\n  \"programs\": []\n}",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4a4ad120",
+      "agent_name": "affiliate",
+      "decision_type": "join_program",
+      "rationale": "No affiliate programs in vault. Start by researching programs in the software niche.",
+      "action_payload": {
+        "niche": "software",
+        "auto_join_first": true
+      },
+      "estimated_revenue_impact": 50.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:17:54.503208",
+      "result_summary": "{\n  \"status\": \"ok\",\n  \"message\": \"Joined affiliate program '15 best affiliate marketing tools and software solutions in 2025'\",\n  \"program_id\": \"1779913075.215541\"\n}",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b1c01fe5",
+      "agent_name": "affiliate",
+      "decision_type": "create_link",
+      "rationale": "Program '15 best affiliate marketing tools and software solutions in 2025' has few tracking links. Create a new campaign link to start driving traffic.",
+      "action_payload": {
+        "program_id": "1779913075.215541",
+        "landing_page": "https://example.com",
+        "campaign": "default"
+      },
+      "estimated_revenue_impact": 25.0,
+      "risk_score": 0.1,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:14.518459",
+      "result_summary": "{\n  \"status\": \"ok\",\n  \"message\": \"Generated tracking link for campaign 'default'\",\n  \"link_id\": \"f3a5c602\",\n  \"tracking_url\": \"https://example.com?ref=f3a5c602_default&campaign=default\",\n  \"vault_id\": \"f3a5c602\"\n}",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "3279880c",
+      "agent_name": "affiliate",
+      "decision_type": "create_link",
+      "rationale": "Program '15 best affiliate marketing tools and software solutions in 2025' has few tracking links. Create a new campaign link to start driving traffic.",
+      "action_payload": {
+        "program_id": "1779913075.215541",
+        "landing_page": "https://example.com",
+        "campaign": "default"
+      },
+      "estimated_revenue_impact": 25.0,
+      "risk_score": 0.1,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:20:55.373646",
+      "result_summary": "{\n  \"status\": \"ok\",\n  \"message\": \"Generated tracking link for campaign 'default'\",\n  \"link_id\": \"a048bb0c\",\n  \"tracking_url\": \"https://example.com?ref=a048bb0c_default&campaign=default\",\n  \"vault_id\": \"a048bb0c\"\n}",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "5f1cc945",
+      "agent_name": "affiliate",
+      "decision_type": "create_review",
+      "rationale": "No affiliate content exists. Create a product review to drive conversions.",
+      "action_payload": {
+        "product_name": "15 best affiliate marketing tools and software solutions in 2025",
+        "features": [
+          "Easy to use",
+          "Great support",
+          "Affordable pricing"
+        ]
+      },
+      "estimated_revenue_impact": 100.0,
+      "risk_score": 0.1,
+      "confidence": 0.75,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:15.866961",
+      "result_summary": "{\n  \"error\": \"generate_product_review() got an unexpected keyword argument 'affiliate_link'\",\n  \"tool\": \"generate_product_review\"\n}",
+      "actual_revenue": 0.0
+    }
+  ]
+}

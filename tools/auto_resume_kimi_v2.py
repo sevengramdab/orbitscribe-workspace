@@ -32,6 +32,31 @@ WAIT_FOR_TUI = 8
 TYPE_INTERVAL = 0.01
 
 LOG_FILE = os.path.join(ROOT_DIR, 'auto_resume_v2.log')
+CIRCUIT_BREAKER_FILE = os.path.join(TOOLS_DIR, '.resume-circuit-breaker')
+MAX_RESTARTS_IN_WINDOW = 3
+CIRCUIT_WINDOW_SECONDS = 120
+
+
+def check_circuit_breaker():
+    """Abort if we've restarted too many times recently (prevents infinite loops)."""
+    now = time.time()
+    try:
+        if os.path.exists(CIRCUIT_BREAKER_FILE):
+            with open(CIRCUIT_BREAKER_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            timestamps = [t for t in data.get('starts', []) if now - t < CIRCUIT_WINDOW_SECONDS]
+            if len(timestamps) >= MAX_RESTARTS_IN_WINDOW:
+                log(f"CIRCUIT BREAKER: {len(timestamps)} restarts in {CIRCUIT_WINDOW_SECONDS}s. Aborting to prevent infinite loop.")
+                return False
+            timestamps.append(now)
+        else:
+            timestamps = [now]
+        with open(CIRCUIT_BREAKER_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'starts': timestamps}, f)
+        return True
+    except Exception as e:
+        log(f"Circuit breaker check failed: {e}. Proceeding anyway.")
+        return True
 
 
 def log(msg):
@@ -243,6 +268,11 @@ def main():
         open(LOG_FILE, 'w').close()
     except Exception:
         pass
+
+    # Circuit breaker: prevent infinite restart loops
+    import json
+    if not check_circuit_breaker():
+        sys.exit(1)
 
     # Check if extension already handled auto-resume
     lock_file = os.path.join(TOOLS_DIR, '.reload-resume-lock')

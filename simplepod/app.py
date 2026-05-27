@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import NODE_ID, NODE_NAME, NODE_ROLE, API_PORT
 from discovery import DiscoveryService, Peer
 from client import PeerClient
+from monetization.main import render_monetization_tab
 
 st.set_page_config(page_title="SimplePod", page_icon="🛰️", layout="wide")
 
@@ -146,8 +147,8 @@ with st.sidebar:
         st.text(line)
 
 # ── Tabs ──
-tab_status, tab_exec, tab_setup, tab_files, tab_screen, tab_remote_files = st.tabs(
-    ["📊 Status", "🖥️ Execute", "🔧 Setup", "📁 Files", "📷 Screen", "📁 Remote Files"]
+tab_status, tab_exec, tab_setup, tab_files, tab_screen, tab_remote_files, tab_monetization = st.tabs(
+    ["📊 Status", "🖥️ Execute", "🔧 Setup", "📁 Files", "📷 Screen", "📁 Remote Files", "💰 Monetization"]
 )
 
 with tab_status:
@@ -330,3 +331,10 @@ with tab_remote_files:
                 if st.button("Clear download"):
                     st.session_state.pending_download = None
                     st.rerun()
+
+with tab_monetization:
+    try:
+        render_monetization_tab()
+    except Exception as e:
+        st.error(f"Monetization dashboard error: {e}")
+        st.info("Make sure the swarm backend is running and data directories exist.")

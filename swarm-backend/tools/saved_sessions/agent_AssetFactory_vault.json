@@ -1,0 +1,105 @@
+{
+  "agent_name": "AssetFactory",
+  "updated_at": "2026-05-27T14:17:49.655094",
+  "ledger": {
+    "agent_name": "AssetFactory",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 4,
+    "decisions_executed": 3,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "60ec73f8",
+      "agent_name": "AssetFactory",
+      "decision_type": "create_asset",
+      "rationale": "To expand our AI-driven marketing solution portfolio and provide more tailored content for businesses.",
+      "action_payload": {
+        "asset_type": "code_template",
+        "topic": "AI-driven marketing solutions",
+        "platform": "self",
+        "price": 19.99,
+        "linked_request_id": null,
+        "features": [
+          "auth",
+          "database",
+          "api"
+        ]
+      },
+      "estimated_revenue_impact": 5.996999999999999,
+      "risk_score": 0.8,
+      "confidence": 0.95,
+      "status": "failed",
+      "timestamp": "2026-05-27T13:18:14.638259",
+      "result_summary": "Failed to create code_template: Code template failed: Parse error: Expecting value: line 3 column 11 (char 1078)",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "3da2cbdd",
+      "agent_name": "AssetFactory",
+      "decision_type": "create_asset",
+      "rationale": "The Asset Factory has identified a high demand for marketing strategy templates tailored to self-learners and professionals in the e-commerce marketing niche. Creating this asset will help users quickly find and use effective strategies, enhancing their online presence.",
+      "action_payload": {
+        "asset_type": "ebook",
+        "topic": "Marketing Strategy Templates",
+        "platform": "self",
+        "price": 19.99,
+        "linked_request_id": null,
+        "chapters": 5
+      },
+      "estimated_revenue_impact": 5.996999999999999,
+      "risk_score": 0.0,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:29.585762",
+      "result_summary": "Created ebook 'Marketing Strategy Templates' (asset_id=1779913169.585783)",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "12b0e8b0",
+      "agent_name": "AssetFactory",
+      "decision_type": "create_brief",
+      "rationale": "To help users create high-quality AI-powered productivity tools and strategies.",
+      "action_payload": {
+        "asset_type": "prompt_pack",
+        "topic": "AI-powered productivity",
+        "platform": "self",
+        "price": 19.99,
+        "linked_request_id": null,
+        "count": 10
+      },
+      "estimated_revenue_impact": 5.996999999999999,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:21:16.664155",
+      "result_summary": "Created prompt_pack 'AI-powered productivity' (asset_id=1779913276.664191)",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4fdcbb89",
+      "agent_name": "AssetFactory",
+      "decision_type": "create_brief",
+      "rationale": "To help users create high-quality AI-powered productivity tools and workflows.",
+      "action_payload": {
+        "asset_type": "prompt_pack",
+        "topic": "AI-Powered Productivity",
+        "platform": "self",
+        "price": 19.99,
+        "linked_request_id": null,
+        "count": 10
+      },
+      "estimated_revenue_impact": 5.996999999999999,
+      "risk_score": 0.8,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:35.947201",
+      "result_summary": "Created prompt_pack 'AI-Powered Productivity' (asset_id=1779916655.94723)",
+      "actual_revenue": 0.0
+    }
+  ],
+  "asset_type_revenue": {},
+  "pending_briefs": []
+}

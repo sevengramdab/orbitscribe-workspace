@@ -1,0 +1,47 @@
+{
+  "agent_name": "StripeAgent",
+  "updated_at": "2026-05-27T14:17:15.283534",
+  "ledger": {
+    "agent_name": "StripeAgent",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 2,
+    "decisions_executed": 2,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "dcd527c5",
+      "agent_name": "StripeAgent",
+      "decision_type": "retry_failed_payment",
+      "rationale": "There is a failed payment with an amount of $49.99, and the customer has not been charged yet. Retrying the payment may recover revenue.",
+      "action_payload": {
+        "payment_id": "ch_mock_failed_1"
+      },
+      "estimated_revenue_impact": 49.99,
+      "risk_score": 0.5,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:18:09.592561",
+      "result_summary": "{\n  \"warning\": \"No invoice_id found for retry.\"\n}",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "834cdc8d",
+      "agent_name": "StripeAgent",
+      "decision_type": "retry_failed_payment",
+      "rationale": "One failed payment in the last 30 days, with a high amount of $4999. Attempting to retry the failed payment may recover revenue.",
+      "action_payload": {
+        "payment_id": "ch_mock_failed_1"
+      },
+      "estimated_revenue_impact": 4.999,
+      "risk_score": 0.8,
+      "confidence": 0.7,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:20:59.519961",
+      "result_summary": "{\n  \"warning\": \"No invoice_id found for retry.\"\n}",
+      "actual_revenue": 0.0
+    }
+  ]
+}

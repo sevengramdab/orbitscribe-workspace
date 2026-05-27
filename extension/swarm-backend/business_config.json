@@ -1,0 +1,45 @@
+{
+  "_comment": "Add your real API keys here to enable live transactions and integrations.",
+  "stripe": {
+    "secret_key": "sk_live_...",
+    "publishable_key": "pk_live_...",
+    "webhook_secret": "whsec_..."
+  },
+  "printify": {
+    "api_key": "..."
+  },
+  "etsy": {
+    "api_key": "...",
+    "shop_id": "..."
+  },
+  "shopify": {
+    "shop_domain": "your-store.myshopify.com",
+    "access_token": "..."
+  },
+  "openai": {
+    "api_key": "..."
+  },
+  "claude": {
+    "api_key": "..."
+  },
+  "gemini": {
+    "api_key": "..."
+  },
+  "email": {
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "username": "...",
+    "password": "..."
+  },
+  "affiliate": {
+    "binance_ref": "...",
+    "coinbase_ref": "...",
+    "amazon_associates_tag": "..."
+  },
+  "swarm_settings": {
+    "autonomy_tier": "AUTOPILOT",
+    "cycle_interval_seconds": 300,
+    "risk_threshold": 0.5,
+    "revenue_escalation_threshold": 1000
+  }
+}

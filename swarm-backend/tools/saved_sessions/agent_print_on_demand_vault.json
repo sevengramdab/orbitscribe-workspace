@@ -1,0 +1,81 @@
+{
+  "agent_name": "print_on_demand",
+  "updated_at": "2026-05-27T14:17:39.998056",
+  "ledger": {
+    "agent_name": "print_on_demand",
+    "lifetime_revenue": 51.5,
+    "lifetime_costs": 0.0,
+    "decisions_made": 4,
+    "decisions_executed": 4,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "47d0c274",
+      "agent_name": "print_on_demand",
+      "decision_type": "create_new_design",
+      "rationale": "The portfolio has a low number of active designs and concepts waiting, indicating potential for growth. Creating new designs can help increase the active design count and potentially lead to more sales.",
+      "action_payload": {
+        "design_name": "Coffee Lover Mug",
+        "material": "Stainless Steel",
+        "color": "Black"
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:18:01.537025",
+      "result_summary": "Created design 'Coffee Quote Coffee Mug' for niche 'coffee lover quotes' (id=1779913093.559198)",
+      "actual_revenue": 15.5
+    },
+    {
+      "decision_id": "3b2eb966",
+      "agent_name": "print_on_demand",
+      "decision_type": "create_new_design",
+      "rationale": "Low number of designs (3) and active designs (2), with no published products, suggests a need to expand portfolio for potential growth.",
+      "action_payload": {
+        "design_niche": "coffee lover mugs"
+      },
+      "estimated_revenue_impact": 10.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:24.068462",
+      "result_summary": "Created design 'Vintage Astronomy Print-on-Demand T-Shirt' for niche 'vintage astronomy' (id=1779913172.604078)",
+      "actual_revenue": 12.0
+    },
+    {
+      "decision_id": "b69c8ce0",
+      "agent_name": "print_on_demand",
+      "decision_type": "create_new_design",
+      "rationale": "Low number of active designs and no published products indicate a need for new content to drive sales.",
+      "action_payload": {
+        "design_niche": "vintage astronomy"
+      },
+      "estimated_revenue_impact": 10.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:21:01.165895",
+      "result_summary": "Created design 'Dog Mom Life Print-On-Demand Collection' for niche 'dog mom life' (id=1779913271.320846)",
+      "actual_revenue": 12.0
+    },
+    {
+      "decision_id": "34613e22",
+      "agent_name": "print_on_demand",
+      "decision_type": "create_new_design",
+      "rationale": "Low number of active designs and no published products indicate a need for new content to drive sales.",
+      "action_payload": {
+        "design_niche": "coffee lover mugs"
+      },
+      "estimated_revenue_impact": 20.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:31.197266",
+      "result_summary": "Created design 'EcoBotanical Prints' for niche 'minimalist botanical' (id=1779916659.985168)",
+      "actual_revenue": 12.0
+    }
+  ]
+}

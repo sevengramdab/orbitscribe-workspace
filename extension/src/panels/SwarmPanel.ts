@@ -670,6 +670,7 @@ export class SwarmPanel {
         <button class="mode-tab ${mode === 'plan' ? 'active' : ''}" data-mode="plan">Plan</button>
         <button class="mode-tab ${mode === 'agent' ? 'active' : ''}" data-mode="agent">Agent</button>
         <button class="mode-tab ${mode === 'swarm' ? 'active' : ''}" data-mode="swarm">Swarm</button>
+        <button class="mode-tab ${mode === 'monetization' ? 'active' : ''}" data-mode="monetization" style="background:linear-gradient(135deg,#10b981,#34d399);color:#fff;border-color:#10b981;">Monetize</button>
     </div>
     <div class="chat-area" id="chatArea"></div>
     <div class="input-area">

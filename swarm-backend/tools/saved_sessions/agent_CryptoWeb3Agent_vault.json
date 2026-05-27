@@ -1,0 +1,99 @@
+{
+  "agent_name": "CryptoWeb3Agent",
+  "updated_at": "2026-05-27T14:17:37.256395",
+  "ledger": {
+    "agent_name": "CryptoWeb3Agent",
+    "lifetime_revenue": 195.39999999999998,
+    "lifetime_costs": 0.0,
+    "decisions_made": 4,
+    "decisions_executed": 3,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "7ac64154",
+      "agent_name": "CryptoWeb3Agent",
+      "decision_type": "generate_crypto_content",
+      "rationale": "Market temperature is neutral, and gas prices are not extremely high (fast > 50 gwei). The agent has a web3 campaign in progress, and generating content can be done off-chain. This action aligns with the conservative approach.",
+      "action_payload": {
+        "topic": "ETH staking risks",
+        "format": "blog",
+        "outline": [
+          "1. Introduction & Market Context",
+          "2. Key Concepts Explained",
+          "3. Step-by-Step Strategy",
+          "4. Risk Considerations",
+          "5. Conclusion & Call to Action"
+        ]
+      },
+      "estimated_revenue_impact": 100.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:18:07.409333",
+      "result_summary": "{\n  \"success\": true,\n  \"vault_id\": \"1779913087.409511\",\n  \"content\": {\n    \"title\": \"Eth Staking Risks: A Complete Guide\",\n    \"topic\": \"ETH staking risks\",\n    \"format\": \"blog\",\n    \"outline\": [\n      \"1. Introduction & Market Context\",\n      \"2. Key Concepts Explained\",\n      \"3. Step-by-Step Strategy\",\n      \"4. Risk Considerations\",\n      \"5. Conclusion & Call to Action\"\n    ],\n    \"body_draft\": \"# Eth Staking Risks: A Complete Guide\\n\\n> **Disclaimer:** This content is for educational purpo",
+      "actual_revenue": 49.56
+    },
+    {
+      "decision_id": "bfa1c9aa",
+      "agent_name": "CryptoWeb3Agent",
+      "decision_type": "generate_crypto_content",
+      "rationale": "Market temperature is hot, indicating a high level of activity and interest in crypto markets. Given the current sentiment scores (BTC: 0.596, ETH: 0.022, SOL: 0.666) and market temperature, it's best to create engaging content that resonates with this audience.",
+      "action_payload": {
+        "topic": "ETH staking risks",
+        "format": "blog",
+        "outline": [
+          "1. Introduction & Market Context",
+          "2. Key Concepts Explained",
+          "3. Step-by-Step Strategy",
+          "4. Risk Considerations",
+          "5. Conclusion & Call to Action"
+        ]
+      },
+      "estimated_revenue_impact": 100.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:27.101873",
+      "result_summary": "{\n  \"success\": true,\n  \"vault_id\": \"1779913167.102067\",\n  \"content\": {\n    \"title\": \"Eth Staking Risks: A Complete Guide\",\n    \"topic\": \"ETH staking risks\",\n    \"format\": \"blog\",\n    \"outline\": [\n      \"1. Introduction & Market Context\",\n      \"2. Key Concepts Explained\",\n      \"3. Step-by-Step Strategy\",\n      \"4. Risk Considerations\",\n      \"5. Conclusion & Call to Action\"\n    ],\n    \"body_draft\": \"# Eth Staking Risks: A Complete Guide\\n\\n> **Disclaimer:** This content is for educational purpo",
+      "actual_revenue": 42.76
+    },
+    {
+      "decision_id": "feaea154",
+      "agent_name": "CryptoWeb3Agent",
+      "decision_type": "generate_crypto_content",
+      "rationale": "Market temperature is cold, and there are no pressing tokenomics or DeFi strategy needs. Generating crypto content can help maintain engagement and provide value to users.",
+      "action_payload": {
+        "content_type": "blog",
+        "topic": "ETH staking risks",
+        "format": "in-depth guide"
+      },
+      "estimated_revenue_impact": 100.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "failed",
+      "timestamp": "2026-05-27T13:21:14.548483",
+      "result_summary": "Unsupported format 'in-depth guide'. Choose from {'blog', 'video_script', 'thread', 'newsletter', 'landing_page'}.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a7dd94d8",
+      "agent_name": "CryptoWeb3Agent",
+      "decision_type": "generate_crypto_content",
+      "rationale": "Market temperature is neutral, and there are no pressing tokenomics or NFT collection needs. The latest web3 campaign is a blog post on ETH staking risks, which suggests a need for more educational content.",
+      "action_payload": {
+        "topic": "ETH staking risks",
+        "format": "blog",
+        "word_count_approx": 166
+      },
+      "estimated_revenue_impact": 100.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:37.248919",
+      "result_summary": "{\n  \"success\": true,\n  \"vault_id\": \"1779916657.249084\",\n  \"content\": {\n    \"title\": \"Eth Staking Risks: A Complete Guide\",\n    \"topic\": \"ETH staking risks\",\n    \"format\": \"blog\",\n    \"outline\": [\n      \"1. Introduction & Market Context\",\n      \"2. Key Concepts Explained\",\n      \"3. Step-by-Step Strategy\",\n      \"4. Risk Considerations\",\n      \"5. Conclusion & Call to Action\"\n    ],\n    \"body_draft\": \"# Eth Staking Risks: A Complete Guide\\n\\n> **Disclaimer:** This content is for educational purpo",
+      "actual_revenue": 103.08
+    }
+  ]
+}

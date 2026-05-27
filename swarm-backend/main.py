@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router as api_router
+from api.monetization_routes import router as monetization_router
 from core import config
 from core.discovery import get_discovery_service
 
@@ -47,6 +48,15 @@ app.add_middleware(
 
 # Include API routes
 app.include_router(api_router, prefix="/api")
+app.include_router(monetization_router, prefix="/api")
+
+# Serve monetization dashboard
+import os
+from fastapi.responses import FileResponse
+_DASHBOARD_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", "monetization_dashboard.html")
+@app.get("/monetization")
+async def monetization_dashboard():
+    return FileResponse(_DASHBOARD_PATH)
 
 # Legacy direct endpoints for OrbitScribe HTML compatibility
 @app.get("/api/health")

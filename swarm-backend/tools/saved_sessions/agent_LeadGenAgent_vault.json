@@ -1,0 +1,100 @@
+{
+  "agent_name": "LeadGenAgent",
+  "updated_at": "2026-05-27T14:17:35.281205",
+  "ledger": {
+    "agent_name": "LeadGenAgent",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 5,
+    "decisions_executed": 5,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "f5530b3a",
+      "agent_name": "LeadGenAgent",
+      "decision_type": "scrape_new_leads",
+      "rationale": "The pipeline is low on inventory and needs new leads to fill the gaps.",
+      "action_payload": {
+        "query": "AI devs",
+        "platform": "linkedin"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.5,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:16:45.058593",
+      "result_summary": "Discovered and saved 0 leads",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "caad33e5",
+      "agent_name": "LeadGenAgent",
+      "decision_type": "scrape_new_leads",
+      "rationale": "The pipeline is in a low-inventory state, and there are no new leads. Scraping for new leads will help to replenish the pipeline.",
+      "action_payload": {
+        "query": "AI devs",
+        "platform": "linkedin"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.2,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:18:11.595014",
+      "result_summary": "Discovered and saved 0 leads",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c69b0951",
+      "agent_name": "LeadGenAgent",
+      "decision_type": "scrape_new_leads",
+      "rationale": "Low inventory and no new leads in the pipeline, indicating a need to replenish with fresh leads.",
+      "action_payload": {
+        "query": "AI devs",
+        "platform": "linkedin"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.5,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:38.077496",
+      "result_summary": "Discovered and saved 0 leads",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "0ae9b409",
+      "agent_name": "LeadGenAgent",
+      "decision_type": "scrape_new_leads",
+      "rationale": "Low inventory and no new leads, scraping for new leads is the best course of action.",
+      "action_payload": {
+        "query": "AI devs",
+        "platform": "linkedin"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.2,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:21:17.792345",
+      "result_summary": "Discovered and saved 0 leads",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c2e8d7a7",
+      "agent_name": "LeadGenAgent",
+      "decision_type": "scrape_new_leads",
+      "rationale": "Low inventory and no new leads, so we should prioritize scraping for new leads to replenish the pipeline.",
+      "action_payload": {
+        "query": "AI devs",
+        "platform": "linkedin"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.5,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:34.779730",
+      "result_summary": "Discovered and saved 0 leads",
+      "actual_revenue": 0.0
+    }
+  ]
+}

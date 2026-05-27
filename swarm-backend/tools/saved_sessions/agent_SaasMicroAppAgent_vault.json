@@ -1,0 +1,117 @@
+{
+  "agent_name": "SaasMicroAppAgent",
+  "updated_at": "2026-05-27T14:17:29.865326",
+  "ledger": {
+    "agent_name": "SaasMicroAppAgent",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 5,
+    "decisions_executed": 3,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "fc98d3f4",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "Market gap for QR generator",
+      "action_payload": {
+        "app_id": null,
+        "app_type": "qr_generator",
+        "features": [
+          "custom_colors"
+        ],
+        "price": 5.0,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 200.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:12:02.310942",
+      "result_summary": "Created qr_generator app 'qr_generator_ad0eb8a8' with 1 features. Payment link: https://buy.stripe.com/test_mock_qr_generator_ad0eb8a8_500. Deploy manifest: packaged.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b2360299",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "There are market gaps and only one active app, so it's best to create a new micro-SaaS app.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": null,
+        "features": [],
+        "price": 9.99,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "failed",
+      "timestamp": "2026-05-27T13:18:03.401627",
+      "result_summary": "Code generation failed: 'NoneType' object has no attribute 'lower'",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d5930011",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "There are market gaps and only one active app, so creating a new micro-SaaS app is the best course of action.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": null,
+        "features": [],
+        "price": 9.99,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "failed",
+      "timestamp": "2026-05-27T13:19:29.802168",
+      "result_summary": "Code generation failed: 'NoneType' object has no attribute 'lower'",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "621c096f",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "There are market gaps and only one active app, so it's best to create a new micro-SaaS app.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": "custom",
+        "features": [],
+        "price": 19.99,
+        "recurring": true
+      },
+      "estimated_revenue_impact": 200.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:21:03.258015",
+      "result_summary": "Created custom app 'custom_b261cff1' with 0 features. Payment link: https://buy.stripe.com/test_mock_custom_b261cff1_1998. Deploy manifest: packaged.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4c6df5c1",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "There are market gaps and only two active apps, so creating a new app is the best course of action.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": "custom",
+        "features": [],
+        "price": 9.99,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:29.841677",
+      "result_summary": "Created custom app 'custom_5d2afaba' with 0 features. Payment link: None. Deploy manifest: packaged.",
+      "actual_revenue": 0.0
+    }
+  ]
+}

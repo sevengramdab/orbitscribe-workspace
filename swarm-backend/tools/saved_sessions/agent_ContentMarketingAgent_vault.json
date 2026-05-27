@@ -1,0 +1,124 @@
+{
+  "agent_name": "ContentMarketingAgent",
+  "updated_at": "2026-05-27T14:17:33.283107",
+  "ledger": {
+    "agent_name": "ContentMarketingAgent",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 5,
+    "decisions_executed": 1,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "1b0a2f33",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The current time is 2026-05-27T13:16:35.828949, and there are no scheduled backlog items. We have a total estimated revenue from content of $0, with an average engagement score of 0.0. The SEO opportunities (AI automation tools, content marketing strategy, small business growth) suggest that we should focus on creating blog posts to engage our audience and drive traffic to our website.",
+      "action_payload": {
+        "topic": "AI Automation Tools",
+        "keywords": [
+          "automation",
+          "AI",
+          "tools"
+        ],
+        "content_type": "technical"
+      },
+      "estimated_revenue_impact": 0.2,
+      "risk_score": 0.8,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:16:46.058098",
+      "result_summary": "Blog post 'AI Automation Tools' generated (ID: blog_5af96bf9). | Scheduled for 2026-05-29T13:16:54.239232 (entry cal_1ff2f193). | Est. revenue: $0.0 | Views: 3706",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "f8213d22",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a lot of blog posts available, so creating new ones will help us reach a wider audience and drive traffic to our website.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "automation",
+          "tools",
+          "ai"
+        ]
+      },
+      "estimated_revenue_impact": 0.5,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-27T13:18:10.819246",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "43cef8d1",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content ($0.0) and the relatively high average engagement score (28.0), it's likely that our existing content is not yet resonating with our audience or generating significant revenue. Creating a new blog post can help us to expand our content offerings, potentially attract more visitors, and increase engagement.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "content marketing"
+        ],
+        "target_audience": "business owners and marketers interested in AI and automation"
+      },
+      "estimated_revenue_impact": 10.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-27T13:19:32.862004",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "9e7006ab",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content and the lack of social posts, a blog post is a good starting point to establish our thought leadership in one of the identified SEO opportunities. We'll choose 'AI automation tools' as it's a relevant topic with potential for high engagement.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "marketing"
+        ],
+        "target_audience": "small business owners and marketers"
+      },
+      "estimated_revenue_impact": 1000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-27T13:21:12.494352",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "5c480964",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a low total estimated revenue from content and an average engagement score of 28, indicating room for improvement. Writing a blog post on one of the identified SEO opportunities will help improve our content inventory and potentially drive more traffic to our site.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "content marketing"
+        ],
+        "target_audience": "small business owners and marketers"
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-27T14:17:33.282332",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "agent_name": "market_intelligence",
+  "updated_at": "2026-05-27T14:17:41.825125",
+  "ledger": {
+    "agent_name": "market_intelligence",
+    "lifetime_revenue": 0.0,
+    "lifetime_costs": 0.0,
+    "decisions_made": 8,
+    "decisions_executed": 8,
+    "active_campaigns": [],
+    "daily_history": []
+  },
+  "decisions": [
+    {
+      "decision_id": "2afb5d14",
+      "agent_name": "market_intelligence",
+      "decision_type": "alert_price_change",
+      "rationale": "Competitor dropped price significantly.",
+      "action_payload": {
+        "product_id": "prod-test",
+        "target_margin": 0.35
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.3,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:02:58.543975",
+      "result_summary": "Price alert sent (signal None). Pricing rec: $None.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8e6945b0",
+      "agent_name": "market_intelligence",
+      "decision_type": "alert_price_change",
+      "rationale": "Competitor dropped price significantly.",
+      "action_payload": {
+        "product_id": "prod-test",
+        "target_margin": 0.35
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.3,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:03:32.172212",
+      "result_summary": "Price alert sent (signal None). Pricing rec: $None.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7b9a1f22",
+      "agent_name": "market_intelligence",
+      "decision_type": "alert_price_change",
+      "rationale": "Competitor dropped price significantly.",
+      "action_payload": {
+        "product_id": "prod-test",
+        "target_margin": 0.35
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.3,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:04:40.514998",
+      "result_summary": "Price alert sent (signal 1779912280.516696). Pricing rec: $148.2.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "be10cb2a",
+      "agent_name": "market_intelligence",
+      "decision_type": "recommend_product",
+      "rationale": "High gap score detected in eco-friendly niche.",
+      "action_payload": {
+        "niche": "eco-friendly water bottles",
+        "target_agents": [
+          "dropshipping"
+        ]
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:05:05.111846",
+      "result_summary": "Product recommendation broadcast (signal 1779912305.330191).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "cb810e6a",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Shift to premium positioning.",
+      "action_payload": {
+        "positioning_note": "Move upstream to enterprise tier.",
+        "urgency": "medium"
+      },
+      "estimated_revenue_impact": 300.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:05:32.819356",
+      "result_summary": "Positioning suggestion broadcast (signal 1779912332.819425).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "5d10aa88",
+      "agent_name": "market_intelligence",
+      "decision_type": "recommend_product",
+      "rationale": "Market trends indicate a growing interest in wireless earbuds and AI productivity tools, which aligns with our product offerings. We should capitalize on this momentum by recommending our products to customers.",
+      "action_payload": {
+        "product_ids": [
+          "product-123",
+          "product-456"
+        ],
+        "target_audience": [
+          "wireless earbuds enthusiasts",
+          "AI productivity tool users"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:18:14.394169",
+      "result_summary": "Product recommendation broadcast (signal 1779913094.627805).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7443c82e",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "The market is showing a strong trend towards 'AI productivity tools' and a significant gap in 'home office gear', indicating an opportunity to position our product for growth.",
+      "action_payload": {
+        "product_id": "our_product",
+        "target_market": "home office gear",
+        "positioning_keywords": [
+          "AI productivity tools",
+          "sustainable packaging"
+        ],
+        "opportunity_score": 65
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T13:19:40.822350",
+      "result_summary": "Positioning suggestion broadcast (signal 1779913180.822502).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8c6b4ef0",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and review sentiment indicate a need to adjust product positioning for better market fit.",
+      "action_payload": {
+        "product_ids": [
+          "product1",
+          "product2"
+        ],
+        "positioning_strategy": "realign_with_market_gaps"
+      },
+      "estimated_revenue_impact": -15000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-27T14:17:41.813103",
+      "result_summary": "Positioning suggestion broadcast (signal 1779916661.813225).",
+      "actual_revenue": 0.0
+    }
+  ]
+}

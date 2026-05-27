@@ -366,6 +366,17 @@ async def chat(req: ChatRequest):
             except Exception as e:
                 yield SSEEvent("error", {"message": str(e)})
         return StreamingResponse(_stream_structured(mesh_gen()), media_type="text/event-stream")
+    elif mode == "monetization":
+        from modes.business.monetization_mode import run_monetization_mode
+        from core.model_router import ModelRouter
+        model_router = ModelRouter()
+        gen = run_monetization_mode(
+            request={"verticals": req.history or [], "autonomy_tier": req.autonomy_level or "AUTOPILOT", "one_shot": req.auto_execute},
+            model_router=model_router,
+            session_store=store,
+            session_id=req.session_id or f"monetization-{uuid.uuid4().hex[:8]}",
+        )
+        return StreamingResponse(_stream_structured(gen), media_type="text/event-stream")
     else:
         async def error_gen():
             yield SSEEvent("error", {"message": f"Unknown mode: {mode}"})
