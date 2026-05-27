@@ -155,7 +155,11 @@ async def http_server(manager: ProcessManager, port: int) -> None:
     from aiohttp import web
 
     async def health(_):
-        return web.Response(text="ok")
+        return web.json_response({
+            "status": "ok",
+            "docker_available": False,
+            "version": "0.1.0-shim",
+        })
 
     async def mesh_start(request):
         try:

@@ -1,6 +1,7 @@
 use anyhow::Result;
 use axum::{
     extract::State,
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -21,6 +22,13 @@ pub struct ApiResponse<T> {
     pub success: bool,
     pub data: Option<T>,
     pub error: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct HealthResponse {
+    pub status: String,
+    pub docker_available: bool,
+    pub version: String,
 }
 
 #[derive(Deserialize)]
@@ -50,7 +58,7 @@ pub struct LogsResponse {
     pub lines: Vec<String>,
 }
 
-fn ok<T>(data: T) -> Json<ApiResponse<T>> {
+fn ok_json<T>(data: T) -> Json<ApiResponse<T>> {
     Json(ApiResponse {
         success: true,
         data: Some(data),
@@ -58,7 +66,7 @@ fn ok<T>(data: T) -> Json<ApiResponse<T>> {
     })
 }
 
-fn err<T: Serialize>(msg: String) -> Json<ApiResponse<T>> {
+fn err_json<T: Serialize>(msg: String) -> Json<ApiResponse<T>> {
     Json(ApiResponse {
         success: false,
         data: None,
@@ -66,52 +74,71 @@ fn err<T: Serialize>(msg: String) -> Json<ApiResponse<T>> {
     })
 }
 
+async fn health(State(state): State<AppState>) -> Json<HealthResponse> {
+    let status = state.manager.status().await;
+    Json(HealthResponse {
+        status: if status.docker_available {
+            "ok".to_string()
+        } else {
+            "degraded".to_string()
+        },
+        docker_available: status.docker_available,
+        version: env!("CARGO_PKG_VERSION").to_string(),
+    })
+}
+
 async fn mesh_start(
     State(state): State<AppState>,
     Json(req): Json<StartRequest>,
-) -> Json<ApiResponse<StartResponse>> {
+) -> (StatusCode, Json<ApiResponse<StartResponse>>) {
     info!("POST /mesh/start");
     if let Some(img) = req.image {
-        // We don't support dynamic image switching in this simple version,
-        // but we could recreate the manager. For now, just log it.
         info!(image = %img, "start request with custom image");
     }
     match state.manager.spawn().await {
-        Ok(id) => ok(StartResponse { container_id: id }),
-        Err(e) => err(format!("failed to start mesh: {}", e)),
+        Ok(id) => (StatusCode::OK, ok_json(StartResponse { container_id: id })),
+        Err(e) => {
+            let msg = format!("failed to start mesh: {}", e);
+            (StatusCode::SERVICE_UNAVAILABLE, err_json(msg))
+        }
     }
 }
 
-async fn mesh_stop(State(state): State<AppState>) -> Json<ApiResponse<StopResponse>> {
+async fn mesh_stop(State(state): State<AppState>) -> (StatusCode, Json<ApiResponse<StopResponse>>) {
     info!("POST /mesh/stop");
     match state.manager.stop().await {
-        Ok(()) => ok(StopResponse { wiped: true }),
-        Err(e) => err(format!("failed to stop mesh: {}", e)),
+        Ok(()) => (StatusCode::OK, ok_json(StopResponse { wiped: true })),
+        Err(e) => {
+            let msg = format!("failed to stop mesh: {}", e);
+            (StatusCode::SERVICE_UNAVAILABLE, err_json(msg))
+        }
     }
 }
 
 async fn mesh_status(State(state): State<AppState>) -> Json<ApiResponse<MeshStatus>> {
     let status = state.manager.status().await;
-    ok(status)
+    ok_json(status)
 }
 
-async fn mesh_failsafe(State(state): State<AppState>) -> Json<ApiResponse<FailsafeResponse>> {
+async fn mesh_failsafe(State(state): State<AppState>) -> (StatusCode, Json<ApiResponse<FailsafeResponse>>) {
     warn!("POST /mesh/failsafe — emergency kill");
     match state.manager.failsafe().await {
-        Ok(()) => ok(FailsafeResponse { killed: true }),
-        Err(e) => err(format!("failsafe failed: {}", e)),
+        Ok(()) => (StatusCode::OK, ok_json(FailsafeResponse { killed: true })),
+        Err(e) => {
+            let msg = format!("failsafe failed: {}", e);
+            (StatusCode::SERVICE_UNAVAILABLE, err_json(msg))
+        }
     }
 }
 
-async fn mesh_logs(State(state): State<AppState>) -> Json<ApiResponse<LogsResponse>> {
+async fn mesh_logs(State(state): State<AppState>) -> (StatusCode, Json<ApiResponse<LogsResponse>>) {
     match state.manager.logs().await {
-        Ok(lines) => ok(LogsResponse { lines }),
-        Err(e) => err(format!("failed to fetch logs: {}", e)),
+        Ok(lines) => (StatusCode::OK, ok_json(LogsResponse { lines })),
+        Err(e) => {
+            let msg = format!("failed to fetch logs: {}", e);
+            (StatusCode::SERVICE_UNAVAILABLE, err_json(msg))
+        }
     }
-}
-
-async fn health() -> &'static str {
-    "ok"
 }
 
 pub async fn serve(manager: Arc<DockerManager>, port: u16) -> Result<()> {

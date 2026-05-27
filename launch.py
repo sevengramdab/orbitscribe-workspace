@@ -97,22 +97,88 @@ def start_ollama() -> subprocess.Popen | None:
         return None
 
 
-def is_backend_running() -> bool:
+def is_port_in_use(port: int) -> bool:
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def kill_stale_python_on_port(port: int) -> bool:
+    import re
+    try:
+        if sys.platform == "win32":
+            result = subprocess.run(
+                ["netstat", "-ano"], capture_output=True, text=True, timeout=5
+            )
+            for line in result.stdout.splitlines():
+                if f":{port}" in line:
+                    parts = line.strip().split()
+                    pid = parts[-1]
+                    if re.match(r"^\d+$", pid):
+                        tasklist = subprocess.run(
+                            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+                            capture_output=True, text=True, timeout=3,
+                        )
+                        if "python" in tasklist.stdout.lower():
+                            print(f"[Launcher] Killing stale python.exe on port {port} (PID {pid})")
+                            subprocess.run(["taskkill", "/F", "/PID", pid], timeout=3)
+                            return True
+        else:
+            result = subprocess.run(
+                ["lsof", "-ti", f":{port}"], capture_output=True, text=True, timeout=5
+            )
+            for pid in result.stdout.strip().splitlines():
+                pid = pid.strip()
+                if pid:
+                    print(f"[Launcher] Killing stale process on port {port} (PID {pid})")
+                    subprocess.run(["kill", "-9", pid], timeout=3)
+                    return True
+    except Exception:
+        pass
+    return False
+
+
+def find_free_port(start_port: int, range_size: int = 10) -> int | None:
+    for p in range(start_port, start_port + range_size):
+        if not is_port_in_use(p):
+            return p
+    return None
+
+
+def resolve_port(port: int) -> int:
+    if not is_port_in_use(port):
+        return port
+    if kill_stale_python_on_port(port):
+        time.sleep(1)
+        if not is_port_in_use(port):
+            print(f"[Launcher] Port {port} freed.")
+            return port
+    free = find_free_port(port + 1)
+    if free:
+        print(f"[Launcher] Port {port} occupied. Using fallback port {free}.")
+        return free
+    print(f"[Launcher] FATAL: No free port found in range {port + 1}-{port + 9}")
+    sys.exit(1)
+
+
+def is_backend_running(port: int = 58081) -> bool:
     try:
         import urllib.request
-        req = urllib.request.Request("http://127.0.0.1:58081/api/health", method="GET")
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/api/health", method="GET")
         with urllib.request.urlopen(req, timeout=2) as resp:
             return resp.status == 200
     except Exception:
         return False
 
 
-def start_backend() -> subprocess.Popen | None:
-    print("[Launcher] Starting Swarm Backend...")
+def start_backend() -> tuple[subprocess.Popen | None, int]:
+    port = resolve_port(58081)
+    print(f"[Launcher] Starting Swarm Backend on port {port}...")
     python = sys.executable
     main_py = SWARM_BACKEND / "main.py"
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
+    env["SWARM_PORT"] = str(port)
     try:
         if sys.platform == "win32":
             startupinfo = subprocess.STARTUPINFO()
@@ -137,14 +203,14 @@ def start_backend() -> subprocess.Popen | None:
         # Wait for it to come online
         for _ in range(20):
             time.sleep(0.5)
-            if is_backend_running():
-                print("[Launcher] Swarm Backend is online at http://127.0.0.1:58081")
-                return proc
+            if is_backend_running(port):
+                print(f"[Launcher] Swarm Backend is online at http://127.0.0.1:{port}")
+                return proc, port
         print("[Launcher] WARNING: Backend started but not responding yet.")
-        return proc
+        return proc, port
     except Exception as e:
         print(f"[Launcher] ERROR starting backend: {e}")
-        return None
+        return None, port
 
 
 def package_extension() -> Path | None:
@@ -262,7 +328,7 @@ def main():
     if is_backend_running():
         print("[Launcher] Swarm Backend is already running.")
     else:
-        backend_proc = start_backend()
+        backend_proc, backend_port = start_backend()
         if not backend_proc:
             print("[Launcher] FATAL: Could not start swarm backend.")
             sys.exit(1)

@@ -112,7 +112,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'newChat': {
                         const { SwarmPanel } = await import('./SwarmPanel');
-                        SwarmPanel.createOrShow(this._extensionUri, message.mode || 'ask');
+                        SwarmPanel.createOrShow(this._extensionUri, message.mode || 'auto');
                         setTimeout(() => {
                             SwarmPanel.currentPanel?.sendMessage({ command: 'resetChat' });
                         }, 300);
@@ -623,7 +623,8 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
     </button>
 
     <div class="mode-tabs">
-        <button class="mode-tab active" data-mode="ask">Ask</button>
+        <button class="mode-tab active" data-mode="auto">Auto</button>
+        <button class="mode-tab" data-mode="ask">Ask</button>
         <button class="mode-tab" data-mode="plan">Plan</button>
         <button class="mode-tab" data-mode="agent">Agent</button>
         <button class="mode-tab" data-mode="swarm">Swarm</button>
@@ -814,7 +815,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
             let currentText = '';
             let history = [];
             let sessionHistory = [];
-            let currentMode = 'ask';
+            let currentMode = 'auto';
             let currentAutonomy = 'default';
             let currentTemperature = 0.7;
             let currentOrchestrator = '';

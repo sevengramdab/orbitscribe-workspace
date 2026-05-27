@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
             args.name.clone(),
             args.memory_limit_mb,
         )
-        .await?,
+        .await,
     );
 
     if args.pull {

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { spawn, ChildProcess, execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as net from 'net';
 import { httpGet } from './httpUtil';
 
 export class BackendService {
@@ -13,6 +14,7 @@ export class BackendService {
     private readonly maxRestartAttempts: number = 5;
     private readonly watchdogIntervalMs: number = 10000;
     private readonly restartBackoffMs: number = 5000;
+    private readonly portScanRange: number = 10;
     private _onStatusChange = new vscode.EventEmitter<{ online: boolean; ollama: boolean; model: string }>();
     readonly onStatusChange = this._onStatusChange.event;
 
@@ -97,7 +99,94 @@ export class BackendService {
         }
     }
 
+    private async isPortInUse(port: number): Promise<boolean> {
+        return new Promise((resolve) => {
+            const server = net.createServer();
+            server.once('error', (err: any) => {
+                if (err.code === 'EADDRINUSE') {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+            server.once('listening', () => {
+                server.close();
+                resolve(false);
+            });
+            server.listen(port, '127.0.0.1');
+        });
+    }
+
+    private killProcessOnPort(port: number): boolean {
+        try {
+            if (process.platform === 'win32') {
+                const netstat = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf-8', timeout: 5000 });
+                const lines = netstat.split(/\r?\n/).filter(l => l.trim());
+                for (const line of lines) {
+                    const parts = line.trim().split(/\s+/);
+                    const pid = parts[parts.length - 1];
+                    if (pid && /^\d+$/.test(pid)) {
+                        try {
+                            const tasklist = execSync(`tasklist /FI "PID eq ${pid}" /FO CSV /NH`, { encoding: 'utf-8', timeout: 3000 });
+                            if (tasklist.toLowerCase().includes('python')) {
+                                console.log(`[OrbitScribe] Killing stale python.exe on port ${port} (PID ${pid})`);
+                                this.outputChannel.appendLine(`[PortGuard] Killing stale python.exe on port ${port} (PID ${pid})`);
+                                execSync(`taskkill /F /PID ${pid}`, { timeout: 3000 });
+                                return true;
+                            }
+                        } catch { /* ignore */ }
+                    }
+                }
+            } else {
+                const lsof = execSync(`lsof -ti :${port}`, { encoding: 'utf-8', timeout: 5000 });
+                const pids = lsof.trim().split(/\r?\n/).filter(l => l.trim());
+                for (const pid of pids) {
+                    console.log(`[OrbitScribe] Killing stale process on port ${port} (PID ${pid})`);
+                    this.outputChannel.appendLine(`[PortGuard] Killing stale process on port ${port} (PID ${pid})`);
+                    execSync(`kill -9 ${pid}`, { timeout: 3000 });
+                }
+                return pids.length > 0;
+            }
+        } catch {
+            // No process found or command failed
+        }
+        return false;
+    }
+
+    private async findFreePort(startPort: number): Promise<number> {
+        for (let p = startPort; p < startPort + this.portScanRange; p++) {
+            if (!(await this.isPortInUse(p))) {
+                return p;
+            }
+        }
+        throw new Error(`No free port found in range ${startPort}-${startPort + this.portScanRange - 1}`);
+    }
+
+    private async resolvePortConflict(): Promise<void> {
+        const desiredPort = this.port;
+        if (await this.isPortInUse(desiredPort)) {
+            // Try to kill a stale python backend on that port
+            const killed = this.killProcessOnPort(desiredPort);
+            if (killed) {
+                // Give the OS a moment to release the port
+                await new Promise(r => setTimeout(r, 1000));
+                if (!(await this.isPortInUse(desiredPort))) {
+                    console.log(`[OrbitScribe] Port ${desiredPort} freed after killing stale process`);
+                    this.outputChannel.appendLine(`[PortGuard] Port ${desiredPort} freed.`);
+                    return;
+                }
+            }
+            // Fall back to scanning for a free port
+            const freePort = await this.findFreePort(desiredPort + 1);
+            console.log(`[OrbitScribe] Port ${desiredPort} in use by foreign process. Switching to port ${freePort}`);
+            this.outputChannel.appendLine(`[PortGuard] Port ${desiredPort} occupied. Using fallback port ${freePort}.`);
+            this.port = freePort;
+        }
+    }
+
     async start(): Promise<void> {
+        await this.resolvePortConflict();
+
         const mainPath = this.findBackendMain();
         const backendPath = path.dirname(mainPath);
         const python = this.findPython();
@@ -106,15 +195,23 @@ export class BackendService {
             throw new Error(`Backend main.py not found at: ${mainPath}`);
         }
 
-        const msg = `[OrbitScribe] Starting backend: ${python} ${mainPath}`;
+        const msg = `[OrbitScribe] Starting backend: ${python} ${mainPath} (port ${this.port})`;
         console.log(msg);
         this.outputChannel.appendLine(msg);
+
+        const env = process.env;
+        env['SWARM_PORT'] = String(this.port);
+
+        // Buffer recent stderr for crash diagnostics
+        const stderrBuffer: string[] = [];
+        const maxStderrLines = 20;
 
         this.process = spawn(python, [mainPath], {
             cwd: backendPath,
             detached: true,
             stdio: ['ignore', 'pipe', 'pipe'],
             windowsHide: true,
+            env,
         });
 
         this.process.stdout?.on('data', (data) => {
@@ -124,12 +221,20 @@ export class BackendService {
         });
 
         this.process.stderr?.on('data', (data) => {
-            const line = `[Backend] ${data}`;
+            const text = data.toString();
+            const line = `[Backend] ${text}`;
             console.error(line);
             this.outputChannel.appendLine(line);
+            // Keep last N lines for diagnostics
+            stderrBuffer.push(...text.split(/\r?\n/).filter((l: string) => l.trim()));
+            while (stderrBuffer.length > maxStderrLines) {
+                stderrBuffer.shift();
+            }
         });
 
+        let exitCode: number | null = null;
         this.process.on('exit', (code) => {
+            exitCode = code;
             const line = `[Backend] exited with code ${code}`;
             console.log(line);
             this.outputChannel.appendLine(line);
@@ -142,16 +247,39 @@ export class BackendService {
             this.outputChannel.appendLine(line);
         });
 
-        // Wait for it to come online
-        for (let i = 0; i < 30; i++) {
-            await new Promise(r => setTimeout(r, 500));
+        // Wait for it to come online with smarter probing
+        const maxWaitMs = 20000;
+        const intervalMs = 500;
+        const startTime = Date.now();
+        while (Date.now() - startTime < maxWaitMs) {
+            await new Promise(r => setTimeout(r, intervalMs));
+
+            // Success path
             if (await this.isHealthy()) {
                 console.log('Backend started successfully');
                 return;
             }
+
+            // Failure path: process died during startup
+            if (this.process === null && exitCode !== null) {
+                const stderrSummary = stderrBuffer.join('\n');
+                // Detect common failure modes
+                if (stderrSummary.includes('Address already in use') || stderrSummary.includes('Only one usage of each socket address')) {
+                    throw new Error(`Backend crashed: port ${this.port} is already in use.\n${stderrSummary}`);
+                }
+                if (stderrSummary.includes('ModuleNotFoundError') || stderrSummary.includes('ImportError')) {
+                    throw new Error(`Backend crashed: missing Python dependency.\n${stderrSummary}`);
+                }
+                throw new Error(`Backend crashed with exit code ${exitCode}.\nLast stderr:\n${stderrSummary}`);
+            }
         }
 
-        throw new Error('Backend failed to start within 15 seconds');
+        // Timeout path — try to scrape a diagnosis from stderr
+        const stderrSummary = stderrBuffer.join('\n');
+        if (stderrSummary.includes('Address already in use') || stderrSummary.includes('Only one usage of each socket address')) {
+            throw new Error(`Backend failed to start: port ${this.port} conflict detected.\n${stderrSummary}`);
+        }
+        throw new Error(`Backend failed to start within ${maxWaitMs / 1000} seconds.\nLast stderr:\n${stderrSummary || '(none)'}`);
     }
 
     private findBackendMain(): string {

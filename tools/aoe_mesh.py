@@ -11,36 +11,42 @@ Usage:
 """
 import argparse
 import json
+import os
 import sys
+import time
 import urllib.request
 import urllib.error
 
-SUPERVISOR_URL = "http://localhost:58082"
+SUPERVISOR_PORT = int(os.environ.get("AOE_PORT", "58082"))
+SUPERVISOR_URL = f"http://localhost:{SUPERVISOR_PORT}"
+MAX_RETRIES = 3
+RETRY_DELAY = 1.0
 
 
-def _post(path: str, body: dict | None = None) -> dict:
+def _request(method: str, path: str, body: dict | None = None) -> dict:
     url = f"{SUPERVISOR_URL}{path}"
     data = json.dumps(body).encode() if body else None
-    req = urllib.request.Request(url, data=data, method="POST")
-    req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        return {"success": False, "error": f"HTTP {e.code}: {e.reason}"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    req = urllib.request.Request(url, data=data, method=method)
+    if body:
+        req.add_header("Content-Type", "application/json")
 
-
-def _get(path: str) -> dict:
-    url = f"{SUPERVISOR_URL}{path}"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        return {"success": False, "error": f"HTTP {e.code}: {e.reason}"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    last_err = ""
+    for attempt in range(MAX_RETRIES):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            try:
+                return json.loads(e.read())
+            except Exception:
+                return {"success": False, "error": f"HTTP {e.code}: {e.reason}"}
+        except urllib.error.URLError as e:
+            last_err = str(e.reason)
+        except Exception as e:
+            last_err = str(e)
+        if attempt < MAX_RETRIES - 1:
+            time.sleep(RETRY_DELAY * (attempt + 1))
+    return {"success": False, "error": f"Supervisor unreachable after {MAX_RETRIES} attempts: {last_err}"}
 
 
 def cmd_start(args: argparse.Namespace) -> int:
@@ -50,7 +56,7 @@ def cmd_start(args: argparse.Namespace) -> int:
         payload["image"] = args.image
     if args.memory:
         payload["memory_limit_mb"] = args.memory
-    result = _post("/mesh/start", payload if payload else None)
+    result = _request("POST", "/mesh/start", payload if payload else None)
     if result.get("success"):
         cid = result["data"]["container_id"]
         print(f"[AOE] Mesh online. Container ID: {cid[:12]}")
@@ -61,7 +67,7 @@ def cmd_start(args: argparse.Namespace) -> int:
 
 def cmd_stop(args: argparse.Namespace) -> int:
     print("[AOE] Initiating stateless wipe and container shutdown...")
-    result = _post("/mesh/stop")
+    result = _request("POST", "/mesh/stop")
     if result.get("success"):
         print("[AOE] Mesh wiped. Node dormant.")
         return 0
@@ -70,7 +76,7 @@ def cmd_stop(args: argparse.Namespace) -> int:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
-    result = _get("/mesh/status")
+    result = _request("GET", "/mesh/status")
     if not result.get("success"):
         print(f"[AOE] ERROR: {result.get('error')}")
         return 1
@@ -78,12 +84,15 @@ def cmd_status(args: argparse.Namespace) -> int:
     print("-" * 50)
     print("  AOE SUPERVISOR - MESH STATUS")
     print("-" * 50)
-    print(f"  Running      : {s.get('running', False)}")
-    print(f"  Container ID : {s.get('container_id', 'N/A')}")
-    print(f"  Memory       : {s.get('memory_usage_mb', 0):.2f} / {s.get('memory_limit_mb', 0)} MB")
-    print(f"  CPU          : {s.get('cpu_percent', 0):.2f}%")
-    print(f"  PIDs         : {s.get('pid_count', 0)}")
-    print(f"  Cycles       : {s.get('cycles_completed', 0)}")
+    print(f"  Running        : {s.get('running', False)}")
+    print(f"  Container ID   : {s.get('container_id', 'N/A')}")
+    print(f"  Memory         : {s.get('memory_usage_mb', 0):.2f} / {s.get('memory_limit_mb', 0)} MB")
+    print(f"  CPU            : {s.get('cpu_percent', 0):.2f}%")
+    print(f"  PIDs           : {s.get('pid_count', 0)}")
+    print(f"  Cycles         : {s.get('cycles_completed', 0)}")
+    print(f"  Docker avail   : {s.get('docker_available', False)}")
+    if s.get('last_error'):
+        print(f"  Last error     : {s['last_error']}")
     print("-" * 50)
     return 0
 
@@ -91,7 +100,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 def cmd_failsafe(args: argparse.Namespace) -> int:
     print("[AOE] !!! FAILSAFE TRIGGERED !!!")
     print("[AOE] Sending emergency kill to supervisor...")
-    result = _post("/mesh/failsafe")
+    result = _request("POST", "/mesh/failsafe")
     if result.get("success"):
         print("[AOE] Container killed. Relays closed.")
         return 0
@@ -100,7 +109,7 @@ def cmd_failsafe(args: argparse.Namespace) -> int:
 
 
 def cmd_logs(args: argparse.Namespace) -> int:
-    result = _get("/mesh/logs")
+    result = _request("GET", "/mesh/logs")
     if not result.get("success"):
         print(f"[AOE] ERROR: {result.get('error')}")
         return 1

@@ -13,6 +13,7 @@ Agents can also call `route_intent` as a tool to self-dispatch.
 """
 import json
 import asyncio
+import os
 from typing import AsyncGenerator, Dict, Any
 
 from core.intent_router import classify_intent, Intent
@@ -23,6 +24,7 @@ from modes.plan_mode import plan
 from modes.agent_mode import agent_run
 from modes.ask_mode import ask
 from modes.aquaculture_mesh_mode import aquaculture_mesh_run
+from core.aoe_client import get_aoe_client
 
 
 async def auto_run(
@@ -123,21 +125,38 @@ async def auto_run(
     elif mode == "aoe":
         yield SSEEvent("status", {"message": "Dispatching to AOE supervisor..."}).to_json()
         try:
-            import subprocess
-            proc = subprocess.run(
-                ["python", "tools/aoe_mesh.py", "status"],
-                capture_output=True, text=True, timeout=10
-            )
-            if proc.returncode != 0 or "No supervisor" in proc.stdout:
+            client = get_aoe_client()
+            # Check if supervisor is already responsive
+            health = await client.health()
+            if health.get("status") in ("ok", "degraded"):
+                status = await client.mesh_status()
+                if status.get("success"):
+                    data = status.get("data", {})
+                    msg = (
+                        f"AOE supervisor online. Docker: {data.get('docker_available', False)}. "
+                        f"Mesh running: {data.get('running', False)}."
+                    )
+                    yield SSEEvent("status", {"message": msg}).to_json()
+                else:
+                    yield SSEEvent("status", {"message": f"Supervisor degraded: {status.get('error')}"}).to_json()
+            else:
+                yield SSEEvent("status", {"message": "AOE supervisor not responding. Attempting to start..."}).to_json()
+                # Attempt to start supervisor via PowerShell launcher
+                import subprocess
+                proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                ps_script = os.path.join(proj_root, "tools", "aoe.ps1")
                 subprocess.Popen(
-                    ["powershell", "-ExecutionPolicy", "Bypass", "-File", "tools/aoe.ps1", "start"],
+                    ["powershell", "-ExecutionPolicy", "Bypass", "-File", ps_script, "start"],
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
                 )
-                yield SSEEvent("status", {"message": "AOE supervisor started."}).to_json()
-            else:
-                yield SSEEvent("status", {"message": proc.stdout}).to_json()
+                # Poll until it comes online
+                online = await client.ensure_supervisor(max_wait=15.0)
+                if online:
+                    yield SSEEvent("status", {"message": "AOE supervisor started and online."}).to_json()
+                else:
+                    yield SSEEvent("error", {"message": "AOE supervisor failed to start within 15 seconds."}).to_json()
         except Exception as e:
-            yield SSEEvent("error", {"message": str(e)}).to_json()
+            yield SSEEvent("error", {"message": f"AOE dispatch failed: {e}"}).to_json()
 
     else:
         # Default: ask mode

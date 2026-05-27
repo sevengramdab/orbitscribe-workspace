@@ -28,10 +28,12 @@ pub struct MeshStatus {
     pub cpu_percent: f64,
     pub pid_count: u64,
     pub cycles_completed: u64,
+    pub docker_available: bool,
+    pub last_error: Option<String>,
 }
 
 pub struct DockerManager {
-    docker: Docker,
+    docker: Arc<RwLock<Option<Docker>>>,
     state: Arc<RwLock<MeshStatus>>,
     image: String,
     container_name: String,
@@ -39,11 +41,17 @@ pub struct DockerManager {
 }
 
 impl DockerManager {
-    pub async fn new(image: String, container_name: String, memory_limit_mb: u64) -> Result<Self> {
-        let docker = Docker::connect_with_local_defaults()
-            .context("failed to connect to Docker (is Docker Desktop running?)")?;
-
-        docker.ping().await.context("Docker daemon did not respond to ping")?;
+    pub async fn new(image: String, container_name: String, memory_limit_mb: u64) -> Self {
+        let docker = match Self::try_connect().await {
+            Ok(d) => {
+                info!("Docker daemon connected");
+                Some(d)
+            }
+            Err(e) => {
+                warn!(error = %e, "Docker not available — supervisor will run in degraded mode");
+                None
+            }
+        };
 
         let state = Arc::new(RwLock::new(MeshStatus {
             container_id: None,
@@ -53,24 +61,65 @@ impl DockerManager {
             cpu_percent: 0.0,
             pid_count: 0,
             cycles_completed: 0,
+            docker_available: docker.is_some(),
+            last_error: None,
         }));
 
-        Ok(Self {
-            docker,
+        Self {
+            docker: Arc::new(RwLock::new(docker)),
             state,
             image,
             container_name,
             memory_limit_mb,
-        })
+        }
+    }
+
+    async fn try_connect() -> Result<Docker> {
+        let docker = Docker::connect_with_local_defaults()
+            .context("failed to connect to Docker (is Docker Desktop running?)")?;
+        docker.ping().await.context("Docker daemon did not respond to ping")?;
+        Ok(docker)
+    }
+
+    async fn ensure_docker(&self) -> Result<Docker> {
+        {
+            let guard = self.docker.read().await;
+            if let Some(ref d) = *guard {
+                return Ok(d.clone());
+            }
+        }
+        // Try to reconnect
+        match Self::try_connect().await {
+            Ok(d) => {
+                let mut guard = self.docker.write().await;
+                *guard = Some(d.clone());
+                {
+                    let mut state = self.state.write().await;
+                    state.docker_available = true;
+                    state.last_error = None;
+                }
+                info!("Docker daemon reconnected");
+                Ok(d)
+            }
+            Err(e) => {
+                {
+                    let mut state = self.state.write().await;
+                    state.docker_available = false;
+                    state.last_error = Some(format!("{}", e));
+                }
+                Err(e)
+            }
+        }
     }
 
     pub async fn pull_image(&self) -> Result<()> {
+        let docker = self.ensure_docker().await?;
         info!(image = %self.image, "pulling image");
         let options = Some(CreateImageOptions {
             from_image: self.image.clone(),
             ..Default::default()
         });
-        let mut stream = self.docker.create_image(options, None, None);
+        let mut stream = docker.create_image(options, None, None);
         while let Some(item) = stream.next().await {
             match item {
                 Ok(status) => {
@@ -87,8 +136,10 @@ impl DockerManager {
     }
 
     pub async fn spawn(&self) -> Result<String> {
+        let docker = self.ensure_docker().await?;
+
         // Remove any existing container with the same name
-        if let Err(e) = self.remove_existing().await {
+        if let Err(e) = self.remove_existing(&docker).await {
             warn!(error = %e, "failed to remove existing container");
         }
 
@@ -115,8 +166,7 @@ impl DockerManager {
             platform: None,
         };
 
-        let container = self
-            .docker
+        let container = docker
             .create_container(Some(create_opts), config)
             .await
             .context("failed to create container")?;
@@ -124,7 +174,7 @@ impl DockerManager {
         let id = container.id;
         info!(container_id = %id, "container created");
 
-        self.docker
+        docker
             .start_container(&id, None::<StartContainerOptions<String>>)
             .await
             .context("failed to start container")?;
@@ -138,7 +188,7 @@ impl DockerManager {
         }
 
         // Spawn memory monitor
-        let docker_clone = self.docker.clone();
+        let docker_clone = docker.clone();
         let state_clone = self.state.clone();
         let limit_mb = self.memory_limit_mb;
         let monitor_id = id.clone();
@@ -150,6 +200,17 @@ impl DockerManager {
     }
 
     pub async fn stop(&self) -> Result<()> {
+        let docker = match self.ensure_docker().await {
+            Ok(d) => d,
+            Err(_) => {
+                // Wipe state even if Docker is gone
+                let mut state = self.state.write().await;
+                state.container_id = None;
+                state.running = false;
+                return Ok(());
+            }
+        };
+
         let id = {
             let state = self.state.read().await;
             match &state.container_id {
@@ -160,18 +221,14 @@ impl DockerManager {
 
         info!(container_id = %id, "stopping container");
 
-        let _ = self
-            .docker
+        let _ = docker
             .kill_container(&id, Some(KillContainerOptions { signal: "SIGKILL" }))
             .await;
 
-        let mut wait_stream = self
-            .docker
-            .wait_container(&id, None::<WaitContainerOptions<String>>);
+        let mut wait_stream = docker.wait_container(&id, None::<WaitContainerOptions<String>>);
         while let Some(_) = wait_stream.next().await {}
 
-        let _ = self
-            .docker
+        let _ = docker
             .remove_container(
                 &id,
                 Some(RemoveContainerOptions {
@@ -197,10 +254,13 @@ impl DockerManager {
     }
 
     pub async fn status(&self) -> MeshStatus {
+        // Opportunistically try to refresh docker availability without blocking
+        let _ = self.ensure_docker().await;
         self.state.read().await.clone()
     }
 
     pub async fn logs(&self) -> Result<Vec<String>> {
+        let docker = self.ensure_docker().await?;
         let id = {
             let state = self.state.read().await;
             match &state.container_id {
@@ -216,7 +276,7 @@ impl DockerManager {
             ..Default::default()
         };
 
-        let mut stream = self.docker.logs(&id, Some(opts));
+        let mut stream = docker.logs(&id, Some(opts));
         let mut lines = Vec::new();
         while let Some(chunk) = stream.next().await {
             match chunk {
@@ -238,7 +298,7 @@ impl DockerManager {
         Ok(lines)
     }
 
-    async fn remove_existing(&self) -> Result<()> {
+    async fn remove_existing(&self, docker: &Docker) -> Result<()> {
         let mut filters = std::collections::HashMap::new();
         filters.insert("name".to_string(), vec![self.container_name.clone()]);
         let opts = ListContainersOptions {
@@ -246,11 +306,10 @@ impl DockerManager {
             filters,
             ..Default::default()
         };
-        let containers = self.docker.list_containers(Some(opts)).await?;
+        let containers = docker.list_containers(Some(opts)).await?;
         for c in containers {
             if let Some(id) = c.id {
-                let _ = self
-                    .docker
+                let _ = docker
                     .remove_container(
                         &id,
                         Some(RemoveContainerOptions {

@@ -1056,3 +1056,28 @@ async def list_discovered_nodes():
     if not discovery:
         return {"success": True, "nodes": []}
     return {"success": True, "nodes": discovery.get_discovered()}
+
+
+class RouteIntentRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+
+@router.post("/route-intent")
+async def route_intent_endpoint(req: RouteIntentRequest):
+    """Classify a user message into an intent and return dispatch metadata.
+
+    This endpoint allows external callers (including subagents) to query
+    the intent router without triggering a full chat stream.
+    """
+    from core.intent_router import classify_intent
+    result = classify_intent(req.message)
+    return {
+        "status": "ok",
+        "intent": result.intent.value,
+        "confidence": round(result.confidence, 2),
+        "target_mode": result.target_mode,
+        "target_roles": result.target_roles,
+        "reasoning": result.reasoning,
+        "session_id": req.session_id,
+    }
