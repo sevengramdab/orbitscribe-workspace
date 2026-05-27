@@ -4,17 +4,19 @@ use bollard::container::{
     RemoveContainerOptions, StartContainerOptions, StatsOptions, WaitContainerOptions,
 };
 use bollard::image::CreateImageOptions;
-use bollard::models::{ContainerSummary, HostConfig};
+use bollard::models::HostConfig;
 use bollard::Docker;
-use bytes::Bytes;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{error, info, warn};
 
+#[allow(dead_code)]
 pub const DEFAULT_IMAGE: &str = "aquaculture-mesh:latest";
+#[allow(dead_code)]
 pub const DEFAULT_CONTAINER_NAME: &str = "aquaculture-mesh-alpha";
+#[allow(dead_code)]
 pub const DEFAULT_MEMORY_LIMIT_MB: u64 = 512;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -139,8 +141,9 @@ impl DockerManager {
         let docker_clone = self.docker.clone();
         let state_clone = self.state.clone();
         let limit_mb = self.memory_limit_mb;
+        let monitor_id = id.clone();
         tokio::spawn(async move {
-            monitor_stats(docker_clone, id.clone(), state_clone, limit_mb).await;
+            monitor_stats(docker_clone, monitor_id, state_clone, limit_mb).await;
         });
 
         Ok(id)
@@ -162,10 +165,10 @@ impl DockerManager {
             .kill_container(&id, Some(KillContainerOptions { signal: "SIGKILL" }))
             .await;
 
-        let _ = self
+        let mut wait_stream = self
             .docker
-            .wait_container(&id, None::<WaitContainerOptions<String>>)
-            .await;
+            .wait_container(&id, None::<WaitContainerOptions<String>>);
+        while let Some(_) = wait_stream.next().await {}
 
         let _ = self
             .docker
@@ -217,7 +220,12 @@ impl DockerManager {
         let mut lines = Vec::new();
         while let Some(chunk) = stream.next().await {
             match chunk {
-                Ok(bytes) => {
+                Ok(log_output) => {
+                    let bytes = match log_output {
+                        bollard::container::LogOutput::StdOut { message } => message,
+                        bollard::container::LogOutput::StdErr { message } => message,
+                        _ => continue,
+                    };
                     if let Ok(line) = String::from_utf8(bytes.to_vec()) {
                         lines.push(line.trim().to_string());
                     }
@@ -231,7 +239,8 @@ impl DockerManager {
     }
 
     async fn remove_existing(&self) -> Result<()> {
-        let filters = serde_json::json!({"name": [&self.container_name]});
+        let mut filters = std::collections::HashMap::new();
+        filters.insert("name".to_string(), vec![self.container_name.clone()]);
         let opts = ListContainersOptions {
             all: true,
             filters,
@@ -272,9 +281,9 @@ async fn monitor_stats(
         match item {
             Ok(stats) => {
                 let mem_usage = stats.memory_stats.usage.unwrap_or(0) as f64 / (1024.0 * 1024.0);
-                let mem_limit = stats.memory_stats.limit.unwrap_or(1) as f64 / (1024.0 * 1024.0);
-                let cpu_delta = stats.cpu_stats.cpu_usage.total_usage.unwrap_or(0)
-                    - stats.precpu_stats.cpu_usage.total_usage.unwrap_or(0);
+                let _mem_limit = stats.memory_stats.limit.unwrap_or(1) as f64 / (1024.0 * 1024.0);
+                let cpu_delta = stats.cpu_stats.cpu_usage.total_usage
+                    - stats.precpu_stats.cpu_usage.total_usage;
                 let system_delta = stats.cpu_stats.system_cpu_usage.unwrap_or(0)
                     - stats.precpu_stats.system_cpu_usage.unwrap_or(0);
                 let cpu_percent = if system_delta > 0 {

@@ -24,6 +24,7 @@ pub struct ApiResponse<T> {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct StartRequest {
     pub image: Option<String>,
     pub memory_limit_mb: Option<u64>,
