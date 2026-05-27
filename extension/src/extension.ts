@@ -675,7 +675,8 @@ class AgentsTreeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
         if (element) { return []; }
         try {
             const { httpGet } = await import('./services/httpUtil');
-            const resp = await httpGet('http://127.0.0.1:58081/api/agents');
+            const port = vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
+            const resp = await httpGet(`http://127.0.0.1:${port}/api/agents`);
             const data = await resp.json();
             const agents = Object.entries(data).map(([key, info]: [string, any]) =>
                 createAgentItem(`${info.name || key}`, info.role || '')

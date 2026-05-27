@@ -39,6 +39,7 @@ export class CommandViewport {
         });
 
         this._panel.webview.onDidReceiveMessage(async (message) => {
+            const port = vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
             switch (message.command) {
                 case 'getWorkspaceContext': {
                     const ctx = await (await import('../extension')).getWorkspaceContext();
@@ -79,7 +80,7 @@ export class CommandViewport {
                 case 'steerAgent': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/agents/${message.agent_id}/steer`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/agents/${message.agent_id}/steer`, {
                             message: message.message,
                         });
                     } catch (err: any) {
@@ -90,7 +91,7 @@ export class CommandViewport {
                 case 'sendApproval': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/approval/respond`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/approval/respond`, {
                             session_id: message.session_id,
                             request_id: message.request_id,
                             approved: message.approved,
@@ -103,7 +104,7 @@ export class CommandViewport {
                 case 'sendDecision': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/decision/respond`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/decision/respond`, {
                             session_id: message.session_id,
                             request_id: message.request_id,
                             decision: message.decision,

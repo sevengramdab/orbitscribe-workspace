@@ -27,6 +27,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
         }
 
         webviewView.webview.onDidReceiveMessage(async (message) => {
+            const apiBase = 'http://127.0.0.1:' + vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
             try {
                 switch (message.command) {
                     case 'openPanel': {
@@ -164,7 +165,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'createPlanOptions': {
                         try {
-                            const resp = await httpPost('http://127.0.0.1:58081/api/plan/options', { goal: message.goal });
+                            const resp = await httpPost(apiBase + '/api/plan/options', { goal: message.goal });
                             const data = await resp.json();
                             webviewView.webview.postMessage({ command: 'planOptionsCreated', success: data.plan_id !== undefined, plan: data, error: data.error });
                         } catch (e: any) {
@@ -174,7 +175,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'selectPlanOption': {
                         try {
-                            const resp = await httpPost('http://127.0.0.1:58081/api/plan/options/select', { plan_id: message.plan_id, option_id: message.option_id });
+                            const resp = await httpPost(apiBase + '/api/plan/options/select', { plan_id: message.plan_id, option_id: message.option_id });
                             const data = await resp.json();
                             webviewView.webview.postMessage({ command: 'planOptionSelected', success: data.status === 'selected', plan: data });
                             // Open the swarm panel in plan mode with the goal
@@ -190,7 +191,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'getNodes': {
                         try {
-                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes');
+                            const resp = await httpGet(apiBase + '/api/nodes');
                             const data = await resp.json();
                             webviewView.webview.postMessage({ command: 'nodesList', nodes: data.nodes || [] });
                         } catch (e: any) {
@@ -200,7 +201,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'discoverNodes': {
                         try {
-                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes/discover?timeout=3');
+                            const resp = await httpGet(apiBase + '/api/nodes/discover?timeout=3');
                             const data = await resp.json();
                             webviewView.webview.postMessage({ command: 'nodesDiscovered', success: data.success, discovered: data.discovered, nodes: data.nodes || [], error: data.error });
                         } catch (e: any) {
@@ -210,7 +211,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'forwardTask': {
                         try {
-                            const resp = await httpPost('http://127.0.0.1:58081/api/nodes/forward', { goal: message.goal, prefer_large_model: false });
+                            const resp = await httpPost(apiBase + '/api/nodes/forward', { goal: message.goal, prefer_large_model: false });
                             const data = await resp.json();
                             webviewView.webview.postMessage({ command: 'taskForwarded', success: data.success, node_id: data.node_id, error: data.error });
                         } catch (e: any) {
@@ -220,7 +221,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                     }
                     case 'checkNodeHealth': {
                         try {
-                            const resp = await httpGet('http://127.0.0.1:58081/api/nodes/health');
+                            const resp = await httpGet(apiBase + '/api/nodes/health');
                             const data = await resp.json();
                             const node = (data.nodes || []).find((n: any) => n.node_id === message.node_id);
                             webviewView.webview.postMessage({ command: 'nodeHealth', node_id: message.node_id, healthy: !!node });
@@ -244,6 +245,8 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
 
     private _getHtml(webview: vscode.Webview): string {
         const nonce = getNonce();
+        const port = vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
+        const apiBase = `http://127.0.0.1:${port}`;
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -252,6 +255,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}'; connect-src http://127.0.0.1:*;">
     <title>OrbitScribe</title>
+    <script nonce="${nonce}">const API_BASE = '${apiBase}';</script>
     <style>
         :root {
             --bg: #0f1117;
@@ -954,7 +958,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                 try {
                     const controller = new AbortController();
                     const t = setTimeout(() => controller.abort(), 5000);
-                    const resp = await fetch('http://127.0.0.1:58081/api/sessions', { signal: controller.signal });
+                    const resp = await fetch(API_BASE + '/api/sessions', { signal: controller.signal });
                     clearTimeout(t);
                     if (resp.ok) {
                         const data = await resp.json();
@@ -1009,7 +1013,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                         try {
                             const controller = new AbortController();
                             const t = setTimeout(() => controller.abort(), 5000);
-                            const resp = await fetch('http://127.0.0.1:58081/api/sessions/' + encodeURIComponent(sid), { method: 'DELETE', signal: controller.signal });
+                            const resp = await fetch(API_BASE + '/api/sessions/' + encodeURIComponent(sid), { method: 'DELETE', signal: controller.signal });
                             clearTimeout(t);
                             if (resp.ok) {
                                 showToast('Session deleted');
@@ -1301,7 +1305,7 @@ export class OrbitScribeSidebarProvider implements vscode.WebviewViewProvider {
                 try {
                     const controller = new AbortController();
                     const t = setTimeout(() => controller.abort(), 5000);
-                    const resp = await fetch('http://127.0.0.1:58081/api/health', { method: 'GET', signal: controller.signal });
+                    const resp = await fetch(API_BASE + '/api/health', { method: 'GET', signal: controller.signal });
                     clearTimeout(t);
                     if (resp.ok) {
                         backendStatus.textContent = 'Online';

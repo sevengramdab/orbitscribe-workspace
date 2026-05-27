@@ -86,6 +86,11 @@ export class CommandDeckPanel {
             html = html.replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n    ${csp}`);
         }
 
+        // Inject dynamic backend port
+        const port = vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
+        html = html.replace(/http:\/\/127\.0\.0\.1:58081/g, `http://127.0.0.1:${port}`);
+        html = html.replace(/ws:\/\/127\.0\.0\.1:58081/g, `ws://127.0.0.1:${port}`);
+
         // Inject VS Code: API bridge for opening files
         const bridge = `
 <script>

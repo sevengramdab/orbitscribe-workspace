@@ -44,6 +44,7 @@ export class SwarmPanel {
         });
 
         this._panel.webview.onDidReceiveMessage(async (message) => {
+            const port = vscode.workspace.getConfiguration('orbitscribe').get<number>('backendPort', 58081);
             switch (message.command) {
                 case 'getWorkspaceContext': {
                     const ctx = await (await import('../extension')).getWorkspaceContext();
@@ -114,7 +115,7 @@ export class SwarmPanel {
                 case 'sendApproval': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/approval/respond`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/approval/respond`, {
                             session_id: message.session_id,
                             request_id: message.request_id,
                             approved: message.approved,
@@ -127,7 +128,7 @@ export class SwarmPanel {
                 case 'sendDecision': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/decision/respond`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/decision/respond`, {
                             session_id: message.session_id,
                             request_id: message.request_id,
                             decision: message.decision,
@@ -160,7 +161,7 @@ export class SwarmPanel {
                 case 'applyBatch': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/batches/${message.batch_id}/apply`);
+                        await httpPost(`http://127.0.0.1:${port}/api/batches/${message.batch_id}/apply`);
                     } catch (err: any) {
                         console.error('applyBatch failed:', err);
                     }
@@ -169,7 +170,7 @@ export class SwarmPanel {
                 case 'undoBatch': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/batches/${message.batch_id}/undo`);
+                        await httpPost(`http://127.0.0.1:${port}/api/batches/${message.batch_id}/undo`);
                     } catch (err: any) {
                         console.error('undoBatch failed:', err);
                     }
@@ -179,7 +180,7 @@ export class SwarmPanel {
                     try {
                         // Abort the stream on the backend by sending a steering command
                         const { httpPost } = await import('../services/httpUtil');
-                        await httpPost(`http://127.0.0.1:58081/api/steer`, {
+                        await httpPost(`http://127.0.0.1:${port}/api/steer`, {
                             session_id: message.session_id,
                             command: 'stop',
                         });
@@ -191,7 +192,7 @@ export class SwarmPanel {
                 case 'saveSession': {
                     try {
                         const { httpPost } = await import('../services/httpUtil');
-                        const res = await httpPost(`http://127.0.0.1:58081/api/sessions/${message.session_id}/save`);
+                        const res = await httpPost(`http://127.0.0.1:${port}/api/sessions/${message.session_id}/save`);
                         if (res.ok) {
                             this._panel.webview.postMessage({ command: 'sessionSaved', session_id: message.session_id });
                         } else {
@@ -206,7 +207,7 @@ export class SwarmPanel {
                 case 'deleteSession': {
                     try {
                         const { httpDelete } = await import('../services/httpUtil');
-                        const res = await httpDelete(`http://127.0.0.1:58081/api/sessions/${message.session_id}`);
+                        const res = await httpDelete(`http://127.0.0.1:${port}/api/sessions/${message.session_id}`);
                         if (res.ok) {
                             this._panel.webview.postMessage({ command: 'sessionDeleted', session_id: message.session_id });
                         } else {

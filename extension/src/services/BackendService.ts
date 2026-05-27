@@ -182,6 +182,12 @@ export class BackendService {
             this.outputChannel.appendLine(`[PortGuard] Port ${desiredPort} occupied. Using fallback port ${freePort}.`);
             this.port = freePort;
         }
+        // Persist resolved port so webviews pick it up
+        try {
+            await vscode.workspace.getConfiguration('orbitscribe').update('backendPort', this.port, true);
+        } catch {
+            // ignore config write failures
+        }
     }
 
     async start(): Promise<void> {
