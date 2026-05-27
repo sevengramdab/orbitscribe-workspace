@@ -15,3 +15,9 @@ API_TOKEN = os.environ.get("SIMPLEPOD_TOKEN", "simplepod-default-token")
 NODE_ID = os.environ.get("SIMPLEPOD_NODE_ID", socket.gethostname())
 NODE_NAME = os.environ.get("SIMPLEPOD_NODE_NAME", NODE_ID)
 NODE_ROLE = os.environ.get("SIMPLEPOD_ROLE", "shadow")  # 'shadow' or 'local'
+
+# v2 features
+HEALTHCHECK_INTERVAL = 5.0  # seconds between heartbeat pings in UI
+SCREENSHOT_FORMAT = "png"  # default screenshot format
+FILE_MANAGER_ROOT = os.environ.get("SIMPLEPOD_FILE_ROOT", os.getcwd())  # root directory for remote file operations
+MAX_FILE_UPLOAD_MB = int(os.environ.get("SIMPLEPOD_MAX_UPLOAD_MB", "50"))

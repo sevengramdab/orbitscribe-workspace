@@ -13,6 +13,12 @@ pip install -r requirements.txt
 python run.py
 ```
 
+### Packaging as a standalone executable
+```bash
+# Build a single .exe with PyInstaller
+python build_exe.bat
+```
+
 ### Environment variables
 
 | Variable | Default | Description |
@@ -51,6 +57,27 @@ Open `http://localhost:8501` on both machines. They will discover each other wit
 - 🔧 **Setup scripts** — Send and run bootstrap scripts
 - 📁 **File transfer** — Upload files to the remote peer
 - 🔒 **Token auth** — Simple shared-token authentication
+- 💓 **Heartbeat monitoring** — Real-time health check with latency display
+- 📸 **Remote screenshot** — Capture and view remote desktop instantly
+- 📂 **Bidirectional file manager** — List, download, and delete remote files
+- 📦 **Standalone executable** — Package everything into a single .exe with PyInstaller
+
+## Building
+
+SimplePod can be packaged into a standalone Windows executable using PyInstaller. This removes the need for a Python installation on the target machine.
+
+```bash
+python build_exe.bat
+```
+
+The script runs:
+```
+pyinstaller --onefile --name simplepod run.py
+```
+
+Requirements:
+- `pip install pyinstaller` (included in `requirements.txt`)
+- The resulting `dist/simplepod.exe` bundles the Python runtime, all dependencies, and the application code into a single file.
 
 ## Architecture
 

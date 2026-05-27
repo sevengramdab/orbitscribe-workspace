@@ -1,6 +1,7 @@
 """SimplePod — Streamlit remote control dashboard.
 Run on both computers. They auto-discover each other via UDP broadcast.
 """
+import base64
 import os
 import sys
 import time
@@ -26,6 +27,9 @@ def ensure_state():
         "logs": [],
         "auto_connect": True,
         "remote_status": None,
+        "remote_path": ".",
+        "remote_files": [],
+        "pending_download": None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -125,6 +129,14 @@ with st.sidebar:
         if st.button("Disconnect"):
             _disconnect()
             st.rerun()
+
+        if st.button("💓 Heartbeat"):
+            result = _run_client_method(st.session_state.client.health)
+            if result and result.get("ok"):
+                latency = result.get("latency_ms", "?")
+                st.success(f"Peer is alive — latency: {latency}ms")
+            elif result:
+                st.error(result.get("error", "Heartbeat failed"))
     else:
         st.warning("No peer connected")
 
@@ -134,7 +146,9 @@ with st.sidebar:
         st.text(line)
 
 # ── Tabs ──
-tab_status, tab_exec, tab_setup, tab_files = st.tabs(["📊 Status", "🖥️ Execute", "🔧 Setup", "📁 Files"])
+tab_status, tab_exec, tab_setup, tab_files, tab_screen, tab_remote_files = st.tabs(
+    ["📊 Status", "🖥️ Execute", "🔧 Setup", "📁 Files", "📷 Screen", "📁 Remote Files"]
+)
 
 with tab_status:
     if not st.session_state.client:
@@ -217,3 +231,102 @@ with tab_files:
                     st.success(f"Saved to: `{result.get('saved_to')}`")
                 else:
                     st.error(result.get("error", "Unknown error"))
+
+with tab_screen:
+    if not st.session_state.client:
+        st.info("Connect to a peer to view remote screen.")
+    else:
+        auto_refresh = st.checkbox("Auto-refresh every 5s", key="screen_auto_refresh")
+        placeholder = st.empty()
+
+        if st.button("📸 Capture") or auto_refresh:
+            result = _run_client_method(st.session_state.client.screenshot)
+            if result and result.get("image_b64"):
+                with placeholder.container():
+                    st.image(base64.b64decode(result["image_b64"]), use_column_width=True)
+            elif result:
+                st.error(result.get("error", "Screenshot failed"))
+
+        if auto_refresh:
+            time.sleep(5)
+            st.rerun()
+
+with tab_remote_files:
+    if not st.session_state.client:
+        st.info("Connect to a peer to browse remote files.")
+    else:
+        path = st.text_input(
+            "Remote path", value=st.session_state.remote_path, key="remote_path_input"
+        )
+        if st.button("📂 List Files"):
+            result = _run_client_method(st.session_state.client.list_files, path)
+            if result and result.get("ok"):
+                st.session_state.remote_files = result.get("files", [])
+                st.session_state.remote_path = path
+            elif result:
+                st.error(result.get("error", "Failed to list files"))
+
+        if st.session_state.remote_files:
+            files = st.session_state.remote_files
+            st.write(f"**{len(files)}** items in `{st.session_state.remote_path}`")
+
+            # Header row
+            h1, h2, h3, h4 = st.columns([4, 2, 1, 1])
+            h1.write("**Name**")
+            h2.write("**Size**")
+            h3.write("")
+            h4.write("")
+
+            for i, f in enumerate(files):
+                c1, c2, c3, c4 = st.columns([4, 2, 1, 1])
+                with c1:
+                    if f.get("is_dir"):
+                        if st.button(f"📁 {f['name']}", key=f"cd_{i}"):
+                            new_path = os.path.join(st.session_state.remote_path, f["name"])
+                            st.session_state.remote_path = os.path.normpath(new_path)
+                            st.session_state.remote_files = []
+                            st.rerun()
+                    else:
+                        st.write(f"📄 {f['name']}")
+                with c2:
+                    if f.get("is_dir"):
+                        st.write("—")
+                    else:
+                        st.write(f"{f.get('size', 0):,}")
+                with c3:
+                    if not f.get("is_dir"):
+                        if st.button("⬇️", key=f"dl_{i}"):
+                            file_path = os.path.join(st.session_state.remote_path, f["name"])
+                            result = _run_client_method(
+                                st.session_state.client.download_file, file_path
+                            )
+                            if result and result.get("content_b64"):
+                                st.session_state.pending_download = {
+                                    "name": f["name"],
+                                    "data": base64.b64decode(result["content_b64"]),
+                                }
+                                st.rerun()
+                with c4:
+                    if st.button("🗑️", key=f"del_{i}"):
+                        file_path = os.path.join(st.session_state.remote_path, f["name"])
+                        result = _run_client_method(
+                            st.session_state.client.delete_file, file_path
+                        )
+                        if result and result.get("ok"):
+                            st.success(f"Deleted `{f['name']}`")
+                            st.session_state.remote_files = []
+                            st.rerun()
+                        elif result:
+                            st.error(result.get("error", "Delete failed"))
+
+            if st.session_state.pending_download:
+                pd = st.session_state.pending_download
+                st.download_button(
+                    label=f"⬇️ Download {pd['name']}",
+                    data=pd["data"],
+                    file_name=pd["name"],
+                    key="pending_dl_btn",
+                )
+                if st.button("Clear download"):
+                    st.session_state.pending_download = None
+                    st.rerun()

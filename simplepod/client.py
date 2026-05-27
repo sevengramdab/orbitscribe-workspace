@@ -57,3 +57,24 @@ class PeerClient:
             return True
         except Exception:
             return False
+
+    def health(self) -> Dict[str, Any]:
+        start = time.time()
+        result = self._request("GET", "/health")
+        result["latency_ms"] = round((time.time() - start) * 1000, 1)
+        return result
+
+    def screenshot(self) -> Dict[str, Any]:
+        return self._request("POST", "/screenshot")
+
+    def list_files(self, path: str = ".") -> Dict[str, Any]:
+        return self._request("POST", "/files/list", {"path": path})
+
+    def download_file(self, path: str) -> Dict[str, Any]:
+        result = self._request("POST", "/files/download", {"path": path})
+        if "content_b64" in result:
+            result["content_bytes"] = base64.b64decode(result["content_b64"])
+        return result
+
+    def delete_file(self, path: str) -> Dict[str, Any]:
+        return self._request("POST", "/files/delete", {"path": path})
