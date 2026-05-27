@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import NODE_ID, NODE_NAME, NODE_ROLE, API_PORT
 from discovery import DiscoveryService, Peer
 from client import PeerClient
-from monetization.main import render_monetization_tab
 
 st.set_page_config(page_title="SimplePod", page_icon="🛰️", layout="wide")
 
@@ -333,8 +332,21 @@ with tab_remote_files:
                     st.rerun()
 
 with tab_monetization:
-    try:
-        render_monetization_tab()
-    except Exception as e:
-        st.error(f"Monetization dashboard error: {e}")
-        st.info("Make sure the swarm backend is running and data directories exist.")
+    st.info("The monetization dashboard is now served directly by the FastAPI backend.")
+    st.write("Open the dashboard in your browser for the full experience with all 8 sections:")
+    st.write("• Overview • Financial Analysis • API Settings • Credentials • Marketplace • Stats • Links • Swarm Control")
+    
+    api_port = os.environ.get("SIMPLEPOD_API_PORT", "58091")
+    dashboard_url = f"http://localhost:{api_port}/monetization"
+    
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("🚀 Open Monetization Dashboard", type="primary"):
+            import webbrowser
+            webbrowser.open(dashboard_url)
+            st.success(f"Opened {dashboard_url}")
+    with col2:
+        st.code(dashboard_url, language="text")
+    
+    st.divider()
+    st.caption("Tip: You can also access it from any device on your network by replacing `localhost` with this machine's IP address.")

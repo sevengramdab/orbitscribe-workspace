@@ -6,15 +6,22 @@ import subprocess
 import sys
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import API_TOKEN, NODE_ID, NODE_NAME, NODE_ROLE, FILE_MANAGER_ROOT
 
 app = FastAPI(title="SimplePod Remote API")
+
+import os
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "monetization")
+if os.path.isdir(static_dir):
+    app.mount("/monetization/static", StaticFiles(directory=static_dir), name="monetization_static")
 
 
 def _verify_token(token: Optional[str]) -> None:
@@ -40,6 +47,36 @@ class SyncFileRequest(BaseModel):
 
 class PathRequest(BaseModel):
     path: str
+
+
+class InjectRequest(BaseModel):
+    agent_name: str
+    decision_type: str
+    payload: dict
+
+
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_BASE_DIR, "..", ".."))
+
+
+def _project_path(*parts: str) -> str:
+    return os.path.join(_PROJECT_ROOT, *parts)
+
+
+def _read_json(path: str, default=None):
+    try:
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return default if default is not None else {}
+
+
+def _write_json(path: str, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 
 @app.get("/")
@@ -221,9 +258,216 @@ def delete_file(req: PathRequest, x_token: Optional[str] = Header(None)):
         return {"ok": False, "error": str(e)}
 
 
+# --- Monetization Dashboard Routes ---
+
+@app.get("/monetization")
+def monetization_dashboard():
+    index_path = os.path.join(_BASE_DIR, "static", "monetization", "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    return HTMLResponse("<h1>Monetization Dashboard</h1><p>index.html not found.</p>", status_code=404)
+
+
+@app.get("/monetization/api/status")
+def monetization_api_status():
+    try:
+        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
+        if vault:
+            return {"ok": True, **vault}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {
+        "ok": True,
+        "status": "active",
+        "revenue": 0.0,
+        "agents_online": 0,
+        "last_update": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/monetization/api/agents")
+def monetization_api_agents():
+    try:
+        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
+        agents = vault.get("agents", [])
+        if agents:
+            return {"ok": True, "agents": agents}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, "agents": []}
+
+
+@app.get("/monetization/api/pl")
+def monetization_api_pl():
+    try:
+        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
+        pl = vault.get("pl", vault.get("profit_loss", vault.get("pnl", None)))
+        if pl is not None:
+            return {"ok": True, "pl": pl}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, "pl": {"revenue": 0.0, "costs": 0.0, "profit": 0.0}}
+
+
+@app.get("/monetization/api/vault")
+def monetization_api_vault():
+    try:
+        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
+        if vault:
+            return {"ok": True, "vault": vault}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, "vault": {}}
+
+
+@app.get("/monetization/api/settings")
+def monetization_api_settings_get():
+    try:
+        data = _read_json(_project_path("swarm-backend", "business_config.json"), {})
+        return {"ok": True, "settings": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/settings")
+def monetization_api_settings_post(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("swarm-backend", "business_config.json")
+        _write_json(path, body)
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/monetization/api/credentials")
+def monetization_api_credentials_get():
+    try:
+        data = _read_json(_project_path("tools", "saved_sessions", "monetization_credentials.json"), [])
+        return {"ok": True, "credentials": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/credentials")
+def monetization_api_credentials_post(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_credentials.json")
+        data = _read_json(path, [])
+        if not isinstance(data, list):
+            data = []
+        if "id" not in body:
+            body["id"] = f"cred_{int(time.time() * 1000)}"
+        data.append(body)
+        _write_json(path, data)
+        return {"ok": True, "credentials": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.delete("/monetization/api/credentials/{cred_id}")
+def monetization_api_credentials_delete(cred_id: str, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_credentials.json")
+        data = _read_json(path, [])
+        if not isinstance(data, list):
+            return {"ok": False, "error": "Invalid data format"}
+        new_data = [c for c in data if c.get("id") != cred_id]
+        removed = len(data) - len(new_data)
+        _write_json(path, new_data)
+        return {"ok": True, "removed": removed}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/monetization/api/links")
+def monetization_api_links_get():
+    try:
+        data = _read_json(_project_path("tools", "saved_sessions", "monetization_links.json"), [])
+        return {"ok": True, "links": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/links")
+def monetization_api_links_post(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_links.json")
+        data = _read_json(path, [])
+        if not isinstance(data, list):
+            data = []
+        if "id" not in body:
+            body["id"] = f"link_{int(time.time() * 1000)}"
+        data.append(body)
+        _write_json(path, data)
+        return {"ok": True, "links": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.delete("/monetization/api/links/{link_id}")
+def monetization_api_links_delete(link_id: str, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_links.json")
+        data = _read_json(path, [])
+        if not isinstance(data, list):
+            return {"ok": False, "error": "Invalid data format"}
+        new_data = [c for c in data if c.get("id") != link_id]
+        removed = len(data) - len(new_data)
+        _write_json(path, new_data)
+        return {"ok": True, "removed": removed}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/monetization/api/control")
+def monetization_api_control_get():
+    try:
+        data = _read_json(_project_path("tools", "saved_sessions", "monetization_control.json"), {})
+        return {"ok": True, "control": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/control")
+def monetization_api_control_post(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_control.json")
+        _write_json(path, body)
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/inject")
+def monetization_api_inject(req: InjectRequest, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        path = _project_path("tools", "saved_sessions", "monetization_injections.json")
+        data = _read_json(path, [])
+        if not isinstance(data, list):
+            data = []
+        data.append({
+            "agent_name": req.agent_name,
+            "decision_type": req.decision_type,
+            "payload": req.payload,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        _write_json(path, data)
+        return {"ok": True, "injected": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 def start_api_server():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("SIMPLEPOD_API_PORT", "58091")), log_level="warning")
+
 
 if __name__ == "__main__":
     start_api_server()

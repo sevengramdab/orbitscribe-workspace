@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimplePod Monetization Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fa-solid fa-podcast"></i>
+          <span>SimplePod</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#" class="nav-link active" data-page="overview"><i class="fa-solid fa-house"></i><span>Overview</span></a></li>
+          <li><a href="#" class="nav-link" data-page="financial"><i class="fa-solid fa-sack-dollar"></i><span>Financial Analysis</span></a></li>
+          <li><a href="#" class="nav-link" data-page="settings"><i class="fa-solid fa-gear"></i><span>API Settings</span></a></li>
+          <li><a href="#" class="nav-link" data-page="credentials"><i class="fa-solid fa-shield-halved"></i><span>Credentials</span></a></li>
+          <li><a href="#" class="nav-link" data-page="marketplace"><i class="fa-solid fa-cart-shopping"></i><span>Marketplace</span></a></li>
+          <li><a href="#" class="nav-link" data-page="stats"><i class="fa-solid fa-chart-line"></i><span>Stats</span></a></li>
+          <li><a href="#" class="nav-link" data-page="links"><i class="fa-solid fa-link"></i><span>Links</span></a></li>
+          <li><a href="#" class="nav-link" data-page="swarm"><i class="fa-solid fa-robot"></i><span>Swarm Control</span></a></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-badge" id="system-status">
+          <span class="status-dot online"></span>
+          <span class="status-text">System Online</span>
+        </div>
+        <div class="version">v1.0.0</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="topbar">
+        <h1 class="page-title" id="page-title">Overview</h1>
+        <div class="topbar-actions">
+          <button class="btn-icon" id="refresh-btn" title="Refresh data"><i class="fa-solid fa-rotate"></i></button>
+          <button class="btn-icon" id="notif-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="badge" id="notif-badge">3</span></button>
+          <div class="user-menu">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=10b981&color=fff" alt="User" class="avatar">
+            <span>Admin</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Overview Page -->
+        <div class="page active" id="page-overview">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon"><i class="fa-solid fa-dollar-sign"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Total Revenue</span>
+                <span class="metric-value" id="metric-revenue">$0.00</span>
+                <span class="metric-change positive" id="metric-revenue-change">+0%</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon red"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Total Costs</span>
+                <span class="metric-value" id="metric-costs">$0.00</span>
+                <span class="metric-change negative" id="metric-costs-change">+0%</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon green"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Net Profit</span>
+                <span class="metric-value" id="metric-profit">$0.00</span>
+                <span class="metric-change positive" id="metric-profit-change">+0%</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon blue"><i class="fa-solid fa-users-gear"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Active Agents</span>
+                <span class="metric-value" id="metric-agents">0</span>
+                <span class="metric-change positive" id="metric-agents-change">+0</span>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-grid">
+            <div class="card chart-card">
+              <div class="card-header"><h3>Revenue Trend</h3></div>
+              <div class="card-body"><canvas id="overview-revenue-chart"></canvas></div>
+            </div>
+            <div class="card chart-card">
+              <div class="card-header"><h3>Profit Distribution</h3></div>
+              <div class="card-body"><canvas id="overview-profit-chart"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Recent Activity</h3></div>
+            <div class="card-body"><ul class="activity-list" id="overview-activity"></ul></div>
+          </div>
+        </div>
+
+        <!-- Financial Analysis Page -->
+        <div class="page hidden" id="page-financial">
+          <div class="dashboard-grid">
+            <div class="card chart-card wide">
+              <div class="card-header"><h3>P&L Overview</h3></div>
+              <div class="card-body"><canvas id="financial-pnl-chart"></canvas></div>
+            </div>
+            <div class="card chart-card">
+              <div class="card-header"><h3>Expense Breakdown</h3></div>
+              <div class="card-body"><canvas id="financial-expense-chart"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Profit & Loss Statement</h3>
+              <div class="card-actions">
+                <button class="btn btn-sm" id="pnl-export"><i class="fa-solid fa-download"></i> Export</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="data-table" id="pnl-table">
+                <thead>
+                  <tr><th>Period</th><th>Revenue</th><th>COGS</th><th>Gross Profit</th><th>Expenses</th><th>Net Profit</th><th>Margin</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Recent Transactions</h3></div>
+            <div class="card-body">
+              <table class="data-table" id="transactions-table">
+                <thead>
+                  <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Status</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Settings Page -->
+        <div class="page hidden" id="page-settings">
+          <div class="card">
+            <div class="card-header"><h3>API Configuration</h3></div>
+            <div class="card-body">
+              <form id="settings-form" class="form-grid">
+                <div class="form-group">
+                  <label for="api-openai">OpenAI API Key</label>
+                  <div class="input-group">
+                    <input type="password" id="api-openai" name="openai_key" placeholder="sk-...">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-anthropic">Anthropic API Key</label>
+                  <div class="input-group">
+                    <input type="password" id="api-anthropic" name="anthropic_key" placeholder="sk-ant-...">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-stripe">Stripe API Key</label>
+                  <div class="input-group">
+                    <input type="password" id="api-stripe" name="stripe_key" placeholder="sk_live_...">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-stripe-webhook">Stripe Webhook Secret</label>
+                  <div class="input-group">
+                    <input type="password" id="api-stripe-webhook" name="stripe_webhook_secret" placeholder="whsec_...">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-paypal">PayPal Client ID</label>
+                  <div class="input-group">
+                    <input type="password" id="api-paypal" name="paypal_client_id" placeholder="">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-paypal-secret">PayPal Secret</label>
+                  <div class="input-group">
+                    <input type="password" id="api-paypal-secret" name="paypal_secret" placeholder="">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-sendgrid">SendGrid API Key</label>
+                  <div class="input-group">
+                    <input type="password" id="api-sendgrid" name="sendgrid_key" placeholder="SG.XXX">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-twilio">Twilio SID</label>
+                  <div class="input-group">
+                    <input type="password" id="api-twilio" name="twilio_sid" placeholder="AC...">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-twilio-token">Twilio Auth Token</label>
+                  <div class="input-group">
+                    <input type="password" id="api-twilio-token" name="twilio_token" placeholder="">
+                    <button type="button" class="btn-toggle-visibility"><i class="fa-solid fa-eye"></i></button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="api-backend">Backend URL</label>
+                  <input type="url" id="api-backend" name="backend_url" placeholder="http://localhost:58081">
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+                  <button type="button" class="btn btn-secondary" id="settings-test"><i class="fa-solid fa-vial"></i> Test Connections</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Credentials Page -->
+        <div class="page hidden" id="page-credentials">
+          <div class="card">
+            <div class="card-header">
+              <h3>Saved Credentials</h3>
+              <button class="btn btn-primary btn-sm" id="cred-add-btn"><i class="fa-solid fa-plus"></i> Add Credential</button>
+            </div>
+            <div class="card-body">
+              <table class="data-table" id="credentials-table">
+                <thead>
+                  <tr><th>Service</th><th>Username / Email</th><th>Password</th><th>Last Updated</th><th>Actions</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" id="cred-form-card" style="display:none;">
+            <div class="card-header"><h3>Add / Edit Credential</h3></div>
+            <div class="card-body">
+              <form id="cred-form" class="form-grid">
+                <div class="form-group"><label for="cred-service">Service</label><input type="text" id="cred-service" required></div>
+                <div class="form-group"><label for="cred-username">Username / Email</label><input type="text" id="cred-username" required></div>
+                <div class="form-group"><label for="cred-password">Password</label><input type="password" id="cred-password" required></div>
+                <div class="form-group"><label for="cred-notes">Notes</label><textarea id="cred-notes" rows="3"></textarea></div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save</button>
+                  <button type="button" class="btn btn-secondary" id="cred-cancel">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Marketplace Page -->
+        <div class="page hidden" id="page-marketplace">
+          <div class="marketplace-header">
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="marketplace-search" placeholder="Search products...">
+            </div>
+            <div class="filter-tabs">
+              <button class="tab active" data-filter="all">All</button>
+              <button class="tab" data-filter="digital">Digital</button>
+              <button class="tab" data-filter="merch">Merch</button>
+              <button class="tab" data-filter="service">Services</button>
+            </div>
+          </div>
+          <div class="product-grid" id="product-grid"></div>
+        </div>
+
+        <!-- Stats Page -->
+        <div class="page hidden" id="page-stats">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon purple"><i class="fa-solid fa-robot"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Total Agents</span>
+                <span class="metric-value" id="stat-total-agents">0</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon green"><i class="fa-solid fa-bolt"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Tasks Completed</span>
+                <span class="metric-value" id="stat-tasks">0</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon orange"><i class="fa-solid fa-clock"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Avg Response</span>
+                <span class="metric-value" id="stat-avg-response">0ms</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Errors</span>
+                <span class="metric-value" id="stat-errors">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Agent Performance</h3></div>
+            <div class="card-body">
+              <div class="agent-performance-grid" id="agent-performance"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Activity Log</h3></div>
+            <div class="card-body">
+              <table class="data-table" id="activity-table">
+                <thead>
+                  <tr><th>Time</th><th>Agent</th><th>Action</th><th>Result</th><th>Duration</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Links Page -->
+        <div class="page hidden" id="page-links">
+          <div class="links-header">
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="links-search" placeholder="Search links...">
+            </div>
+            <button class="btn btn-primary btn-sm" id="link-add-btn"><i class="fa-solid fa-plus"></i> Add Link</button>
+          </div>
+          <div class="links-categories" id="links-categories"></div>
+        </div>
+
+        <!-- Swarm Control Page -->
+        <div class="page hidden" id="page-swarm">
+          <div class="swarm-status-header">
+            <div class="status-card" id="swarm-status-card">
+              <div class="status-icon"><i class="fa-solid fa-circle-nodes"></i></div>
+              <div class="status-info">
+                <span class="status-label">Swarm Status</span>
+                <span class="status-value" id="swarm-status-text">Idle</span>
+              </div>
+            </div>
+            <div class="swarm-controls">
+              <button class="btn btn-success" id="swarm-start"><i class="fa-solid fa-play"></i> Start</button>
+              <button class="btn btn-warning" id="swarm-pause"><i class="fa-solid fa-pause"></i> Pause</button>
+              <button class="btn btn-danger" id="swarm-stop"><i class="fa-solid fa-stop"></i> Stop</button>
+              <button class="btn btn-secondary" id="swarm-restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+            </div>
+          </div>
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header"><h3>Active Agents</h3></div>
+              <div class="card-body"><div class="agent-grid" id="swarm-agent-grid"></div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Command Injection</h3></div>
+              <div class="card-body">
+                <form id="injection-form">
+                  <div class="form-group">
+                    <label for="inject-target">Target Agent</label>
+                    <select id="inject-target"><option value="all">All Agents</option></select>
+                  </div>
+                  <div class="form-group">
+                    <label for="inject-command">Command / Prompt</label>
+                    <textarea id="inject-command" rows="4" placeholder="Enter command or prompt to inject..."></textarea>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Inject</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="card log-card">
+            <div class="card-header">
+              <h3>Live Log</h3>
+              <div class="card-actions">
+                <button class="btn btn-sm btn-secondary" id="log-clear"><i class="fa-solid fa-trash"></i> Clear</button>
+                <button class="btn btn-sm btn-secondary" id="log-pause"><i class="fa-solid fa-pause"></i> Pause</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="log-container" id="live-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
