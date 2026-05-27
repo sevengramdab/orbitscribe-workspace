@@ -133,3 +133,6 @@ def sync_file(req: SyncFileRequest, x_token: Optional[str] = Header(None)):
 def start_api_server():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("SIMPLEPOD_API_PORT", "58091")), log_level="warning")
+
+if __name__ == "__main__":
+    start_api_server()
