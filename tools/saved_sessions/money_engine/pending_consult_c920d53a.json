@@ -1,0 +1,13 @@
+{
+  "agent_id": "consulting_fc1843",
+  "vertical": "consulting",
+  "decision_id": "consult_c920d53a",
+  "timestamp": 1779930722.1021907,
+  "action": "find_gigs",
+  "params": {
+    "next_stage": "screenshot_opportunities"
+  },
+  "reasoning": "No recent gig search; scouting Upwork/Freelancer for opportunities.",
+  "screenshot": null,
+  "status": "pending"
+}

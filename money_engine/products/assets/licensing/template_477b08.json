@@ -1,0 +1,19 @@
+{
+  "id": "template_477b08",
+  "type": "code_template",
+  "project_type": "chrome_extension",
+  "features": [
+    "api",
+    "payments",
+    "auth"
+  ],
+  "title": "Chrome_Extension Starter Template",
+  "description": "Production-ready chrome_extension template including api, payments, auth.",
+  "price": 3.0,
+  "listed": true,
+  "platforms": [
+    "gumroad"
+  ],
+  "created_at": 1779922680.7164385,
+  "path": "C:\\Users\\Shadow\\voice to text engine\\money_engine\\products\\assets\\licensing\\template_477b08.zip"
+}

@@ -1,0 +1,29 @@
+{
+  "agent_id": "consulting_5958ca",
+  "vertical": "consulting",
+  "status": "idle",
+  "revenue": 50.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922684.5554707,
+  "ledger": [
+    {
+      "timestamp": 1779922684.5554688,
+      "decision_id": "consult_18fd63d9",
+      "action": "send_proposal",
+      "revenue": 50.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:57:47] [consulting] Starting decision cycle...",
+    "[2026-05-27 15:57:47] [consulting] Executing: send_proposal | Submitting the generated proposal on the gig page.",
+    "[2026-05-27 15:57:47] [consulting] ConsultingAgent executing: send_proposal",
+    "[2026-05-27 15:57:47] [consulting] Navigating to gig page: https://www.upwork.com/jobs/Python-Automation-Script_~01abcd/",
+    "[2026-05-27 15:58:04] [consulting] Proposal sent for https://www.upwork.com/jobs/Python-Automation-Script_~01abcd/. Simulated revenue +$50.0",
+    "[2026-05-27 15:58:04] [consulting] Cycle complete: completed",
+    "[2026-05-27 15:58:04] [consulting] Reached max_cycles (1). Stopping."
+  ]
+}

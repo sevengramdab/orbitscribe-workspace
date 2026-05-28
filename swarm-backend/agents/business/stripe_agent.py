@@ -10,7 +10,6 @@ import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from core.model_router import ModelRouter
 from core.business_tools.vault import vault
 from .base import BaseBusinessAgent, BusinessDecision
 
@@ -30,14 +29,16 @@ class StripeAgent(BaseBusinessAgent):
 
     def __init__(
         self,
-        model_router: ModelRouter,
+        llm_client=None,
+        model_router=None,
         autonomy_tier: str = "AUTOPILOT",
         decision_callback=None,
     ):
+        client = llm_client or model_router
         super().__init__(
             name="StripeAgent",
             description="Autonomous payment, subscription, and revenue optimization agent.",
-            model_router=model_router,
+            llm_client=client,
             autonomy_tier=autonomy_tier,
             decision_callback=decision_callback,
         )

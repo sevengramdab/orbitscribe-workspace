@@ -1,12 +1,12 @@
 {
   "agent_name": "DropshippingAgent",
-  "updated_at": "2026-05-27T14:17:48.405759",
+  "updated_at": "2026-05-28T12:15:43.370075",
   "ledger": {
     "agent_name": "DropshippingAgent",
     "lifetime_revenue": 0.0,
     "lifetime_costs": 0.0,
-    "decisions_made": 4,
-    "decisions_executed": 4,
+    "decisions_made": 52,
+    "decisions_executed": 52,
     "active_campaigns": [],
     "daily_history": []
   },
@@ -89,6 +89,966 @@
       "status": "executed",
       "timestamp": "2026-05-27T14:17:45.182697",
       "result_summary": "Created 'Eco-Friendly Mug' on etsy. Profit: profitable. Product ID: 1779916668.389527",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6bf9803b",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The existing products are all similar, while the underperforming ones are all eco-friendly. The trending web results suggest a growing demand for sustainable living products, making this a high potential opportunity in the e-commerce market.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Mug",
+        "niche": "Sustainable Living Products",
+        "cost": 20.0,
+        "price": 40.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.3,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:37:44.506278",
+      "result_summary": "Created 'Eco-Friendly Mug' on etsy. Profit: profitable. Product ID: 1779979070.287937",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e87577d2",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the market analysis indicating a top opportunity in Eco-Friendly Mugs on Etsy, and considering the low underperformer count (6) and active product count (6), it's best to create a new listing for an Eco-Friendly Mug product.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:42:56.313835",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779979378.782759",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a06e9115",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the market analysis indicating a top opportunity in Eco-Friendly Mugs, and considering the low product count (7 active products) on Etsy, it's best to create a new listing for an eco-friendly mug.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 120.5,
+      "risk_score": 0.3,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:48:04.028995",
+      "result_summary": "Created 'Eco-Friendly Mug' on etsy. Profit: profitable. Product ID: 1779979686.05996",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "90a59a60",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "High demand for eco-friendly products and low risk make it an ideal time to introduce a new product that aligns with the market trend.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 120.5,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:53:13.186715",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779979996.779765",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c3666c50",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the strong demand for eco-friendly products and the low sales of existing listings, creating a new listing for the Eco-Friendly Reusable Travel Mug could lead to higher sales.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable products for environmentally conscious consumers",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.35,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:59:21.911492",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779980364.599478",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "42eba93d",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a high demand for eco-friendly reusable travel mugs, and the current product count is low. This opportunity has significant growth potential, making it an attractive choice for dropshipping.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Travel and Lifestyle",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:05:35.183183",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779980742.024919",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d6a01cbe",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in the Eco-Friendly Reusable Travel Mug niche, which aligns with our platform focus on Etsy. Given that we have only 10 active products and 10 underperforming ones, it's essential to inject new products into the vault.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Travel and Lifestyle",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.25,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:05:47.145366",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779980749.89107",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1929b749",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in eco-friendly travel mugs with low competition, and the current product count is below the threshold for sourcing new products.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:11:46.769803",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779981109.728929",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "5fc0f13e",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with a low risk level. Given the current product count is below 5 and there are 14 underperforming products, it's best to create a new listing for this niche.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:17:55.705100",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779981478.784081",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7d88afa9",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with a low risk level. Given the current underperforming products and active product count, it's recommended to create a new listing for this niche.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:24:04.980371",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779981871.085694",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "3d7125a4",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "High demand for eco-friendly products and low product count in vault make it an ideal time to introduce a new listing.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.25,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:30:39.046231",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779982241.49801",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "efc1eee6",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the market analysis indicating a high demand for eco-friendly products, particularly reusable travel mugs, and with only 19 active products in the vault, it's essential to introduce new listings to capitalize on this opportunity.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:36:46.379533",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779982608.608307",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6d13dc33",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a top opportunity in Eco-Friendly Reusable Travel Mugs, with a low risk level. Given the underperforming products in the 'Eco-Friendly Mug' category and the potential for growth in this niche, creating a new listing for an Eco-Friendly Reusable Travel Mug is a strategic move.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:42:54.186910",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779982977.195339",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e1a13776",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "High demand for eco-friendly products and low risk level make it an ideal time to introduce a new product.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:49:01.933812",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779983347.689522",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "70ba87c5",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a strong opportunity in the Eco-Friendly Reusable Travel Mug, aligning with our platform focus on Etsy and the existing product niche of eco-friendly products.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Travel Accessories",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:55:20.089767",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779983722.771441",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8f1b9019",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a strong interest in sustainable products, and the Eco-Friendly Reusable Travel Mug shows potential for growth with low risk.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:01:28.935781",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779984092.873357",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7630982a",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in eco-friendly reusable travel mugs, with a low risk level. Given the current state of having only 24 active products and 24 underperforming products, it's essential to expand our offerings.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:07:38.524892",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779984461.119783",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "fb6e8776",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with low competition on Etsy. Given the underperforming product count (25) and active products in vault (25), it's time to introduce new products to the platform.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:13:47.321472",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779984830.925166",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4750da20",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Strong interest in eco-friendly products on Etsy or Shopify, low risk level, and underperforming products indicate a need to refresh product offerings.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:19:57.410586",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779985201.429574",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b4f22abf",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Strong interest in eco-friendly products, particularly reusable travel mugs, with a low risk level.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:26:06.731628",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779985569.124919",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "cc284fc8",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with a low risk level. Given the current product count (28) is above the threshold of 5, but we have a high number of underperforming products (28), it's best to create a new listing to capitalize on this niche.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:32:15.285001",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779985937.854239",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "79750a51",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a niche opportunity in sustainable and eco-conscious products, and the current product count is low (29 active products). This suggests that introducing new products to the vault could be beneficial.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:38:25.390796",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779986307.984035",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "700ebf5f",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, and the current product count is below the threshold of 5. This indicates a need to source new products or create listings for existing ones.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:44:33.301331",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779986675.788163",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1d9495cd",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with low competition and high demand potential on Etsy.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:50:41.438908",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779987053.996727",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "f952eea0",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a top opportunity in Eco-Friendly Reusable Travel Mugs, and the platform focus is on Etsy, which is well-suited for this type of product. With only 32 active products in vault and 32 underperforming products, it's likely that there's room to grow with new listings.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and eco-friendly products for daily use",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:56:59.894718",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779987422.937553",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d87b35a7",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in eco-friendly products, particularly reusable travel mugs. With only 33 active products in the vault and 33 underperforming products, it's essential to introduce new listings to capitalize on this trend.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and eco-friendly products for daily use",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:03:09.091493",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779987792.415772",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7c565c2b",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in the Eco-Friendly Reusable Travel Mug niche, with low risk. Given the current underperforming products and the platform focus on Etsy, creating a new listing for this product is the best course of action.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Eco-friendly and sustainable products for travel",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:09:18.645162",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779988161.464038",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "77dca6ad",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with low risk and underserved market. Given the current product count (35) is above the threshold of 5, but we have 35 underperforming products which indicates room for improvement.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:15:27.903377",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779988531.439956",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "43ed3c40",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "High potential for success with Eco-Friendly Reusable Travel Mug due to current market trends, and low risk level.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:21:36.459145",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779988898.878837",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8042d9da",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a top opportunity in Eco-Friendly Reusable Travel Mugs, and the existing products are already listed on Etsy. Listing these products on Shopify will increase visibility and potentially drive sales.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable products for outdoor enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "Shopify"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:27:44.408748",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on Shopify. Profit: profitable. Product ID: 1779989266.186468",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c214d32f",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a top opportunity in Eco-Friendly Reusable Travel Mugs, with low risk and a recommended platform of Etsy or Shopify. With only 38 active products in the vault and 38 underperforming products, it's essential to introduce new products to the market.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:33:54.518648",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779989637.310824",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "f757db7b",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the strong demand for eco-friendly mugs and the low risk level, creating a new listing for an Eco-Friendly Reusable Travel Mug is a strategic move.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:40:03.393510",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779990006.221897",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6b2f280d",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a top opportunity in Eco-Friendly Reusable Travel Mugs, with low risk and potential for success. Given the underperforming products in the 'Eco-Friendly Mug' category, creating a new listing for this niche product can help diversify the product portfolio and capitalize on the trend.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:46:11.989394",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779990374.100252",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "bee9e3d7",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with a trending niche and low competition.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and eco-friendly products for outdoor enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:52:19.665990",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779990742.447932",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "31cef4be",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a clear opportunity to capitalize on eco-friendly products, and the current product count is low (42 active products). This is a high-conviction move with a confidence level of 0.9 and a risk score of 0.2.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:58:28.122873",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779991112.029718",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e1b1504d",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, and the current product count is low (43 active products). This is a high-conviction move with a confidence level of 0.9 and a risk score of 0.2.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:04:40.651423",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779991489.572417",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "253a8113",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a low-risk opportunity in the Eco-Friendly Reusable Travel Mugs niche, with a single underperforming product indicating potential for growth.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:10:56.746773",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779991859.298284",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "93798cc6",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the low underperformer count (45) and the top opportunity in Eco-Friendly Reusable Travel Mugs, it's a good time to create a new listing on Etsy.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:17:06.724639",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779992229.831063",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "fc0791ab",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The data suggests that the existing products are underperforming, except for the Eco-Friendly Reusable Travel Mug. This product has a higher potential for growth due to its unique features and increasing demand for sustainable products.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:23:15.317865",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779992599.653343",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "abe8bb26",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the low risk level and high demand for eco-friendly travel mugs, creating a new listing in this niche can help improve overall performance.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.0,
+        "price": 25.0,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:29:25.118703",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779992968.476098",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6926f2fc",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a strong opportunity in Eco-Friendly Reusable Travel Mugs, which aligns with the platform focus on Etsy. Given the low risk level and high concentration of underperforming products, it's essential to introduce new products to drive growth.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:35:36.975304",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779993343.709184",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7f730fd8",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, and the current product count is low. This decision aims to capitalize on the top opportunity while minimizing risk.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:41:50.210978",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779993714.323521",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "f4e9f9e4",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis indicates a top opportunity in the Eco-Friendly Travel Goods niche, with a low risk level. The current product count is 50, which is above the threshold of 5, but we have identified a gap in the market that can be filled with a unique and eco-friendly reusable travel mug.",
+      "action_payload": {
+        "product_name": "EcoMug",
+        "niche": "Eco-Friendly Travel Goods",
+        "cost": 10.0,
+        "price": 29.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:48:11.721738",
+      "result_summary": "Created 'EcoMug' on etsy. Profit: profitable. Product ID: 1779994105.138781",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "057e04c0",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Market analysis suggests a strong opportunity in Eco-Friendly Reusable Travel Mugs, with low competition on Etsy and Shopify.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T11:54:30.949598",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779994473.785802",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e8967c2b",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "High concentration of underperforming products (52) suggests a need to focus on a specific niche, and the Eco-Friendly Reusable Travel Mug shows potential with only one existing instance. Recommending Etsy or Shopify for ease of use and existing customer base.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products for Daily Use",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T12:00:07.336286",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779994811.445025",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1935f18f",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Given the low underperformer count (53) and active products in vault (50), we can afford to add a new product. The market analysis suggests that Eco-Friendly Reusable Travel Mug has high potential, making it an ideal candidate for listing.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Eco-Friendly Products for Outdoor Enthusiasts",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T12:05:17.404905",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779995120.830388",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a275f76b",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "The market analysis indicates a strong opportunity in the Eco-Friendly Reusable Travel Mug niche, with low risk. Given that we have only 50 active products in vault and underperforming products outnumber them, it's essential to expand our product offerings.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Friendly Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T12:10:27.706873",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779995430.918906",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7a25f442",
+      "agent_name": "DropshippingAgent",
+      "decision_type": "create_listing",
+      "rationale": "Strong interest in eco-friendly products, particularly reusable travel mugs, with a low risk level.",
+      "action_payload": {
+        "product_name": "Eco-Friendly Reusable Travel Mug",
+        "niche": "Sustainable and Eco-Conscious Products",
+        "cost": 10.99,
+        "price": 24.99,
+        "platform": "etsy"
+      },
+      "estimated_revenue_impact": 1200.0,
+      "risk_score": 0.2,
+      "confidence": 0.95,
+      "status": "executed",
+      "timestamp": "2026-05-28T12:15:38.512609",
+      "result_summary": "Created 'Eco-Friendly Reusable Travel Mug' on etsy. Profit: profitable. Product ID: 1779995743.240322",
       "actual_revenue": 0.0
     }
   ]

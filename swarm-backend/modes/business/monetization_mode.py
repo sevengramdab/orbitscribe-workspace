@@ -6,14 +6,14 @@ A swarm mode that launches 10 autonomous business agents to generate revenue.
 import asyncio
 from typing import AsyncGenerator, Dict, Any
 
-from core.model_router import ModelRouter
+from core.llm_client import LLMClient
 from core.session_store import SessionStore
 from agents.business.swarm_orchestrator import MonetizationSwarmOrchestrator
 
 
 async def run_monetization_mode(
     request: Dict[str, Any],
-    model_router: ModelRouter,
+    llm_client: LLMClient,
     session_store: SessionStore,
     session_id: str,
 ) -> AsyncGenerator[Dict[str, Any], None]:
@@ -34,7 +34,7 @@ async def run_monetization_mode(
     yield {"event": "status", "message": "🚀 Initializing Monetization Swarm..."}
 
     orchestrator = MonetizationSwarmOrchestrator(
-        model_router=model_router,
+        llm_client=llm_client,
         autonomy_tier=autonomy_tier,
     )
 

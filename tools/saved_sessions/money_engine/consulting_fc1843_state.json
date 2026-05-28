@@ -1,0 +1,26 @@
+{
+  "agent_id": "consulting_fc1843",
+  "vertical": "consulting",
+  "status": "completed",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930422.1005118,
+  "ledger": [
+    {
+      "timestamp": 1779930422.100507,
+      "decision_id": "consult_9d928837",
+      "action": "follow_up",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:02] [consulting] Starting decision cycle...",
+    "[2026-05-27 18:07:02] [consulting] Executing: follow_up | Checking messages and following up on pending proposals.",
+    "[2026-05-27 18:07:02] [consulting] ConsultingAgent executing: follow_up",
+    "[2026-05-27 18:07:02] [consulting] Follow-up: no new messages or wins this cycle."
+  ]
+}

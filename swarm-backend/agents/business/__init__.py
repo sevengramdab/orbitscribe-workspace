@@ -84,3 +84,9 @@ def _load_all_agents():
         register_business_agent("affiliate", AffiliateAgent)
     except Exception as e:
         print(f"[Business Agents] affiliate not loaded: {e}")
+
+    try:
+        from .data_science_agent import DataScienceAgent
+        register_business_agent("data_science", DataScienceAgent)
+    except Exception as e:
+        print(f"[Business Agents] data_science not loaded: {e}")

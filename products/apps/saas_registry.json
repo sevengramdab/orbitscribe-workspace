@@ -1,0 +1,18 @@
+[
+  {
+    "name": "url_shortener_1",
+    "app_type": "url_shortener",
+    "tech_stack": "flask",
+    "features": [
+      "auth",
+      "dashboard",
+      "api"
+    ],
+    "created_at": 1779916913.416009,
+    "deployed": true,
+    "deploy_url": "https://url_shortener_1.onrender.com",
+    "users": 21,
+    "folder": "C:\\Users\\Shadow\\voice to text engine\\products\\apps\\url_shortener_1",
+    "deployed_at": 1779922571.1501381
+  }
+]

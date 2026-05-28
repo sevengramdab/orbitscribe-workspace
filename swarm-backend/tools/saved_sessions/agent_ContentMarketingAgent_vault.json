@@ -1,12 +1,12 @@
 {
   "agent_name": "ContentMarketingAgent",
-  "updated_at": "2026-05-27T14:17:33.283107",
+  "updated_at": "2026-05-28T12:13:38.278449",
   "ledger": {
     "agent_name": "ContentMarketingAgent",
     "lifetime_revenue": 0.0,
     "lifetime_costs": 0.0,
-    "decisions_made": 5,
-    "decisions_executed": 1,
+    "decisions_made": 59,
+    "decisions_executed": 5,
     "active_campaigns": [],
     "daily_history": []
   },
@@ -117,6 +117,1292 @@
       "confidence": 0.85,
       "status": "approved",
       "timestamp": "2026-05-27T14:17:33.282332",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8367a5ac",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a high demand for AI automation tools and content marketing strategies, and there are no scheduled posts to fill the gap.",
+      "action_payload": {
+        "topic": "AI Automation Tools",
+        "keywords": [
+          "automation",
+          "AI",
+          "tools"
+        ],
+        "content_type": "blog_post"
+      },
+      "estimated_revenue_impact": 200.0,
+      "risk_score": 0.5,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:37:57.597181",
+      "result_summary": "Blog post 'Mastering the Art of AI Automation Tools: The Key to Streamlining Your Operations' generated (ID: blog_ba16fbb7). | Scheduled for 2026-05-30T07:38:05.138409 (entry cal_556e0bbc). | Est. revenue: $0.0 | Views: None",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e187a8f6",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content and average engagement score, creating a new blog post can help drive more engagement and potentially increase revenue. We have a relatively small content inventory compared to our scheduled backlog, indicating that we need to produce more content to meet demand.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "content marketing"
+        ],
+        "format": "listicle"
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T07:43:10.400668",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "ece45692",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content ($0.0) and average engagement score (28.0), it's likely that our existing content is not resonating with our audience. Creating a new blog post on a relevant topic can help us better understand what drives engagement and potentially increase revenue.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "content marketing",
+          "small business growth"
+        ],
+        "tags": [
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T07:48:16.328359",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "baca32b4",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, writing a blog post on 'AI business automation' will help us capitalize on this trend while also improving our content inventory.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "meta_description": "Discover the latest advancements in AI business automation and how they can transform your organization.",
+        "target_audience": "Business owners, entrepreneurs, and decision-makers interested in leveraging AI for growth."
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T07:53:23.890293",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "027e2fe2",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Fallback due to LLM parse failure.",
+      "action_payload": {
+        "topic": "How AI Automation Transforms Small Business",
+        "keywords": [
+          "AI automation",
+          "small business"
+        ],
+        "tone": "professional",
+        "length": "medium"
+      },
+      "estimated_revenue_impact": 75.0,
+      "risk_score": 0.2,
+      "confidence": 0.6,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:58:43.992041",
+      "result_summary": "Blog post 'How AI Automation Transforms Small Business' generated (ID: blog_af4d3461). | Scheduled for 2026-05-30T07:58:53.064054 (entry cal_19b83216). | Est. revenue: $0.0 | Views: None",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "aecb1192",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation, writing a blog post on this topic will likely resonate with our audience and provide valuable insights to establish our thought leadership.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "thought leadership",
+          "industry insights"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:04:10.949750",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "78731929",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides an in-depth guide to this topic will likely resonate with our audience. This will not only increase engagement but also establish our agency as a thought leader in the industry.",
+      "action_payload": {
+        "topic": "Beginner's guide to AI business automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "target_audience": "small business owners and marketers"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:05:00.245820",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "5649179e",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a high demand for blog posts on AI automation tools and beginner's guides to AI business automation, which aligns with the current market signals.",
+      "action_payload": {
+        "topic": "AI Automation Tools and Beginner's Guide to AI Business Automation",
+        "keywords": [
+          "AI automation",
+          "tools",
+          "beginner",
+          "automation",
+          "business",
+          "growth"
+        ],
+        "content_type": "blog_post"
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:09:33.318899",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8436602f",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post on 'AI business automation' will help us capitalize on current market interest while also improving our SEO.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:14:51.084870",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7723ed1c",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post on 'AI business automation' will help us tap into current market interest while also improving our search engine rankings.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "latest innovations"
+        ],
+        "tags": [
+          "AI",
+          "business",
+          "automation"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:20:08.821622",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6af24b01",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides a beginner's guide to this topic will likely resonate with our audience. This will also help us capitalize on one of the trending topics.",
+      "action_payload": {
+        "topic": "Beginner's guide to AI business automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "beginner's guide",
+          "ai business automation"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:25:27.955819",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "19cd3ded",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation, writing a blog post on this topic will help us capitalize on the interest and establish our agency as thought leaders in the space. The lack of content inventory for social posts also suggests that we should prioritize creating more evergreen content to maximize its reach.",
+      "action_payload": {
+        "topic": "The Future of AI Business Automation: Trends and Opportunities",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy",
+          "small business growth"
+        ],
+        "tags": [
+          "trending_topics",
+          "seo_opportunities"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:30:45.627551",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a9a71999",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The trending topic 'Latest innovations in AI business automation' is highly relevant to our current market signals and has a high potential for engagement. Creating a blog post on this topic will help us capitalize on the trend, improve SEO, and increase revenue.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:36:03.341228",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "dc5f96a7",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, creating a high-quality blog post on 'Latest innovations in AI business automation' will help us capitalize on the current market interest while also improving our SEO. This topic is relevant to our existing content inventory and has a strong potential for engagement.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:41:22.716310",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a92f456a",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides a beginner's guide to AI business automation will likely resonate with our audience. This topic is also an SEO opportunity.",
+      "action_payload": {
+        "topic": "Beginner's guide to AI business automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "AI",
+          "business automation",
+          "small business"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:46:40.637986",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d0e47ef1",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides actionable insights will likely resonate with our audience and drive engagement.",
+      "action_payload": {
+        "topic": "The Future of Small Business Growth: Leveraging AI Automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "trending_topics",
+          "seo_opportunities"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:51:58.832211",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b935c6b5",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post on 'Latest innovations in AI business automation' will help us capitalize on current market interest and improve our search engine rankings.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T08:57:16.789651",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c1bce1b3",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of 'Latest innovations in AI business automation' and 'How AI business automation is changing the market', a blog post on this topic will likely resonate with our audience. We'll also capitalize on the SEO opportunity.",
+      "action_payload": {
+        "topic": "The Future of Business Automation: How AI is Revolutionizing Industries",
+        "keywords": [
+          "AI business automation",
+          "latest innovations",
+          "market trends"
+        ],
+        "tags": [
+          "trending topics",
+          "SEO opportunities"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:02:34.888876",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "31574a5b",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides a beginner's guide to AI business automation will likely resonate with our audience. This topic is also an SEO opportunity.",
+      "action_payload": {
+        "topic": "Beginner's guide to AI business automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "AI",
+          "business automation",
+          "marketing"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:07:54.317683",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "3db88ebd",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The trending topic 'Latest innovations in AI business automation' is highly relevant to our audience and has high potential for engagement and revenue generation. We have a relatively low content inventory, which makes it easier to create new content that will not cannibalize existing efforts.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "engagement_score_target": 35.0
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:13:15.809232",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "32874fe4",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, creating a blog post that addresses 'Latest innovations in AI business automation' will likely resonate with our audience and improve engagement scores. This topic is also highly relevant to our existing content inventory.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "target_length": 1000,
+        "engagement_score_target": 35
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:18:35.323072",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "716d1adb",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, a blog post that provides an in-depth analysis of this topic will likely resonate with our audience. This will also help us to create fresh content and potentially attract new visitors.",
+      "action_payload": {
+        "topic": "The Impact of AI Business Automation on Small Businesses",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "target_length": 1000,
+        "meta_description": "Discover how AI business automation is changing the market and its impact on small businesses."
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:23:53.718905",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "fbf582c1",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The current content inventory is relatively low, and the scheduled backlog is high. Creating a new blog post will help increase the inventory and provide more opportunities for SEO optimization.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "format": "listicle",
+        "length": 1000
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:29:11.726727",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d32fd981",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, creating a high-quality blog post that addresses one of these topics will likely drive significant engagement and revenue. The 'Beginner's guide to AI business automation' topic is particularly promising as it has a broad appeal and can be optimized for relevant keywords.",
+      "action_payload": {
+        "topic": "Beginner's guide to AI business automation",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy"
+        ],
+        "meta_description": "Discover the latest innovations in AI business automation and learn how it can transform your small business.",
+        "target_audience": "small business owners"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:34:30.264852",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "0a328ee8",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a low engagement score and are considering optimizing our blog posts to improve their visibility and attract more readers.",
+      "action_payload": {
+        "topic": "AI Automation Tools",
+        "keywords": [
+          "automation",
+          "AI tools",
+          "business process automation"
+        ],
+        "content_type": "technical"
+      },
+      "estimated_revenue_impact": 0.05,
+      "risk_score": 0.1,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:39:53.260153",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "bed36a64",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The current time is early morning, and the content inventory shows that we have a backlog of 3 blog posts to write. The SEO opportunities suggest focusing on AI automation tools and beginner's guides to AI business automation. Given the high engagement score of 28.0, it indicates that there is a strong demand for these topics among readers.",
+      "action_payload": {
+        "topic": "AI Automation Tools",
+        "keywords": [
+          "automation",
+          "AI",
+          "business automation"
+        ],
+        "content_type": "blog_post"
+      },
+      "estimated_revenue_impact": 0.3,
+      "risk_score": 0.5,
+      "confidence": 1.0,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:45:18.102948",
+      "result_summary": "Blog post 'AI Automation Tools' generated (ID: blog_8714e5c2). | Scheduled for 2026-05-30T09:45:32.670331 (entry cal_b8ea65f1). | Est. revenue: $0.0 | Views: None",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "95fb2831",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "create_email_funnel",
+      "rationale": "The email funnel is a critical component of content marketing that can significantly increase the number of leads and customers. By creating an effective email funnel, you can capture more subscribers, nurture them through different stages, and ultimately convert them into paying customers.",
+      "action_payload": {
+        "topic": "Email Marketing Strategies for Small Businesses",
+        "keywords": [
+          "email marketing",
+          "small business growth",
+          "automation"
+        ],
+        "content_type": "guide"
+      },
+      "estimated_revenue_impact": 1.2,
+      "risk_score": 0.5,
+      "confidence": 0.9,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:50:55.024598",
+      "result_summary": "Email sequence 'Engage Subscribers' with 3 emails created (ID: seq_9f65de67). | First email scheduled for 2026-05-29T09:51:02.787729.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4e8735f3",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The current time is 9:56 AM, and the total estimated revenue from content is $0.0. The average engagement score of blog posts is 28.0, indicating a high level of interest among readers. Additionally, there are no scheduled backlog items or SEO opportunities that require immediate attention. Therefore, creating a new blog post would be the most effective action to take next.",
+      "action_payload": {
+        "topic": "AI Automation Tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "tools"
+        ],
+        "content_type": "blog_post"
+      },
+      "estimated_revenue_impact": 0.0,
+      "risk_score": 0.0,
+      "confidence": 1.0,
+      "status": "approved",
+      "timestamp": "2026-05-28T09:56:25.441482",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "96007dfc",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post that addresses 'Latest innovations in AI business automation' will likely drive relevant traffic and engagement. This topic is also closely related to our existing content inventory, allowing us to build on established themes.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "related_topics": [
+          "content marketing strategy",
+          "small business growth"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:01:45.702755",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1fbf1cae",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a strong signal that 'AI business automation' is a trending topic, and our current content inventory is relatively low in this area. Creating a high-quality blog post on this topic can help us establish thought leadership and drive engagement.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "content_type": "blog_post",
+        "target_audience": "small_business_owners"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:07:04.068892",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7be59e50",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post on 'AI business automation' will help us establish authority in this space while also driving organic traffic.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:12:22.691553",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "504f6cb6",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a strong trending topic in 'Latest innovations in AI business automation' and it's been gaining traction recently. Writing a blog post on this topic will allow us to capitalize on the current interest and provide value to our audience.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "innovation",
+          "latest trends"
+        ],
+        "meta_description": "Discover the latest advancements in AI business automation and how they're changing the market.",
+        "target_keywords": [
+          "AI business automation tools",
+          "content marketing strategy for small businesses"
+        ]
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:17:41.444130",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "7b8de00e",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The trending topics indicate a strong interest in AI business automation, and our current blog post count is relatively low. Writing a new blog post on one of these topics will help us capitalize on this trend and provide value to our audience.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "AI business automation"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:22:59.598791",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "cda887f5",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics, I recommend creating a blog post that addresses 'Latest innovations in AI business automation'. This topic is highly relevant to our audience and has high potential for engagement. Additionally, it aligns with one of our identified SEO opportunities.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:28:17.310618",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "55374ce1",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a blog post that addresses one of these topics will likely drive relevant traffic to our website and improve engagement scores.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "latest innovations"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:33:34.625893",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "03dff617",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides a beginner's guide to this topic will likely resonate with our audience. This will also help us capitalize on the SEO opportunity 'Beginner's guide to AI business automation'.",
+      "action_payload": {
+        "topic": "A Beginner's Guide to AI Business Automation",
+        "keywords": [
+          "AI business automation",
+          "small businesses",
+          "beginner's guide"
+        ],
+        "target_audience": "small business owners and entrepreneurs interested in AI automation tools"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:38:53.245168",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "cc955f50",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a high-quality blog post that addresses 'Latest innovations in AI business automation' will help us establish thought leadership, attract relevant traffic, and potentially drive engagement. This topic is also closely related to our existing content inventory.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "innovation",
+          "technology"
+        ],
+        "tags": [
+          "thought leadership",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:44:11.355275",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "6f71a06d",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The current trend of 'AI business automation' is highly relevant to our audience and has a high potential for engagement. Writing a blog post on this topic will not only increase our content inventory but also provide an opportunity to optimize SEO.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy",
+          "small business growth"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 1500.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:49:29.056481",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a7670952",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, a blog post would provide in-depth analysis and insights to our audience, potentially driving engagement and revenue.",
+      "action_payload": {
+        "topic": "AI Business Automation for Small Businesses",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "target_audience": "small business owners and marketers"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T10:54:46.899082",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "ab49af96",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, a blog post that highlights the latest innovations in this space will provide valuable insights to our audience. This topic is also an SEO opportunity.",
+      "action_payload": {
+        "topic": "Latest Innovations in AI Business Automation",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "target_length": 1000,
+        "engagement_score_target": 35
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:00:04.984427",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "f0b60204",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The trending topic 'Latest innovations in AI business automation' is highly relevant and has a high potential for engagement, but there's no existing content on this topic yet. Creating a blog post will help us establish our authority on the subject and attract organic traffic.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "content gap"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:05:23.319454",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1570b24c",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, writing a blog post on 'Latest innovations in AI business automation' will provide immediate value to our audience while also addressing a key SEO opportunity.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "target_audience": "small business owners and entrepreneurs interested in AI technology"
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:10:41.382594",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "9446e9a2",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trending topics and SEO opportunities, writing a blog post on 'Latest innovations in AI business automation' will help us capitalize on the current market interest while also improving our content inventory.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "meta_description": "Discover the latest advancements in AI business automation and how they can transform your organization.",
+        "target_audience": [
+          "Business owners",
+          "Marketing managers"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:16:00.045814",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8f3e25cb",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Create a blog post on 'Latest innovations in AI business automation' to capitalize on the trending topic and provide value to our audience.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "AI business automation"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:21:17.535265",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "c910139c",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation, creating a blog post on this topic will provide valuable insights to our audience and establish our agency as an authority in the field. The lack of blog posts (5 out of inventory) indicates a need for more content around this topic.",
+      "action_payload": {
+        "topic": "The Future of AI Business Automation: Trends and Opportunities",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy",
+          "small business growth"
+        ],
+        "tags": [
+          "trending_topics",
+          "seo_opportunities"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:26:35.633459",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "4a4c554c",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current trend of AI business automation and its impact on small businesses, creating a blog post that provides actionable insights will likely resonate with our audience and drive engagement.",
+      "action_payload": {
+        "topic": "The Future of Small Business Growth: Leveraging AI Automation Tools",
+        "keywords": [
+          "AI business automation",
+          "small business growth",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "trending_topic",
+          "seo_opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:31:53.503540",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "ba7cf308",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "The trending topics indicate a high interest in AI business automation, and our current inventory is relatively low on blog posts (5). Writing a new blog post will allow us to capitalize on this trend and provide value to our audience.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI",
+          "business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "low inventory"
+        ]
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:37:11.429549",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "20b84104",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a strong trending topic in 'Latest innovations in AI business automation' and it's also an SEO opportunity, which can help drive organic traffic to our site. Writing a blog post on this topic will allow us to create high-quality content that addresses the needs of our audience.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "innovation"
+        ],
+        "tags": [
+          "trending topic",
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:42:29.655189",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "dced0191",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "We have a high demand for blog posts on AI automation tools and beginner's guides, and the content inventory is low. Additionally, there are several SEO opportunities available that align with our current trends.",
+      "action_payload": {
+        "topic": "AI Automation Tools and Beginner's Guide",
+        "keywords": [
+          "AI automation",
+          "business automation",
+          "beginner's guide"
+        ],
+        "content_type": "blog_post"
+      },
+      "estimated_revenue_impact": 0.4,
+      "risk_score": 0.1,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:47:52.169899",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e79e6a98",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, a blog post on 'AI automation tools' would be an excellent choice to address the growing interest in AI business automation while also improving our SEO. This topic is highly relevant and has been identified as a key area of opportunity.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI business automation",
+          "content marketing strategy"
+        ],
+        "tags": [
+          "business",
+          "technology",
+          "innovation"
+        ]
+      },
+      "estimated_revenue_impact": 500.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:53:10.283369",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "2ee506ab",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the trending topics and SEO opportunities, creating a new blog post that addresses 'Latest innovations in AI business automation' will help us capitalize on current market interest while improving our search engine rankings.",
+      "action_payload": {
+        "topic": "Latest innovations in AI business automation",
+        "keywords": [
+          "AI business automation",
+          "innovation",
+          "market trends"
+        ],
+        "target_audience": "business owners and marketers interested in AI automation tools"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.9,
+      "status": "approved",
+      "timestamp": "2026-05-28T11:58:28.270357",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b775078e",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content ($0.0) and average engagement score (28.0), it's essential to create high-quality, engaging content that resonates with our audience. Writing a blog post on one of the identified SEO opportunities ('AI automation tools' or 'content marketing strategy') will help improve our online presence, drive organic traffic, and potentially increase revenue.",
+      "action_payload": {
+        "topic": "AI automation tools in content marketing",
+        "keywords": [
+          "AI",
+          "content marketing",
+          "automation"
+        ],
+        "SEO_opportunity": true
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T12:03:32.378907",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "b32cde76",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content ($0.0) and average engagement score (28.0), creating a new blog post can help increase brand awareness, drive traffic, and potentially generate leads. Additionally, since there are no trending topics to leverage, we should focus on creating high-quality, SEO-optimized content that addresses one of the identified SEO opportunities.",
+      "action_payload": {
+        "topic": "AI automation tools",
+        "keywords": [
+          "AI",
+          "automation",
+          "content marketing"
+        ],
+        "format": "listicle"
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T12:08:35.543508",
+      "result_summary": "",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "9721c8b1",
+      "agent_name": "ContentMarketingAgent",
+      "decision_type": "write_blog_post",
+      "rationale": "Given the current low total estimated revenue from content and average engagement score, creating a new blog post can help increase brand visibility, drive traffic, and potentially generate leads.",
+      "action_payload": {
+        "topic": "AI automation tools in content marketing",
+        "keywords": [
+          "AI automation",
+          "content marketing strategy",
+          "small business growth"
+        ],
+        "tags": [
+          "SEO opportunity"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "approved",
+      "timestamp": "2026-05-28T12:13:38.277922",
       "result_summary": "",
       "actual_revenue": 0.0
     }

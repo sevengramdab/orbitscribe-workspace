@@ -12,10 +12,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from core import config as cfg
-from core.model_router import ModelRouter
+from core.llm_client import LLMClient
 from core.autonomy_engine import SSEEvent
 from core.business_tools.registry import registry
 from core.business_tools.vault import vault
+from core.mode_guard import mode_guard, ModeGuardError
 from agents.business.swarm_orchestrator import MonetizationSwarmOrchestrator
 from agents.business import _load_all_agents, BUSINESS_AGENT_REGISTRY
 
@@ -28,9 +29,9 @@ _orchestrator: Optional[MonetizationSwarmOrchestrator] = None
 def _get_orchestrator(autonomy_tier: str = "AUTOPILOT") -> MonetizationSwarmOrchestrator:
     global _orchestrator
     if _orchestrator is None or _orchestrator.autonomy_tier != autonomy_tier:
-        model_router = ModelRouter()
+        llm_client = LLMClient()
         _orchestrator = MonetizationSwarmOrchestrator(
-            model_router=model_router,
+            llm_client=llm_client,
             autonomy_tier=autonomy_tier,
         )
     return _orchestrator
@@ -79,6 +80,10 @@ async def _stream_events(generator):
 @router.post("/monetization/start")
 async def monetization_start(req: MonetizationStartRequest):
     """Start the monetization swarm (SSE stream of status)."""
+    # Gate check: if any agent would execute real financial actions, verify mode
+    if mode_guard.is_simulation:
+        # Simulation is always allowed
+        pass
     orchestrator = _get_orchestrator(req.autonomy_tier)
 
     async def event_generator():

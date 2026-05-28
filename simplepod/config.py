@@ -21,3 +21,6 @@ HEALTHCHECK_INTERVAL = 5.0  # seconds between heartbeat pings in UI
 SCREENSHOT_FORMAT = "png"  # default screenshot format
 FILE_MANAGER_ROOT = os.environ.get("SIMPLEPOD_FILE_ROOT", os.getcwd())  # root directory for remote file operations
 MAX_FILE_UPLOAD_MB = int(os.environ.get("SIMPLEPOD_MAX_UPLOAD_MB", "50"))
+
+# Gumroad API (optional — get token at https://gumroad.com/settings/advanced#api)
+GUMROAD_ACCESS_TOKEN = os.environ.get("GUMROAD_ACCESS_TOKEN", "")

@@ -1,0 +1,15 @@
+{
+  "agent_id": "ads_b0b88a",
+  "vertical": "ads",
+  "decision_id": "ads_1779930720_d2ce",
+  "timestamp": 1779930720.095218,
+  "action": "setup_facebook_ad",
+  "params": {
+    "platform": "facebook",
+    "campaign_id": "fb_df5660",
+    "budget_usd": 44.58
+  },
+  "reasoning": "Launching Facebook campaign fb_df5660 with $44.58 budget.",
+  "screenshot": null,
+  "status": "pending"
+}

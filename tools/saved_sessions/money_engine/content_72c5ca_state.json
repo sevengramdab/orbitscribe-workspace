@@ -1,0 +1,16 @@
+{
+  "agent_id": "content_72c5ca",
+  "vertical": "content",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:03] [content] Starting decision cycle...",
+    "[2026-05-27 18:07:03] [content] Decision content_26116c83 waiting for Kimi approval: generate_ebook",
+    "[2026-05-27 18:12:03] [content] Decision rejected by Kimi."
+  ]
+}

@@ -225,6 +225,38 @@ async function injectDecision(data) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*                          MONEY ENGINE HELPERS                              */
+/* -------------------------------------------------------------------------- */
+
+async function fetchMoneyEngineStatus() {
+  const res = await apiGet('/money-engine/status');
+  return res.ok ? res : null;
+}
+
+async function startMoneyEngine(verticals, autonomyTier, oneShot) {
+  const res = await apiPost('/money-engine/start', {
+    verticals,
+    autonomy_tier: autonomyTier,
+    interval_seconds: 300,
+    one_shot: oneShot,
+  });
+  if (!res.ok) throw new Error(res.error || 'Start failed');
+  return res;
+}
+
+async function stopMoneyEngine() {
+  const res = await apiPost('/money-engine/stop', {});
+  if (!res.ok) throw new Error(res.error || 'Stop failed');
+  return res;
+}
+
+async function injectMoneyEngineDecision(agentId, action, params) {
+  const res = await apiPost('/money-engine/inject', { agent_id: agentId, action, params });
+  if (!res.ok) throw new Error(res.error || 'Inject failed');
+  return res;
+}
+
+/* -------------------------------------------------------------------------- */
 /*                               TOAST SYSTEM                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -316,7 +348,8 @@ async function loadPageData(page) {
     switch (page) {
       case 'overview': {
         const status = await fetchWithFallback(fetchStatus, DEMO.status);
-        renderOverview(status);
+        const meStatus = await fetchWithFallback(fetchMoneyEngineStatus, null);
+        renderOverview(status, meStatus);
         break;
       }
       case 'financial': {
@@ -342,7 +375,8 @@ async function loadPageData(page) {
       }
       case 'stats': {
         const agents = await fetchWithFallback(fetchAgents, DEMO.agents);
-        renderStats(agents);
+        const meStatus = await fetchWithFallback(fetchMoneyEngineStatus, null);
+        renderStats(agents, meStatus);
         break;
       }
       case 'links': {
@@ -352,7 +386,8 @@ async function loadPageData(page) {
       }
       case 'swarm': {
         const control = await fetchWithFallback(fetchControlState, DEMO.control);
-        renderSwarmControl(control);
+        const meStatus = await fetchWithFallback(fetchMoneyEngineStatus, null);
+        renderSwarmControl(control, meStatus);
         break;
       }
     }
@@ -396,7 +431,7 @@ function managePolling() {
 /*                             RENDER: OVERVIEW                               */
 /* -------------------------------------------------------------------------- */
 
-function renderOverview(data) {
+function renderOverview(data, meStatus) {
   const container = document.getElementById('page-overview');
   if (!container) return;
 
@@ -407,12 +442,18 @@ function renderOverview(data) {
   const money = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const pct = (n) => `${Number(n).toFixed(2)}%`;
 
+  // Merge Money Engine data if available
+  const activeAgents = meStatus ? Object.keys(meStatus.agents || {}).length : data.active_agents;
+  const revenueToday = meStatus ? meStatus.total_revenue : data.revenue_today;
+  const netProfit = meStatus ? meStatus.net_profit : 0;
+  const lastEvent = meStatus ? `Money Engine: ${meStatus.autonomy_tier} mode` : data.last_event;
+
   container.innerHTML = `
     <h2 class="page-title">Overview</h2>
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="metric-label">Active Agents</div>
-        <div class="metric-value">${safe(data.active_agents)}</div>
+        <div class="metric-value">${safe(activeAgents)}</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Queue Depth</div>
@@ -420,11 +461,11 @@ function renderOverview(data) {
       </div>
       <div class="metric-card">
         <div class="metric-label">Revenue Today</div>
-        <div class="metric-value">${safe(data.revenue_today, money)}</div>
+        <div class="metric-value">${safe(revenueToday, money)}</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Revenue This Month</div>
-        <div class="metric-value">${safe(data.revenue_month, money)}</div>
+        <div class="metric-label">Net Profit</div>
+        <div class="metric-value" style="color:${netProfit >= 0 ? '#22c55e' : '#ef4444'}">${safe(netProfit, money)}</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Uptime</div>
@@ -432,7 +473,7 @@ function renderOverview(data) {
       </div>
       <div class="metric-card">
         <div class="metric-label">Last Event</div>
-        <div class="metric-value" style="font-size:1rem">${safe(data.last_event)}</div>
+        <div class="metric-value" style="font-size:1rem">${safe(lastEvent)}</div>
       </div>
     </div>
   `;
@@ -743,11 +784,22 @@ function renderMarketplace(data) {
 /*                              RENDER: STATS                                 */
 /* -------------------------------------------------------------------------- */
 
-function renderStats(data) {
+function renderStats(data, meStatus) {
   const container = document.getElementById('page-stats');
   if (!container) return;
 
-  const agents = Array.isArray(data) ? data : [];
+  // Use Money Engine agents if available
+  let agents = Array.isArray(data) ? data : [];
+  if (meStatus && meStatus.agents) {
+    agents = Object.entries(meStatus.agents).map(([aid, a]) => ({
+      id: aid,
+      name: (a.vertical || aid).replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) + ' Agent',
+      status: a.status || 'idle',
+      tasks_completed: a.decisions_executed || 0,
+      revenue: a.revenue || 0,
+      last_active: a.last_run ? new Date(a.last_run * 1000).toLocaleTimeString() : '—',
+    }));
+  }
 
   container.innerHTML = `
     <h2 class="page-title">Stats</h2>
@@ -757,7 +809,7 @@ function renderStats(data) {
           <div class="agent-name">${escapeHtml(a.name)}</div>
           <div class="agent-status">${a.status}</div>
           <div class="agent-metrics">
-            <div><span>Tasks</span><strong>${Number(a.tasks_completed || 0).toLocaleString()}</strong></div>
+            <div><span>Decisions</span><strong>${Number(a.tasks_completed || 0).toLocaleString()}</strong></div>
             <div><span>Revenue</span><strong>$${Number(a.revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></div>
           </div>
           <div class="agent-meta">Last active: ${escapeHtml(a.last_active || '—')}</div>
@@ -767,7 +819,7 @@ function renderStats(data) {
 
     <h3>Recent Activity</h3>
     <table class="data-table">
-      <thead><tr><th>Agent</th><th>Status</th><th>Tasks</th><th>Revenue</th><th>Last Active</th></tr></thead>
+      <thead><tr><th>Agent</th><th>Status</th><th>Decisions</th><th>Revenue</th><th>Last Active</th></tr></thead>
       <tbody>
         ${agents.map(a => `
           <tr>
@@ -885,41 +937,61 @@ function renderLinks(data) {
 /*                           RENDER: SWARM CONTROL                            */
 /* -------------------------------------------------------------------------- */
 
-function renderSwarmControl(data) {
+function renderSwarmControl(data, meStatus) {
   const container = document.getElementById('page-swarm');
   if (!container) return;
 
   const control = data || DEMO.control;
+  const isRunning = meStatus ? meStatus.running : control.master_switch;
+  const mode = meStatus ? (meStatus.autonomy_tier === 'AUTOPILOT' ? 'auto' : 'manual') : (control.mode || 'manual');
+
+  // Build agent list from Money Engine if available
+  let agents = control.agents || [];
+  if (meStatus && meStatus.registered_verticals) {
+    agents = meStatus.registered_verticals.map(v => {
+      const meAgent = Object.values(meStatus.agents || {}).find(a => a.vertical === v);
+      return {
+        id: v,
+        name: v.charAt(0).toUpperCase() + v.slice(1) + ' Agent',
+        enabled: !!meAgent,
+        running: meAgent && (meAgent.status === 'running' || meAgent.status === 'completed'),
+        status: meAgent ? meAgent.status : 'idle',
+        revenue: meAgent ? meAgent.revenue : 0,
+        decisions: meAgent ? meAgent.decisions_executed : 0,
+      };
+    });
+  }
 
   container.innerHTML = `
     <h2 class="page-title">Swarm Control</h2>
 
     <div class="control-header">
       <div class="control-status">
-        <span class="status-dot ${control.master_switch ? 'on' : 'off'}"></span>
-        <strong>Master Switch:</strong> ${control.master_switch ? 'ON' : 'OFF'}
+        <span class="status-dot ${isRunning ? 'on' : 'off'}"></span>
+        <strong>Money Engine:</strong> ${isRunning ? 'RUNNING' : 'STOPPED'}
       </div>
       <div class="control-mode">
-        <strong>Mode:</strong> ${escapeHtml(control.mode || 'auto')}
+        <strong>Mode:</strong> ${escapeHtml(mode)}
       </div>
       <div class="control-actions">
-        <button type="button" id="btn-toggle-master" class="btn-primary">${control.master_switch ? 'Stop' : 'Start'}</button>
-        <button type="button" id="btn-mode-auto" class="btn-secondary ${control.mode === 'auto' ? 'active' : ''}">Auto</button>
-        <button type="button" id="btn-mode-manual" class="btn-secondary ${control.mode === 'manual' ? 'active' : ''}">Manual</button>
+        <button type="button" id="btn-me-start" class="btn-primary" ${isRunning ? 'disabled' : ''}>Start</button>
+        <button type="button" id="btn-me-stop" class="btn-danger" ${!isRunning ? 'disabled' : ''}>Stop</button>
+        <button type="button" id="btn-me-autopilot" class="btn-secondary ${mode === 'auto' ? 'active' : ''}">Autopilot</button>
+        <button type="button" id="btn-me-manual" class="btn-secondary ${mode !== 'auto' ? 'active' : ''}">Manual</button>
       </div>
     </div>
 
     <div class="agent-grid">
-      ${(control.agents || []).map(a => `
+      ${agents.map(a => `
         <div class="agent-control-card ${a.enabled ? 'enabled' : 'disabled'}" data-id="${a.id}">
           <div class="agent-name">${escapeHtml(a.name)}</div>
           <div class="agent-state">
             <span class="badge ${a.running ? 'running' : 'idle'}">${a.running ? 'Running' : 'Idle'}</span>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" class="agent-toggle" ${a.enabled ? 'checked' : ''} />
-            <span>Enabled</span>
-          </label>
+          <div class="agent-mini-metrics" style="font-size:0.75rem;color:#888;margin:4px 0">
+            Rev: $${Number(a.revenue || 0).toFixed(2)} | Decisions: ${a.decisions || 0}
+          </div>
+          <button type="button" class="btn-sm btn-secondary cycle-agent" data-id="${a.id}">Cycle</button>
         </div>
       `).join('')}
     </div>
@@ -927,9 +999,12 @@ function renderSwarmControl(data) {
     <div class="injection-section">
       <h3>Inject Decision</h3>
       <form id="inject-form" class="inline-form">
-        <input name="agent_id" placeholder="Agent ID" required />
-        <input name="action" placeholder="Action (e.g., buy, skip)" required />
-        <input name="target" placeholder="Target / Symbol" />
+        <select name="agent_id" required>
+          <option value="">Select Agent</option>
+          ${agents.map(a => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('')}
+        </select>
+        <input name="action" placeholder="Action (e.g., generate_blog, publish)" required />
+        <input name="target" placeholder="Target / Params (JSON)" />
         <button type="submit" class="btn-primary">Inject</button>
       </form>
     </div>
@@ -937,83 +1012,109 @@ function renderSwarmControl(data) {
     <div class="log-section">
       <h3>Activity Log</h3>
       <div class="log-panel">
-        ${(control.log || []).map(entry => `
-          <div class="log-entry ${entry.level}">
-            <span class="log-time">${escapeHtml(entry.time)}</span>
-            <span class="log-level">${entry.level.toUpperCase()}</span>
-            <span class="log-message">${escapeHtml(entry.message)}</span>
+        ${(meStatus && meStatus.logs ? meStatus.logs : (control.log || [])).map(entry => {
+          const isString = typeof entry === 'string';
+          const time = isString ? entry.slice(1, 20) : (entry.time || '—');
+          const level = isString ? 'info' : (entry.level || 'info');
+          const message = isString ? entry.slice(21) : (entry.message || '');
+          return `
+          <div class="log-entry ${level}">
+            <span class="log-time">${escapeHtml(time)}</span>
+            <span class="log-level">${String(level).toUpperCase()}</span>
+            <span class="log-message">${escapeHtml(message)}</span>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     </div>
   `;
 
-  document.getElementById('btn-toggle-master').addEventListener('click', async () => {
-    const newState = !control.master_switch;
-    try {
-      await saveControlState({ master_switch: newState, mode: control.mode });
-      showToast(`Master switch turned ${newState ? 'ON' : 'OFF'}`, 'success');
-      loadPageData('swarm');
-    } catch (err) {
-      showToast(`Toggle failed: ${err.message}`, 'error');
-    }
-  });
+  const startBtn = document.getElementById('btn-me-start');
+  const stopBtn = document.getElementById('btn-me-stop');
 
-  document.getElementById('btn-mode-auto').addEventListener('click', async () => {
-    try {
-      await saveControlState({ master_switch: control.master_switch, mode: 'auto' });
-      showToast('Switched to Auto mode', 'success');
-      loadPageData('swarm');
-    } catch (err) {
-      showToast(`Mode switch failed: ${err.message}`, 'error');
-    }
-  });
-
-  document.getElementById('btn-mode-manual').addEventListener('click', async () => {
-    try {
-      await saveControlState({ master_switch: control.master_switch, mode: 'manual' });
-      showToast('Switched to Manual mode', 'success');
-      loadPageData('swarm');
-    } catch (err) {
-      showToast(`Mode switch failed: ${err.message}`, 'error');
-    }
-  });
-
-  container.querySelectorAll('.agent-toggle').forEach(toggle => {
-    toggle.addEventListener('change', async () => {
-      const card = toggle.closest('.agent-control-card');
-      const id = card.dataset.id;
-      const enabled = toggle.checked;
+  if (startBtn) {
+    startBtn.addEventListener('click', async () => {
       try {
-        const updatedAgents = (control.agents || []).map(a =>
-          a.id === id ? { ...a, enabled } : a
-        );
-        await saveControlState({ master_switch: control.master_switch, mode: control.mode, agents: updatedAgents });
-        showToast(`Agent ${enabled ? 'enabled' : 'disabled'}`, 'success');
+        const autonomy = mode === 'auto' ? 'AUTOPILOT' : 'DEFAULT';
+        await startMoneyEngine(null, autonomy, false);
+        showToast('Money Engine started', 'success');
         loadPageData('swarm');
       } catch (err) {
-        showToast(`Update failed: ${err.message}`, 'error');
-        toggle.checked = !enabled;
+        showToast(`Start failed: ${err.message}`, 'error');
+      }
+    });
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener('click', async () => {
+      try {
+        await stopMoneyEngine();
+        showToast('Money Engine stopped', 'success');
+        loadPageData('swarm');
+      } catch (err) {
+        showToast(`Stop failed: ${err.message}`, 'error');
+      }
+    });
+  }
+
+  const autopilotBtn = document.getElementById('btn-me-autopilot');
+  if (autopilotBtn) {
+    autopilotBtn.addEventListener('click', async () => {
+      try {
+        await apiPost('/money-engine/autonomy', { tier: 'AUTOPILOT' });
+        showToast('Switched to AUTOPILOT', 'success');
+        loadPageData('swarm');
+      } catch (err) {
+        showToast(`Mode switch failed: ${err.message}`, 'error');
+      }
+    });
+  }
+
+  const manualBtn = document.getElementById('btn-me-manual');
+  if (manualBtn) {
+    manualBtn.addEventListener('click', async () => {
+      try {
+        await apiPost('/money-engine/autonomy', { tier: 'DEFAULT' });
+        showToast('Switched to MANUAL (Kimi approval required)', 'success');
+        loadPageData('swarm');
+      } catch (err) {
+        showToast(`Mode switch failed: ${err.message}`, 'error');
+      }
+    });
+  }
+
+  container.querySelectorAll('.cycle-agent').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      try {
+        await injectMoneyEngineDecision(id, 'cycle', {});
+        showToast(`Cycled ${id}`, 'success');
+        loadPageData('swarm');
+      } catch (err) {
+        showToast(`Cycle failed: ${err.message}`, 'error');
       }
     });
   });
 
-  document.getElementById('inject-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const payload = {
-      agent_name: fd.get('agent_id'),
-      decision_type: fd.get('action'),
-      payload: { target: fd.get('target') || undefined }
-    };
-    try {
-      await injectDecision(payload);
-      showToast('Decision injected', 'success');
-      e.target.reset();
-    } catch (err) {
-      showToast(`Injection failed: ${err.message}`, 'error');
-    }
-  });
+  const injectForm = document.getElementById('inject-form');
+  if (injectForm) {
+    injectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      let params = {};
+      try {
+        const raw = fd.get('target');
+        if (raw) params = JSON.parse(raw);
+      } catch {}
+      try {
+        await injectMoneyEngineDecision(fd.get('agent_id'), fd.get('action'), params);
+        showToast('Decision injected into Money Engine', 'success');
+        e.target.reset();
+        loadPageData('swarm');
+      } catch (err) {
+        showToast(`Injection failed: ${err.message}`, 'error');
+      }
+    });
+  }
 }
 
 /* -------------------------------------------------------------------------- */

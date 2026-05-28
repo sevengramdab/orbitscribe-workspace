@@ -1,12 +1,12 @@
 {
   "agent_name": "market_intelligence",
-  "updated_at": "2026-05-27T14:17:41.825125",
+  "updated_at": "2026-05-28T12:16:55.654349",
   "ledger": {
     "agent_name": "market_intelligence",
     "lifetime_revenue": 0.0,
     "lifetime_costs": 0.0,
-    "decisions_made": 8,
-    "decisions_executed": 8,
+    "decisions_made": 20,
+    "decisions_executed": 20,
     "active_campaigns": [],
     "daily_history": []
   },
@@ -161,6 +161,271 @@
       "status": "executed",
       "timestamp": "2026-05-27T14:17:41.813103",
       "result_summary": "Positioning suggestion broadcast (signal 1779916661.813225).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d5f06aca",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "The agent has identified a lack of market gaps and no significant price changes or sentiment shifts, suggesting that positioning for future growth is a strategic priority.",
+      "action_payload": {
+        "positioning_strategy": "emphasize_sustainability",
+        "target_market": "home_office_gear"
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:00:58.079498",
+      "result_summary": "Positioning suggestion broadcast (signal 1779980458.079618).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a9a3a952",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for product positioning in emerging niches, particularly 'pet accessories' and 'home office gear'. The agent's vault contains unread signals that may inform this decision.",
+      "action_payload": {
+        "niches": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "signal_threshold": 50
+      },
+      "estimated_revenue_impact": 25000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:06:55.087114",
+      "result_summary": "Positioning suggestion broadcast (signal 1779980815.087243).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "fa3a9b84",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate an opportunity to position products in emerging niches, such as pet accessories and home office gear.",
+      "action_payload": {
+        "niches_to_focus": [
+          "pet_accessories",
+          "home_office_gear"
+        ],
+        "product_categories": [
+          "wireless earbuds",
+          "AI productivity tools"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:30:24.799164",
+      "result_summary": "Positioning suggestion broadcast (signal 1779982224.799284).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "0d1095a8",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends suggest a need to reposition our product offerings to capitalize on emerging demand.",
+      "action_payload": {
+        "product_ids": [
+          "product-alpha",
+          "product-beta"
+        ],
+        "target_niches": [
+          "pet accessories",
+          "home office gear"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:52:21.662792",
+      "result_summary": "Positioning suggestion broadcast (signal 1779983541.662914).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1a0bf226",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "The agent has identified a lack of market gaps and no significant price changes or sentiment shifts, suggesting that positioning our products to meet emerging trends is a high-priority action.",
+      "action_payload": {
+        "trend_keywords": [
+          "wireless earbuds",
+          "sustainable packaging",
+          "AI productivity tools"
+        ],
+        "product_categories": [
+          "pet accessories",
+          "home office gear"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T08:59:40.144553",
+      "result_summary": "Positioning suggestion broadcast (signal 1779983980.144678).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "d1611caa",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need to reposition products for emerging niches, specifically 'pet accessories' and 'home office gear', while also considering the stagnant trend of 'wireless earbuds'. The agent should suggest positioning adjustments to capitalize on these opportunities.",
+      "action_payload": {
+        "product_ids": [
+          "product-alpha",
+          "product-beta"
+        ],
+        "niches": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "trend_keywords": [
+          "wireless earbuds"
+        ]
+      },
+      "estimated_revenue_impact": 25000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:21:35.866874",
+      "result_summary": "Positioning suggestion broadcast (signal 1779985295.867051).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "fde47bdb",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for product positioning in emerging niches.",
+      "action_payload": {
+        "niches": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "trends": [
+          "wireless earbuds",
+          "sustainable packaging",
+          "AI productivity tools"
+        ]
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T09:58:24.072299",
+      "result_summary": "Positioning suggestion broadcast (signal 1779987504.072427).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "e67d5964",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for positioning in emerging niches, particularly 'pet accessories' and 'home office gear'. The lack of competitor prices and review sentiment suggests an opportunity to establish market presence.",
+      "action_payload": {
+        "niches": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "product_categories": [
+          "wireless earbuds",
+          "AI productivity tools"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:05:42.781119",
+      "result_summary": "Positioning suggestion broadcast (signal 1779987942.781285).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "cb8d1b32",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for strategic positioning to capitalize on emerging opportunities.",
+      "action_payload": {
+        "market_niche": "home office gear",
+        "product_categories": [
+          "AI productivity tools",
+          "wireless earbuds"
+        ],
+        "sentiment_threshold": 0.5
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:20:29.946917",
+      "result_summary": "Positioning suggestion broadcast (signal 1779988829.947037).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "8164df17",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "The market gaps identified suggest potential opportunities for product positioning. However, the lack of competitor pricing data and neutral review sentiment indicates a need to reassess our offerings.",
+      "action_payload": {
+        "product_categories": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "positioning_strategy": "reassess_and_refine"
+      },
+      "estimated_revenue_impact": -50000.0,
+      "risk_score": 0.4,
+      "confidence": 0.7,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:42:35.476992",
+      "result_summary": "Positioning suggestion broadcast (signal 1779990155.477128).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "2aa27459",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for positioning in emerging niches, particularly 'pet accessories' and 'home office gear', which have no opportunities despite having a gap score of 0.",
+      "action_payload": {
+        "niches": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "signal_threshold": 50
+      },
+      "estimated_revenue_impact": 10000.0,
+      "risk_score": 0.2,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T10:57:17.706967",
+      "result_summary": "Positioning suggestion broadcast (signal 1779991037.70709).",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "a530e95e",
+      "agent_name": "market_intelligence",
+      "decision_type": "suggest_positioning",
+      "rationale": "Market gaps and trends indicate a need for positioning in emerging niches, particularly 'pet accessories' and 'home office gear', with an opportunity to capitalize on growing demand.",
+      "action_payload": {
+        "niches_to_focus_on": [
+          "pet accessories",
+          "home office gear"
+        ],
+        "trends_to_track": [
+          "wireless earbuds",
+          "sustainable packaging",
+          "AI productivity tools"
+        ]
+      },
+      "estimated_revenue_impact": 15000.0,
+      "risk_score": 0.4,
+      "confidence": 0.8,
+      "status": "executed",
+      "timestamp": "2026-05-28T12:11:43.344573",
+      "result_summary": "Positioning suggestion broadcast (signal 1779995503.344719).",
       "actual_revenue": 0.0
     }
   ]

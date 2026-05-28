@@ -7,7 +7,7 @@ and generate revenue across multiple verticals.
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from core.model_router import ModelRouter
+from core.llm_client import LLMClient
 from core.business_tools.vault import vault
 from .base import BaseBusinessAgent, BusinessDecision
 from . import _load_all_agents, BUSINESS_AGENT_REGISTRY
@@ -30,8 +30,8 @@ class MonetizationSwarmOrchestrator:
     10. AffiliateAgent        — Affiliate link automation, commission tracking
     """
 
-    def __init__(self, model_router: ModelRouter, autonomy_tier: str = "AUTOPILOT"):
-        self.model_router = model_router
+    def __init__(self, llm_client: LLMClient = None, model_router=None, autonomy_tier: str = "AUTOPILOT"):
+        self.llm_client = llm_client or model_router
         self.autonomy_tier = autonomy_tier
         self.agents: Dict[str, BaseBusinessAgent] = {}
         self.running = False
@@ -43,7 +43,7 @@ class MonetizationSwarmOrchestrator:
         for name, agent_class in BUSINESS_AGENT_REGISTRY.items():
             if name not in self.agents:
                 agent = agent_class(
-                    model_router=self.model_router,
+                    llm_client=self.llm_client,
                     autonomy_tier=self.autonomy_tier,
                     decision_callback=self._on_decision,
                 )
@@ -88,7 +88,7 @@ Respond in JSON:
             {"role": "user", "content": prompt},
         ]
         try:
-            text = await self.model_router.chat(messages=messages, temperature=0.1)
+            text = await self.llm_client.chat(messages=messages, temperature=0.1)
             import json, re
             m = re.search(r'\{.*\}', text, re.DOTALL)
             if m:

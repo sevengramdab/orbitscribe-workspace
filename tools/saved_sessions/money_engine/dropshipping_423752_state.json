@@ -1,0 +1,27 @@
+{
+  "agent_id": "dropshipping_423752",
+  "vertical": "dropshipping",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.5,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922679.868337,
+  "ledger": [
+    {
+      "timestamp": 1779922679.8683343,
+      "decision_id": "ds_9e1a425c",
+      "action": "research_products",
+      "revenue": 0.0,
+      "costs": 0.5,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:57:49] [dropshipping] Starting decision cycle...",
+    "[2026-05-27 15:57:49] [dropshipping] Executing: research_products | Weighted decision selected 'research_products' with 1 existing listings.",
+    "[2026-05-27 15:57:49] [dropshipping] Executing dropshipping action: research_products",
+    "[2026-05-27 15:57:59] [dropshipping] Cycle complete: completed",
+    "[2026-05-27 15:57:59] [dropshipping] Reached max_cycles (1). Stopping."
+  ]
+}

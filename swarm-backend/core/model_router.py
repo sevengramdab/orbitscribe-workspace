@@ -259,6 +259,11 @@ class ModelRouter:
         top_p: float | None = None,
     ) -> str:
         errors = []
+        if config.SUBAGENT_MODE == "local":
+            try:
+                return await openai_chat(messages, model=config.LOCAL_MODEL, temperature=temperature, top_p=top_p)
+            except Exception as e:
+                errors.append(f"Ollama OpenAI: {e}")
         try:
             return await ollama_chat(messages, temperature=temperature, top_p=top_p)
         except Exception as e:
@@ -308,7 +313,7 @@ class ModelRouter:
             return await self._local_chat(messages, temperature=temperature, top_p=top_p)
         else:
             try:
-                return await ollama_chat(messages, temperature=temperature, top_p=top_p)
+                return await self._local_chat(messages, temperature=temperature, top_p=top_p)
             except Exception:
                 try:
                     return await self._cloud_chat(messages, temperature=temperature, top_p=top_p)
@@ -322,6 +327,13 @@ class ModelRouter:
         temperature: float | None = None,
         top_p: float | None = None,
     ) -> AsyncGenerator[str, None]:
+        if config.SUBAGENT_MODE == "local":
+            try:
+                async for chunk in openai_chat_stream(messages, model=config.LOCAL_MODEL, temperature=temperature, top_p=top_p):
+                    yield chunk
+                return
+            except Exception:
+                pass
         try:
             async for chunk in ollama_chat_stream(messages, temperature=temperature, top_p=top_p):
                 yield chunk

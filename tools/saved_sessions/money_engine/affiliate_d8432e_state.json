@@ -1,0 +1,27 @@
+{
+  "agent_id": "affiliate_d8432e",
+  "vertical": "affiliate",
+  "status": "idle",
+  "revenue": 2.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922667.567942,
+  "ledger": [
+    {
+      "timestamp": 1779922667.567939,
+      "decision_id": "aff_3694b310",
+      "action": "generate_comparison",
+      "revenue": 2.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:57:46] [affiliate] Starting decision cycle...",
+    "[2026-05-27 15:57:46] [affiliate] Executing: generate_comparison | Generate a comparison post for 'Adobe Photoshop' vs 'GIMP' to drive affiliate traffic.",
+    "[2026-05-27 15:57:47] [affiliate] Comparison post result: success=True, revenue=2.0",
+    "[2026-05-27 15:57:47] [affiliate] Cycle complete: completed",
+    "[2026-05-27 15:57:47] [affiliate] Reached max_cycles (1). Stopping."
+  ]
+}

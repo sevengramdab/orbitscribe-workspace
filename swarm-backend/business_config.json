@@ -41,5 +41,11 @@
     "cycle_interval_seconds": 300,
     "risk_threshold": 0.5,
     "revenue_escalation_threshold": 1000
+  },
+  "content": {
+    "clickbank_tracking_ids": "TID1,TID2,TID3",
+    "substack_url": "https://substack.com/@orbstudio",
+    "substack_publication_name": "OrbStudio's Substack",
+    "substack_from_email": "joshldyer@gmail.com"
   }
 }

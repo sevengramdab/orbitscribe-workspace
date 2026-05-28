@@ -45,6 +45,10 @@ tools/.orbitscribe-resume-debug.log
 tools/.watchdog.pid
 tools/.reload-lock
 tools/.reload-resume-lock
+tools/.vault_key
+tools/.keep_awake_active
+tools/*.pid
+tools/keep_awake_config.json
 
 # Temp / scratch files
 tmp_*.py

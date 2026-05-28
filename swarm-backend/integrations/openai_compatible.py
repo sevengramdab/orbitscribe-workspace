@@ -1,4 +1,5 @@
-"""OpenAI-compatible integration — supports OpenAI, Kimi, Groq, and any other compatible provider."""
+"""OpenAI-compatible integration — supports OpenAI, Kimi, Groq, and any other compatible provider.
+When SUBAGENT_MODE=local, transparently routes to Ollama's OpenAI-compatible endpoint."""
 import json
 import logging
 from typing import Any, AsyncGenerator, Dict, List
@@ -13,7 +14,14 @@ logger = logging.getLogger(__name__)
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 
 
+def _use_ollama_openai() -> bool:
+    """Return True when we should route OpenAI-compatible calls to local Ollama."""
+    return config.SUBAGENT_MODE == "local" or config.API_MODE == "local_only"
+
+
 def _get_base_url() -> str:
+    if _use_ollama_openai():
+        return config.OLLAMA_OPENAI_URL
     return config.OPENAI_BASE_URL or DEFAULT_BASE_URL
 
 
@@ -22,14 +30,18 @@ def _get_api_key() -> str:
 
 
 def is_configured() -> bool:
-    return bool(_get_api_key())
+    return bool(_get_api_key()) or _use_ollama_openai()
 
 
 def _get_headers() -> dict:
-    return {
-        "authorization": f"Bearer {_get_api_key()}",
-        "content-type": "application/json",
-    }
+    headers = {"content-type": "application/json"}
+    if not _use_ollama_openai():
+        headers["authorization"] = f"Bearer {_get_api_key()}"
+    return headers
+
+
+def _default_model() -> str:
+    return config.LOCAL_MODEL if _use_ollama_openai() else "gpt-4o-mini"
 
 
 async def openai_chat(
@@ -43,7 +55,7 @@ async def openai_chat(
         raise RuntimeError("OpenAI-compatible API key not configured")
 
     body: Dict[str, Any] = {
-        "model": model or "gpt-4o-mini",
+        "model": model or _default_model(),
         "messages": messages,
     }
     if temperature is not None:
@@ -69,7 +81,7 @@ async def openai_chat_stream(
         raise RuntimeError("OpenAI-compatible API key not configured")
 
     body: Dict[str, Any] = {
-        "model": model or "gpt-4o-mini",
+        "model": model or _default_model(),
         "messages": messages,
         "stream": True,
     }

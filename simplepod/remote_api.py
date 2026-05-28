@@ -7,6 +7,7 @@ import sys
 import json
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -15,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import API_TOKEN, NODE_ID, NODE_NAME, NODE_ROLE, FILE_MANAGER_ROOT
+import money_engine_bridge as me_bridge
 
 app = FastAPI(title="SimplePod Remote API")
 
@@ -302,18 +304,6 @@ def monetization_api_status():
     }
 
 
-@app.get("/monetization/api/agents")
-def monetization_api_agents():
-    try:
-        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
-        agents = vault.get("agents", [])
-        if agents:
-            return {"ok": True, "agents": agents}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-    return {"ok": True, "agents": []}
-
-
 @app.get("/monetization/api/pl")
 def monetization_api_pl():
     try:
@@ -441,15 +431,6 @@ def monetization_api_links_delete(link_id: str, x_token: Optional[str] = Header(
         return {"ok": False, "error": str(e)}
 
 
-@app.get("/monetization/api/control")
-def monetization_api_control_get():
-    try:
-        data = _read_json(_project_path("tools", "saved_sessions", "monetization_control.json"), {})
-        return {"ok": True, "control": data}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
-
 @app.post("/monetization/api/control")
 def monetization_api_control_post(body: dict, x_token: Optional[str] = Header(None)):
     _verify_token(x_token)
@@ -481,8 +462,195 @@ def monetization_api_inject(req: InjectRequest, x_token: Optional[str] = Header(
         return {"ok": False, "error": str(e)}
 
 
+# ── Money Engine Integration ──────────────────────────────────────────────
+
+@app.get("/monetization/api/money-engine/status")
+def me_status():
+    """Proxy Money Engine status."""
+    return me_bridge.get_status()
+
+
+@app.get("/monetization/api/debug/agents")
+def debug_agents():
+    """Debug endpoint to trace agent retrieval."""
+    try:
+        status = me_bridge.get_status()
+        agents = me_bridge.get_agents_for_dashboard()
+        control = me_bridge.get_control_state()
+        return {
+            "ok": True,
+            "status_ok": status.get("ok"),
+            "status_agent_count": len(status.get("agents", {})),
+            "dashboard_agent_count": len(agents),
+            "control_agent_count": len(control.get("agents", [])),
+        }
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.post("/monetization/api/money-engine/start")
+def me_start(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.start_swarm(
+        verticals=body.get("verticals"),
+        autonomy_tier=body.get("autonomy_tier", "DEFAULT"),
+        interval_seconds=body.get("interval_seconds", 300),
+        one_shot=body.get("one_shot", False),
+    )
+
+
+@app.post("/monetization/api/money-engine/stop")
+def me_stop(x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.stop_swarm()
+
+
+@app.post("/monetization/api/money-engine/agent/{agent_id}/stop")
+def me_stop_agent(agent_id: str, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.stop_agent(agent_id)
+
+
+@app.post("/monetization/api/money-engine/inject")
+def me_inject(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.inject_decision(
+        agent_id=body.get("agent_id", ""),
+        action=body.get("action", ""),
+        params=body.get("params", {}),
+        reasoning=body.get("reasoning", "manual"),
+    )
+
+
+@app.get("/monetization/api/money-engine/pending")
+def me_pending():
+    return {"ok": True, "pending": me_bridge.list_pending()}
+
+
+@app.post("/monetization/api/money-engine/approve")
+def me_approve(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.approve_decision(body.get("decision_id"), body.get("modified_params"))
+
+
+@app.post("/monetization/api/money-engine/reject")
+def me_reject(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    return me_bridge.reject_decision(body.get("decision_id"))
+
+
+@app.post("/monetization/api/money-engine/autonomy")
+def me_autonomy(body: dict, x_token: Optional[str] = Header(None)):
+    _verify_token(x_token)
+    try:
+        orch = me_bridge._get_orchestrator()
+        orch.set_autonomy(body.get("tier", "DEFAULT"))
+        return {"ok": True, "tier": body.get("tier", "DEFAULT")}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+# ── Gumroad Integration ─────────────────────────────────────────────────
+
+@app.get("/monetization/api/gumroad/status")
+def gumroad_status():
+    """Check whether Gumroad API credentials are configured."""
+    from money_engine.integrations.gumroad_client import GumroadClient
+    client = GumroadClient()
+    return {
+        "ok": True,
+        "connected": client.has_credentials(),
+        "message": "Set GUMROAD_ACCESS_TOKEN env var to connect." if not client.has_credentials() else "Connected",
+    }
+
+
+@app.get("/monetization/api/gumroad/products")
+def gumroad_products():
+    """List Gumroad products (live if token is set, mock otherwise)."""
+    from money_engine.integrations.gumroad_client import GumroadClient
+    try:
+        client = GumroadClient()
+        products = client.list_products()
+        return {"ok": True, "products": products, "mock": not client.has_credentials()}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/monetization/api/gumroad/sales")
+def gumroad_sales():
+    """Get Gumroad sales data (live if token is set, mock otherwise)."""
+    from money_engine.integrations.gumroad_client import GumroadClient
+    try:
+        client = GumroadClient()
+        sales = client.get_sales()
+        summary = client.get_revenue_summary()
+        return {"ok": True, "sales": sales, "summary": summary, "mock": not client.has_credentials()}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+# ── Override existing endpoints to merge Money Engine data ───────────────
+
+@app.get("/monetization/api/agents")
+def monetization_api_agents():
+    try:
+        # Prefer real Money Engine agents
+        me_agents = me_bridge.get_agents_for_dashboard()
+        if me_agents:
+            return {"ok": True, "agents": me_agents}
+        # Fallback to vault
+        vault = _read_json(_project_path("tools", "saved_sessions", "unified_business_vault.json"), {})
+        agents = vault.get("agents", [])
+        if agents:
+            return {"ok": True, "agents": agents}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, "agents": []}
+
+
+@app.get("/monetization/api/control")
+def monetization_api_control_get():
+    try:
+        # Prefer real Money Engine control state
+        me_control = me_bridge.get_control_state()
+        if me_control.get("agents"):
+            return {"ok": True, "control": me_control}
+        # Fallback to static JSON
+        data = _read_json(_project_path("tools", "saved_sessions", "monetization_control.json"), {})
+        if data:
+            return {"ok": True, "control": data}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, "control": {"master_switch": False, "mode": "manual", "agents": [], "log": []}}
+
+
+def _start_keep_awake():
+    """Spawn the Keep-Awake GUI so the PC doesn't sleep during long tasks.
+    The window must be visible — never a background process."""
+    import subprocess
+    import sys
+    script = Path(__file__).parent.parent / "tools" / "keep_awake.py"
+    # Simple duplicate-guard: check window title via tasklist
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", "WINDOWTITLE eq Keep-Awake", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if "python" in result.stdout.lower():
+            return  # GUI already running
+    except Exception:
+        pass
+    # Launch GUI with its own visible console window
+    duration = os.environ.get("KEEP_AWAKE_DURATION_HOURS", "8")
+    subprocess.Popen(
+        [sys.executable, str(script), "--duration", duration],
+        creationflags=subprocess.CREATE_NEW_CONSOLE,
+    )
+
+
 def start_api_server():
     import uvicorn
+    _start_keep_awake()
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("SIMPLEPOD_API_PORT", "58091")), log_level="warning")
 
 

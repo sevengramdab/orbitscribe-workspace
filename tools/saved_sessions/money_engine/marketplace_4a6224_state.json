@@ -1,0 +1,27 @@
+{
+  "agent_id": "marketplace_4a6224",
+  "vertical": "marketplace",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930503.02661,
+  "ledger": [
+    {
+      "timestamp": 1779930503.0266085,
+      "decision_id": "mp_6ea5aecc",
+      "action": "generate_product",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": false
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:08:01] [marketplace] Starting decision cycle...",
+    "[2026-05-27 18:08:01] [marketplace] Executing: generate_product | Marketplace cycle: generate_product",
+    "[2026-05-27 18:08:01] [marketplace] Generating product via registry...",
+    "[2026-05-27 18:08:23] [marketplace] Cycle complete: error",
+    "[2026-05-27 18:08:23] [marketplace] Reached max_cycles (1). Stopping."
+  ]
+}

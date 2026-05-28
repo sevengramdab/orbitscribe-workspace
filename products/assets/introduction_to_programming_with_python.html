@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset='UTF-8'><title>Introduction to Programming with Python</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:720px;margin:40px auto;line-height:1.6;padding:0 20px}
+h1,h2,h3{color:#222}pre{background:#f4f4f4;padding:12px;border-radius:6px;overflow:auto}
+code{font-family:monospace;font-size:.95em}blockquote{border-left:4px solid #ccc;padding-left:12px;color:#555}
+</style></head><body>
+<h1>Introduction to Programming with Python</h1>
+<br>
+<h2>Table of Contents</h2>
+<br>
+<p>1. **Introduction to Programming**</p>
+<p>2. **The Basics of Python**</p>
+<p>3. **Functions and Modules in Python**</p>
+<p>4. **Control Flow and Error Handling**</p>
+<p>5. **Advanced Topics in Python**</p>
+<br>
+<p>---</p>
+<br>
+<h3>Chapter 1: What is Programming?</h3>
+<br>
+<p>Programming is a systematic approach to solving problems by breaking them down into smaller, manageable tasks. It involves writing instructions that can be executed by a computer to perform specific actions or generate output.</p>
+<br>
+<p>Python is one of the most popular programming languages due to its simplicity and readability. It is widely used in various fields such as web development, data analysis, artificial intelligence, and scientific computing.</p>
+<br>
+<p>#### Summary:</p>
+<ul><li>Programming is essential for solving problems and creating software applications.</li></ul>
+<ul><li>Python is an interpreted language, meaning code is executed line by line.</li></ul>
+<ul><li>The basics of programming include syntax, variables, data types, operators, control structures (loops and conditionals).</li></ul>
+<ul><li>Functions allow reusability of code, making programs more organized.</li></ul>
+<br>
+<p>---</p>
+<br>
+<h3>Chapter 2: The Basics of Python</h3>
+<br>
+<p>#### Introduction to Python Syntax</p>
+<p>Python uses indentation to define blocks of code, which is different from other programming languages like C or Java. For example:</p>
+<br>
+<pre><code>
+if x &gt; 0:
+    print(&quot;x is positive&quot;)
+else:
+    print(&quot;x is not positive&quot;)
+</code></pre>
+<br>
+<p>In this example, the `if`, `elif`, and `else` statements are used to control the flow of execution based on the value of `x`.</p>
+<br>
+<p>#### Variables</p>
+<p>Variables hold data that can be manipulated throughout a program. In Python, variables are declared by assigning values:</p>
+<br>
+<pre><code>
+name = &quot;Alice&quot;
+age = 25
+</code></pre>
+<br>
+<p>You can change the value of a variable later in the program:</p>
+<br>
+<pre><code>
+name = &quot;Bob&quot;
+print(name)  # Output: Bob
+</code></pre>
+<br>
+<p>#### Data Types</p>
+<p>Python supports various data types such as integers, floats, strings, lists, dictionaries, and tuples. Here are some examples:</p>
+<br>
+<pre><code>
+# Integer
+num = 10
+
+# Float
+pi = 3.14159
+
+# String
+message = &quot;Hello, World!&quot;
+
+# List
+fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+
+# Dictionary
+person = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25}
+</code></pre>
+<br>
+<p>#### Operators</p>
+<p>Operators are used to perform operations on data. Here are some examples:</p>
+<br>
+<pre><code>
+x = 10
+y = 5
+
+# Addition
+sum = x + y
+print(sum)  # Output: 15
+
+# Subtraction
+difference = x - y
+print(difference)  # Output: 5
+
+# Multiplication
+product = x * y
+print(product)  # Output: 50
+
+# Division (float)
+quotient = x / y
+print(quotient)  # Output: 2.0
+
+# Modulus
+remainder = x % y
+print(remainder)  # Output: 0
+
+# Exponentiation
+power = x ** y
+print(power)  # Output: 100000
+</code></pre>
+<br>
+<p>#### Basic Control Structures</p>
+<p>Control structures allow you to control the flow of execution based on conditions.</p>
+<br>
+<ul><li>**If-Else Statements**</li></ul>
+<pre><code>
+  x = 10
+
+  if x &gt; 5:
+      print(&quot;x is greater than 5&quot;)
+  else:
+      print(&quot;x is not greater than 5&quot;)
+</code></pre>
+<br>
+<ul><li>**For Loops**</li></ul>
+<pre><code>
+  for i in range(5):
+      print(i)
+</code></pre>
+<br>
+<ul><li>**While Loops**</li></ul>
+<pre><code>
+  count = 0
+  while count &lt; 5:
+      print(count)
+      count += 1
+</code></pre>
+<br>
+<p>#### Error Handling</p>
+<p>Python provides built-in mechanisms to handle errors gracefully.</p>
+<br>
+<pre><code>
+try:
+    x = int(&quot;abc&quot;)
+except ValueError:
+    print(&quot;Invalid input, please enter a number.&quot;)
+</code></pre>
+<br>
+<p>---</p>
+<br>
+<h3>Chapter 3: Functions and Modules in Python</h3>
+<br>
+<p>#### Defining Functions</p>
+<p>Functions are blocks of code that perform specific tasks. They can be defined using the `def` keyword:</p>
+<br>
+<pre><code>
+def greet(name):
+    return f&quot;Hello, {name}!&quot;
+
+print(greet(&quot;Alice&quot;))  # Output: Hello, Alice!
+</code></pre>
+<br>
+<p>#### Calling Functions</p>
+<p>You can call a function by its name followed by parentheses containing any arguments:</p>
+<br>
+<pre><code>
+def add(a, b):
+    return a + b
+
+result = add(3, 5)
+print(result)  # Output: 8
+</code></pre>
+<br>
+<p>#### Passing Arguments</p>
+<p>Functions can accept arguments. You can pass values directly or use variables as arguments:</p>
+<br>
+<pre><code>
+x = 10
+y = 20
+
+def multiply(x, y):
+    return x * y
+
+result = multiply(x, y)
+print(result)  # Output: 200
+</code></pre>
+<br>
+<p>#### Using Modules</p>
+<p>Python has a vast ecosystem of modules that can be used to extend the functionality of Python. You can install modules using `pip`:</p>
+<br>
+<pre><code>
+pip install numpy pandas
+</code></pre>
+<br>
+<p>Once installed, you can import them in your code:</p>
+<br>
+<pre><code>
+import numpy as np
+
+data = np.array([1, 2, 3])
+print(data)  # Output: [1 2 3]
+</code></pre>
+<br>
+<p>#### Example of a Module</p>
+<p>Let&#x27;s create a simple module called `math_utils.py`:</p>
+<br>
+<pre><code>
+# math_utils.py
+def add(a, b):
+    return a + b
+
+def subtract(a, b):
+    return a - b
+
+# Main script to use the module
+if __name__ == &quot;__main__&quot;:
+    result_add = add(3, 5)
+    print(&quot;Addition:&quot;, result_add)
+
+    result_subtract = subtract(10, 2)
+    print(&quot;Subtraction:&quot;, result_subtract)
+</code></pre>
+<br>
+<p>When you run this script, it will output:</p>
+<br>
+<pre><code>
+Addition: 8
+Subtraction: 8
+</code></pre>
+<br>
+<p>---</p>
+<br>
+<h3>Chapter 4: Control Flow and Error Handling</h3>
+<br>
+<p>#### Decision-making Structures</p>
+<ul><li>**If-Else Statements**</li></ul>
+<pre><code>
+  x = 10
+
+  if x &gt; 5:
+      print(&quot;x is greater than 5&quot;)
+  else:
+      print(&quot;x is not greater than 5&quot;)
+</code></pre>
+<br>
+<ul><li>**For Loops**</li></ul>
+<pre><code>
+  for i in range(5):
+      print(i)
+</code></pre>
+<br>
+<ul><li>**While Loops**</li></ul>
+<pre><code>
+  count = 0
+  while count &lt; 5:
+      print(count)
+      count += 1
+</code></pre>
+<br>
+<p>#### Error Handling</p>
+<ul><li>**Exceptions**</li></ul>
+<p>  Python uses the `try-except` block to handle exceptions. For example:</p>
+<br>
+<pre><code>
+    try:
+        x = int(&quot;abc&quot;)
+    except ValueError:
+        print(&quot;Invalid input, please enter a number.&quot;)
+</code></pre>
+<br>
+<ul><li>**Finally Clause**</li></ul>
+<p>  The `finally` clause is executed regardless of whether an exception was raised or not:</p>
+<br>
+<pre><code>
+    try:
+        x = 10 / 0
+    except ZeroDivisionError as e:
+        print(e)
+    finally:
+        print(&quot;This block will always execute.&quot;)
+</code></pre>
+<br>
+<p>#### Example of Error Handling in a Function</p>
+<p>Let&#x27;s create a function that handles errors when dividing by zero:</p>
+<br>
+<pre><code>
+def safe_divide(a, b):
+    try:
+        result = a / b
+        return result
+    except ZeroDivisionError as e:
+        print(f&quot;Error: {e}&quot;)
+        return None
+
+# Main script to use the function
+if __name__ == &quot;__main__&quot;:
+    result = safe_divide(10, 2)
+    if result is not None:
+        print(&quot;Result:&quot;, result)
+
+    result = safe_divide(10, 0)
+    if result is not None:
+        print(&quot;Result:&quot;, result)
+</code></pre>
+<br>
+<p>When you run this script, it will output:</p>
+<br>
+<pre><code>
+Result: 5.0
+Error: division by zero
+This block will always execute.
+</code></pre>
+<br>
+<p>---</p>
+<br>
+<h3>Chapter 5: Advanced Topics in Python</h3>
+<br>
+<p>#### Object-Oriented Programming (OOP)</p>
+<p>Python supports object-oriented programming through classes and objects.</p>
+<br>
+<pre><code>
+# Define a class
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def greet(self):
+        return f&quot;Hello, my name is {self.name} and I am {self.age} years old.&quot;
+
+# Create an object of the class
+person = Person(&quot;Alice&quot;, 25)
+
+# Call a method on the object
+print(person.greet())  # Output: Hello, my name is Alice and I am 25 years old.
+</code></pre>
+<br>
+<p>#### Libraries</p>
+<p>Python has many built-in libraries that provide additional functionality. For example, `numpy` for numerical computations:</p>
+<br>
+<pre><code>
+import numpy as np
+
+data = np.array([1, 2, 3])
+print(data)  # Output: [1 2 3]
+</code></pre>
+<br>
+<p>And `pandas` for data manipulation:</p>
+<br>
+<pre><code>
+import pandas as pd
+
+data = {
+    &quot;Name&quot;: [&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;],
+    &quot;Age&quot;: [25, 30, 35]
+}
+
+df = pd.DataFrame(data)
+print(df)  # Output:
+        Name  Age
+0      Alice   25
+1        Bob   30
+2  Charlie   35
+</code></pre>
+<br>
+<p>#### Web Development with Flask</p>
+<p>Flask is a lightweight web framework for Python.</p>
+<br>
+<pre><code>
+# Import the necessary modules
+from flask import Flask
+
+# Create an instance of the Flask class
+app = Flask(__name__)
+
+# Define a route
+@app.route(&#x27;/&#x27;)
+def home():
+    return &#x27;Hello, World!&#x27;
+
+# Run the application
+if __name__ == &#x27;__main__&#x27;:
+    app.run(debug=True)
+</code></pre>
+<br>
+<p>When you run this script and visit `http://127.0.0.1:5000/`, it will display &quot;Hello, World!&quot;.</p>
+<br>
+<p>These examples cover the basics of programming with Python, including syntax, variables, data types, control structures, error handling, and some advanced topics. Each chapter provides practical examples to help you understand these concepts better.</p>
+</body></html>

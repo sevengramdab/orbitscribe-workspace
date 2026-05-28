@@ -16,13 +16,44 @@ or
 """
 from __future__ import annotations
 
+import argparse
+import json
 import random
 import threading
 import time
 import tkinter as tk
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Callable, List, Optional
+
+# Config file shared across all keep-awake scripts
+CONFIG_FILE = Path(__file__).with_name("keep_awake_config.json")
+
+
+def _load_config() -> dict:
+    if CONFIG_FILE.exists():
+        try:
+            return json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+
+def _save_last_used(duration: float, mode: str) -> None:
+    if not CONFIG_FILE.exists():
+        return
+    try:
+        cfg = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        cfg["last_used"] = {
+            "duration_hours": duration,
+            "mode": mode,
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+        }
+        CONFIG_FILE.write_text(json.dumps(cfg, indent=4), encoding="utf-8")
+    except Exception:
+        pass
+
 
 # ---------------------------------------------------------------------------
 # Try to import pyautogui; if missing we fall back to keyboard-only via ctypes
@@ -163,14 +194,25 @@ def _next_interval(base_sec: float = 1800, jitter_pct: float = 0.20) -> float:
 # ---------------------------------------------------------------------------
 
 class KeepAwakeEngine:
-    def __init__(self, log_callback: Optional[Callable[[str], None]] = None):
+    def __init__(
+        self,
+        log_callback: Optional[Callable[[str], None]] = None,
+        duration_hours: float = 0.0,
+        countdown_callback: Optional[Callable[[str], None]] = None,
+        shutdown_callback: Optional[Callable[[], None]] = None,
+    ):
         self.actions = _make_actions()
         self.deck = ActionDeck(self.actions)
         self.log_callback = log_callback
+        self.countdown_callback = countdown_callback
+        self.shutdown_callback = shutdown_callback
         self._timer: Optional[threading.Timer] = None
+        self._countdown_timer: Optional[threading.Timer] = None
         self._running = False
         self._lock = threading.Lock()
         self.action_count = 0
+        self.duration_hours = duration_hours
+        self._start_time: Optional[datetime] = None
 
     def log(self, msg: str):
         ts = datetime.now().strftime("%H:%M:%S")
@@ -203,12 +245,38 @@ class KeepAwakeEngine:
                 self._timer.daemon = True
                 self._timer.start()
 
+    def _update_countdown(self):
+        if not self._running or not self._start_time or self.duration_hours <= 0:
+            return
+        elapsed = (datetime.now() - self._start_time).total_seconds()
+        remaining = max(0, self.duration_hours * 3600 - elapsed)
+        if self.countdown_callback:
+            hrs, rem = divmod(int(remaining), 3600)
+            mins, secs = divmod(rem, 60)
+            self.countdown_callback(f"{hrs:02d}:{mins:02d}:{secs:02d}")
+        if remaining <= 0:
+            self.log("Timer expired. Stopping...")
+            self.stop()
+            if self.shutdown_callback:
+                try:
+                    self.shutdown_callback()
+                except Exception:
+                    pass
+            return
+        self._countdown_timer = threading.Timer(1.0, self._update_countdown)
+        self._countdown_timer.daemon = True
+        self._countdown_timer.start()
+
     def start(self):
         with self._lock:
             if self._running:
                 return
             self._running = True
+            self._start_time = datetime.now()
         self.log("Engine started")
+        if self.duration_hours > 0:
+            self.log(f"Auto-stop in {self.duration_hours} hour(s)")
+            self._update_countdown()
         self._tick()
 
     def stop(self):
@@ -217,6 +285,9 @@ class KeepAwakeEngine:
             if self._timer:
                 self._timer.cancel()
                 self._timer = None
+            if self._countdown_timer:
+                self._countdown_timer.cancel()
+                self._countdown_timer = None
         self.log("Engine stopped")
 
     @property
@@ -230,14 +301,19 @@ class KeepAwakeEngine:
 # ---------------------------------------------------------------------------
 
 class KeepAwakeGUI:
-    def __init__(self):
+    def __init__(self, duration_hours: float = 0.0):
         self.root = tk.Tk()
         self.root.title("Keep-Awake")
-        self.root.geometry("420x320")
+        self.root.geometry("420x360")
         self.root.resizable(False, False)
         self.root.configure(bg="#1e1e2e")
 
-        self.engine = KeepAwakeEngine(log_callback=self._append_log)
+        self.engine = KeepAwakeEngine(
+            log_callback=self._append_log,
+            duration_hours=duration_hours,
+            countdown_callback=self._update_countdown_label,
+            shutdown_callback=self._auto_close,
+        )
 
         # Header
         tk.Label(
@@ -255,6 +331,17 @@ class KeepAwakeGUI:
             bg="#1e1e2e",
             fg="#a6adc8",
         ).pack(pady=(0, 8))
+
+        # Countdown (visible when duration is set)
+        self.countdown_var = tk.StringVar(value="")
+        self.countdown_label = tk.Label(
+            self.root,
+            textvariable=self.countdown_var,
+            font=("Segoe UI", 10),
+            bg="#1e1e2e",
+            fg="#94e2d5",
+        )
+        self.countdown_label.pack(pady=2)
 
         # Status
         self.status_var = tk.StringVar(value="Status: Stopped")
@@ -325,6 +412,12 @@ class KeepAwakeGUI:
         self.log_box.see(tk.END)
         self.log_box.configure(state=tk.DISABLED)
 
+    def _update_countdown_label(self, text: str):
+        self.root.after(0, lambda: self.countdown_var.set(f"Auto-stop in: {text}"))
+
+    def _auto_close(self):
+        self.root.after(0, self._on_close)
+
     def _on_start(self):
         self.engine.start()
         self.status_var.set("Status: Running")
@@ -334,6 +427,7 @@ class KeepAwakeGUI:
     def _on_stop(self):
         self.engine.stop()
         self.status_var.set("Status: Stopped")
+        self.countdown_var.set("")
         self.start_btn.configure(state=tk.NORMAL)
         self.stop_btn.configure(state=tk.DISABLED)
 
@@ -350,7 +444,20 @@ class KeepAwakeGUI:
 # ---------------------------------------------------------------------------
 
 def main():
-    gui = KeepAwakeGUI()
+    config = _load_config()
+    default_duration = config.get("default_duration_hours", 4.0)
+
+    parser = argparse.ArgumentParser(description="Keep-Awake GUI")
+    parser.add_argument(
+        "--duration",
+        type=float,
+        default=default_duration,
+        help="Hours before auto-stop (0 = run forever until stopped). Default: %(default)s",
+    )
+    args = parser.parse_args()
+
+    _save_last_used(args.duration, "gui")
+    gui = KeepAwakeGUI(duration_hours=args.duration)
     gui.run()
 
 

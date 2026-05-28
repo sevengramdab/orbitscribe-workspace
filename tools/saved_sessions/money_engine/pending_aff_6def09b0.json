@@ -1,0 +1,19 @@
+{
+  "agent_id": "affiliate_e01ffb",
+  "vertical": "affiliate",
+  "decision_id": "aff_6def09b0",
+  "timestamp": 1779930724.0311582,
+  "action": "generate_review",
+  "params": {
+    "product_name": "NordVPN",
+    "features": [
+      "Military-grade encryption",
+      "No-logs policy",
+      "6,000+ servers",
+      "Threat Protection"
+    ]
+  },
+  "reasoning": "Generate a product review for 'NordVPN' with embedded affiliate links.",
+  "screenshot": null,
+  "status": "pending"
+}

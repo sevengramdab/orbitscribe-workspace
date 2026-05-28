@@ -1,0 +1,96 @@
+# E-Commerce Business Templates Prompt Pack
+
+These AI prompts are designed to generate high-quality templates for various e-commerce platforms, helping businesses create visually appealing and functional online stores. Use these prompts as a starting point for your creative projects, and feel free to modify or expand them to suit your specific needs.
+
+Total prompts: 10
+============================================================
+
+1. E-commerce Website Wireframe Template
+   Category: Graphic Design
+   Use case: Visual Merchandising and E-commerce Web Design
+
+   Prompt:
+   Design an e-commerce website wireframe template with a minimalist aesthetic, including a homepage, product page, and cart page, using Figma's design principles.
+
+------------------------------------------------------------
+
+2. Digital Product Sales Funnel Template
+   Category: Digital Marketing
+   Use case: E-commerce Marketing and Sales Funnels
+
+   Prompt:
+   Create a digital product sales funnel template in ClickFunnels, consisting of 5 pages: welcome page, benefits page, pricing page, order form page, and thank you page, with a focus on conversions.
+
+------------------------------------------------------------
+
+3. Shopify E-commerce Store Template Layout
+   Category: Web Development
+   Use case: E-commerce Web Development and Design
+
+   Prompt:
+   Design a Shopify e-commerce store template layout for fashion products, including product grids, category pages, and collection pages, with mobile responsiveness in mind.
+
+------------------------------------------------------------
+
+4. Amazon Product Listing Template
+   Category: Content Writing
+   Use case: E-commerce Content Creation and SEO
+
+   Prompt:
+   Create an Amazon product listing template for a hypothetical outdoor gear brand, including product description, images, and customer reviews section, with compliance to Amazon's policies.
+
+------------------------------------------------------------
+
+5. Etsy Shop Template Layout Design
+   Category: General
+   Use case: Handmade E-commerce and Craft Business
+
+   Prompt:
+   Design an Etsy shop template layout for handmade jewelry products, including product showcases, collections pages, and profile information section, with a focus on visual appeal.
+
+------------------------------------------------------------
+
+6. WooCommerce E-commerce Website Template
+   Category: General
+   Use case: E-commerce Web Development and WordPress
+
+   Prompt:
+   Create a WooCommerce e-commerce website template for an electronics store, including product categories, search functionality, and cart integration, with responsive design.
+
+------------------------------------------------------------
+
+7. E-commerce Email Marketing Campaign Template
+   Category: General
+   Use case: E-commerce Email Marketing and Newsletters
+
+   Prompt:
+   Design an email marketing campaign template in Mailchimp for a hypothetical fashion brand, consisting of 5 emails: welcome series, abandoned cart reminders, product recommendations, and promotional offers.
+
+------------------------------------------------------------
+
+8. BigCommerce E-commerce Store Template Layout
+   Category: General
+   Use case: E-commerce Web Development and Design
+
+   Prompt:
+   Create a BigCommerce e-commerce store template layout for outdoor gear products, including product grids, category pages, and collection pages, with mobile responsiveness in mind.
+
+------------------------------------------------------------
+
+9. Facebook Shop and Instagram Shopping Integration Template
+   Category: General
+   Use case: E-commerce Social Media Marketing
+
+   Prompt:
+   Design a Facebook shop and Instagram shopping integration template for an e-commerce brand, including product feeds, catalog management, and checkout process, with a focus on social commerce.
+
+------------------------------------------------------------
+
+10. Google Merchant Center Product Feed Template
+   Category: General
+   Use case: E-commerce Search Engine Optimization
+
+   Prompt:
+   Create a Google Merchant Center product feed template for an e-commerce brand, including product data schema, image requirements, and content guidelines, with compliance to Google's policies.
+
+------------------------------------------------------------

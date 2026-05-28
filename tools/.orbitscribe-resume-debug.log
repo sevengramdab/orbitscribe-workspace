@@ -744,3 +744,51 @@
 2026-05-27T18:05:26.907Z [14252] [RESUME] Resume command sent.
 2026-05-27T18:05:36.392Z [14252] [RESUME] Context sent to terminal.
 2026-05-27T18:05:47.529Z [14252] [RESUME] Lock file cleaned up.
+2026-05-27T22:27:25.459Z [9496] [RESUME] Crash detected via stale heartbeat. age=1639s, session=0f719be5e0e9bce4749eb7804ce7b8f6
+2026-05-27T22:27:25.462Z [9496] [RESUME] sessionId=0f719be5e0e9bce4749eb7804ce7b8f6, isReload=false, isCrashRecovery=true
+2026-05-27T22:27:25.463Z [9496] [RESUME] No lock file. Triggering auto-resume...
+2026-05-27T22:27:25.464Z [9496] [RESUME] Crash recovery. Scheduling terminal auto-resume. session=0f719be5e0e9bce4749eb7804ce7b8f6, workDir=c:\Users\Shadow\voice to text engine
+2026-05-27T22:27:25.465Z [9496] [RESUME] Lock file created.
+2026-05-27T22:27:40.468Z [9496] [RESUME] Timer fired (15s). Creating terminal...
+2026-05-27T22:27:40.470Z [9496] [RESUME] Existing 'Kimi Auto-Resume' terminal found: false
+2026-05-27T22:27:40.471Z [9496] [RESUME] Creating new terminal with cwd=c:\Users\Shadow\voice to text engine
+2026-05-27T22:27:40.472Z [9496] [RESUME] Terminal created successfully.
+2026-05-27T22:27:40.476Z [9496] [RESUME] Waiting 2500ms for terminal to be ready (new=true)...
+2026-05-27T22:27:45.897Z [9496] [RESUME] Sent Ctrl+C to terminal.
+2026-05-27T22:27:47.551Z [9496] [RESUME] Sending history command: python tools/show_kimi_history.py 0f719be5e0e9bce4749eb7804ce7b8f6 --turns 5
+2026-05-27T22:27:50.427Z [9496] [RESUME] Sending command: kimi -r 0f719be5e0e9bce4749eb7804ce7b8f6 -w "c:\\Users\\Shadow\\voice to text engine"
+2026-05-27T22:27:50.430Z [9496] [RESUME] Resume command sent.
+2026-05-27T22:27:59.899Z [9496] [RESUME] Context sent to terminal.
+2026-05-27T22:28:10.475Z [9496] [RESUME] Lock file cleaned up.
+2026-05-28T00:25:05.793Z [13880] [RESUME] Crash detected via stale heartbeat. age=1209s, session=0f719be5e0e9bce4749eb7804ce7b8f6
+2026-05-28T00:25:05.796Z [13880] [RESUME] sessionId=0f719be5e0e9bce4749eb7804ce7b8f6, isReload=false, isCrashRecovery=true
+2026-05-28T00:25:05.797Z [13880] [RESUME] No lock file. Triggering auto-resume...
+2026-05-28T00:25:05.798Z [13880] [RESUME] Crash recovery. Scheduling terminal auto-resume. session=0f719be5e0e9bce4749eb7804ce7b8f6, workDir=c:\Users\Shadow\voice to text engine
+2026-05-28T00:25:05.800Z [13880] [RESUME] Lock file created.
+2026-05-28T00:25:20.800Z [13880] [RESUME] Timer fired (15s). Creating terminal...
+2026-05-28T00:25:20.801Z [13880] [RESUME] Existing 'Kimi Auto-Resume' terminal found: false
+2026-05-28T00:25:20.802Z [13880] [RESUME] Creating new terminal with cwd=c:\Users\Shadow\voice to text engine
+2026-05-28T00:25:20.803Z [13880] [RESUME] Terminal created successfully.
+2026-05-28T00:25:20.804Z [13880] [RESUME] Waiting 2500ms for terminal to be ready (new=true)...
+2026-05-28T00:25:28.006Z [13880] [RESUME] Sent Ctrl+C to terminal.
+2026-05-28T00:25:29.024Z [13880] [RESUME] Sending history command: python tools/show_kimi_history.py 0f719be5e0e9bce4749eb7804ce7b8f6 --turns 5
+2026-05-28T00:25:33.055Z [13880] [RESUME] Sending command: kimi -r 0f719be5e0e9bce4749eb7804ce7b8f6 -w "c:\\Users\\Shadow\\voice to text engine"
+2026-05-28T00:25:33.056Z [13880] [RESUME] Resume command sent.
+2026-05-28T00:25:42.010Z [13880] [RESUME] Context sent to terminal.
+2026-05-28T00:25:50.805Z [13880] [RESUME] Lock file cleaned up.
+2026-05-28T02:10:08.298Z [6484] [RESUME] Crash detected via stale heartbeat. age=1201s, session=0f719be5e0e9bce4749eb7804ce7b8f6
+2026-05-28T02:10:08.301Z [6484] [RESUME] sessionId=0f719be5e0e9bce4749eb7804ce7b8f6, isReload=false, isCrashRecovery=true
+2026-05-28T02:10:08.302Z [6484] [RESUME] No lock file. Triggering auto-resume...
+2026-05-28T02:10:08.303Z [6484] [RESUME] Crash recovery. Scheduling terminal auto-resume. session=0f719be5e0e9bce4749eb7804ce7b8f6, workDir=c:\Users\Shadow\voice to text engine
+2026-05-28T02:10:08.304Z [6484] [RESUME] Lock file created.
+2026-05-28T02:10:23.313Z [6484] [RESUME] Timer fired (15s). Creating terminal...
+2026-05-28T02:10:23.314Z [6484] [RESUME] Existing 'Kimi Auto-Resume' terminal found: false
+2026-05-28T02:10:23.315Z [6484] [RESUME] Creating new terminal with cwd=c:\Users\Shadow\voice to text engine
+2026-05-28T02:10:23.316Z [6484] [RESUME] Terminal created successfully.
+2026-05-28T02:10:23.317Z [6484] [RESUME] Waiting 2500ms for terminal to be ready (new=true)...
+2026-05-28T02:10:25.818Z [6484] [RESUME] Sent Ctrl+C to terminal.
+2026-05-28T02:10:28.688Z [6484] [RESUME] Sending history command: python tools/show_kimi_history.py 0f719be5e0e9bce4749eb7804ce7b8f6 --turns 5
+2026-05-28T02:10:30.331Z [6484] [RESUME] Sending command: kimi -r 0f719be5e0e9bce4749eb7804ce7b8f6 -w "c:\\Users\\Shadow\\voice to text engine"
+2026-05-28T02:10:30.332Z [6484] [RESUME] Resume command sent.
+2026-05-28T02:10:39.822Z [6484] [RESUME] Context sent to terminal.
+2026-05-28T02:10:53.320Z [6484] [RESUME] Lock file cleaned up.

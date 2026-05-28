@@ -1,0 +1,28 @@
+{
+  "agent_id": "leadgen_0845f7",
+  "vertical": "leadgen",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930479.4325674,
+  "ledger": [
+    {
+      "timestamp": 1779930479.432565,
+      "decision_id": "leadgen_87095d41",
+      "action": "search_leads",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:59] [leadgen] Starting decision cycle...",
+    "[2026-05-27 18:07:59] [leadgen] Executing: search_leads | Searching for new leads to expand pipeline.",
+    "[2026-05-27 18:07:59] [leadgen] Searching leads: query='SaaS founders OR startup CTO' platform=linkedin",
+    "[2026-05-27 18:07:59] [leadgen] Found 0 leads via linkedin.",
+    "[2026-05-27 18:07:59] [leadgen] Cycle complete: completed",
+    "[2026-05-27 18:07:59] [leadgen] Reached max_cycles (1). Stopping."
+  ]
+}

@@ -7,9 +7,11 @@ commissions via the unified business vault.
 """
 
 import json
+import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from core import config
 from core.business_tools.vault import vault
 from .base import BaseBusinessAgent, BusinessDecision
 
@@ -38,17 +40,19 @@ class AffiliateAgent(BaseBusinessAgent):
 
     def __init__(
         self,
-        model_router,
+        llm_client=None,
+        model_router=None,
         autonomy_tier: str = "AUTOPILOT",
         decision_callback=None,
     ):
+        client = llm_client or model_router
         super().__init__(
             name="affiliate",
             description=(
                 "Affiliate marketing automation: program discovery, link generation, "
                 "content creation, and commission tracking."
             ),
-            model_router=model_router,
+            llm_client=client,
             autonomy_tier=autonomy_tier,
             decision_callback=decision_callback,
         )
@@ -58,6 +62,55 @@ class AffiliateAgent(BaseBusinessAgent):
             import core.business_tools.affiliate_tools  # noqa: F401
         except Exception as exc:
             print(f"[{self.name}] Warning: could not load affiliate_tools: {exc}")
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    def _resolve_affiliate_placeholders(self, text: str) -> str:
+        if not text:
+            return text
+        tag = config.AMAZON_ASSOCIATES_TAG
+        if tag:
+            text = text.replace("{{AMAZON_ASSOCIATES_TAG}}", tag)
+        return text
+
+    def _get_estimated_commission(self, link_id: str) -> float:
+        link = vault.get("affiliate_links", link_id)
+        if not link:
+            return 5.0
+        program = vault.get("affiliate_programs", link.get("program_id", ""))
+        if program and program.get("commission_rate"):
+            return round(50.0 * (program.get("commission_rate") / 100.0), 2)
+        name = (program.get("program_name", "") if program else "").lower()
+        niche = (program.get("niche", "") if program else "").lower()
+        if "amazon" in name:
+            if any(k in niche for k in ("home", "garden", "kitchen", "furniture")):
+                rate = 0.08
+            elif any(k in niche for k in ("electronic", "tech", "computer", "software")):
+                rate = 0.04
+            else:
+                rate = 0.04
+            return round(50.0 * rate, 2)
+        if "binance" in name:
+            return 10.0
+        return 5.0
+
+    def _publish_affiliate_content(self, content_id: str) -> None:
+        """Resolve placeholders and mark content as published in vault and on disk."""
+        doc = vault.get("affiliate_content", content_id)
+        if not doc:
+            return
+        body = doc.get("body", "")
+        resolved = self._resolve_affiliate_placeholders(body)
+        updates: Dict[str, Any] = {"published": True}
+        if resolved != body:
+            updates["body"] = resolved
+            filepath = doc.get("filepath")
+            if filepath and os.path.exists(filepath):
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(resolved)
+        vault.update("affiliate_content", content_id, updates)
 
     # ------------------------------------------------------------------
     # Perceive
@@ -452,6 +505,8 @@ class AffiliateAgent(BaseBusinessAgent):
                     content_id=content_id,
                     product_urls=product_urls,
                 )
+                if result.get("status") == "ok":
+                    self._publish_affiliate_content(content_id)
 
             elif decision_type == "create_review":
                 product_name = payload.get("product_name", "Product")
@@ -480,22 +535,30 @@ class AffiliateAgent(BaseBusinessAgent):
                     features=features,
                     affiliate_link=affiliate_link,
                 )
+                if result.get("status") == "ok":
+                    self._publish_affiliate_content(result.get("content_id", ""))
 
             elif decision_type == "create_comparison":
                 result = await self.tools.execute(
                     "generate_comparison_post",
                     product_a=payload.get("product_a", "Product A"),
                     product_b=payload.get("product_b", "Product B"),
-                    affiliate_links=payload.get("affiliate_links", {}),
+                    programs=payload.get("programs", {}),
+                    landing_pages=payload.get("landing_pages", {}),
                 )
+                if result.get("status") == "ok":
+                    self._publish_affiliate_content(result.get("content_id", ""))
 
             elif decision_type == "track_commissions":
+                link_id = payload.get("link_id", "")
+                commission = self._get_estimated_commission(link_id)
+                payload["commission"] = commission
                 result = await self.tools.execute(
                     "track_commission_estimate",
-                    link_id=payload.get("link_id", ""),
+                    link_id=link_id,
                     clicks=payload.get("clicks", 0),
                     conversion_rate=payload.get("conversion_rate", 0.0),
-                    commission=payload.get("commission", 0.0),
+                    commission=commission,
                 )
                 if result.get("status") == "ok":
                     self.ledger.lifetime_revenue += result.get(
@@ -528,7 +591,7 @@ class AffiliateAgent(BaseBusinessAgent):
 
         decision.result_summary = json.dumps(result, indent=2, default=str)[:1000]
         decision.actual_revenue = (
-            result.get("estimated_earnings", 0.0)
+            result.get("estimated_earnings", result.get("estimated_revenue", 0.0))
             if isinstance(result, dict)
             else 0.0
         )

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Formatter & Validator</title>
+<style>
+body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+textarea { width: 100%; height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: monospace; }
+button { padding: 10px 20px; margin: 8px 4px 0 0; border: none; border-radius: 6px; cursor: pointer; }
+.format { background: #007bff; color: #fff; }
+.minify { background: #6c757d; color: #fff; }
+.validate { background: #28a745; color: #fff; }
+.result { background: #f8f9fa; padding: 16px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 16px; white-space: pre-wrap; font-family: monospace; }
+.error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+</style>
+</head>
+<body>
+<h1>JSON Formatter & Validator</h1>
+<textarea id="input" placeholder="Paste JSON here..."></textarea>
+<div>
+<button class="format" onclick="formatJson()">Format</button>
+<button class="minify" onclick="minifyJson()">Minify</button>
+<button class="validate" onclick="validateJson()">Validate</button>
+</div>
+<div id="output" class="result" style="display:none"></div>
+<script>
+function setOut(text, isError) {
+  const el = document.getElementById('output');
+  el.style.display = 'block';
+  el.innerText = text;
+  el.className = 'result' + (isError ? ' error' : '');
+}
+function formatJson() {
+  try { const obj = JSON.parse(document.getElementById('input').value); setOut(JSON.stringify(obj, null, 2), false); }
+  catch (e) { setOut('Invalid JSON: ' + e.message, true); }
+}
+function minifyJson() {
+  try { const obj = JSON.parse(document.getElementById('input').value); setOut(JSON.stringify(obj), false); }
+  catch (e) { setOut('Invalid JSON: ' + e.message, true); }
+}
+function validateJson() {
+  try { JSON.parse(document.getElementById('input').value); setOut('Valid JSON!', false); }
+  catch (e) { setOut('Invalid JSON: ' + e.message, true); }
+}
+</script>
+</body>
+</html>

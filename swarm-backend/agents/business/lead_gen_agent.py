@@ -37,14 +37,16 @@ class LeadGenAgent(BaseBusinessAgent):
 
     def __init__(
         self,
-        model_router,
+        llm_client=None,
+        model_router=None,
         autonomy_tier: str = "AUTOPILOT",
         decision_callback=None,
     ):
+        client = llm_client or model_router
         super().__init__(
             name="LeadGenAgent",
             description="Autonomous lead generation, enrichment, scoring, and outreach.",
-            model_router=model_router,
+            llm_client=client,
             autonomy_tier=autonomy_tier,
             decision_callback=decision_callback,
         )
@@ -189,7 +191,7 @@ class LeadGenAgent(BaseBusinessAgent):
         user_prompt = f"Pipeline state:\n{json.dumps(perception, indent=2, default=str)}"
 
         try:
-            llm_text = await self.model_router.chat(
+            llm_text = await self.llm_client.chat(
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},

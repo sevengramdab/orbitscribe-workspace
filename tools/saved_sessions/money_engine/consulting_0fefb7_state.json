@@ -1,0 +1,28 @@
+{
+  "agent_id": "consulting_0fefb7",
+  "vertical": "consulting",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779916907.5559373,
+  "ledger": [
+    {
+      "timestamp": 1779916907.5559351,
+      "decision_id": "consult_2d17be35",
+      "action": "screenshot_opportunities",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 14:21:47] [consulting] Starting decision cycle...",
+    "[2026-05-27 14:21:47] [consulting] Executing: screenshot_opportunities | Capturing visual snapshot of current opportunities for review.",
+    "[2026-05-27 14:21:47] [consulting] ConsultingAgent executing: screenshot_opportunities",
+    "[2026-05-27 14:21:47] [consulting] Screenshot of opportunities saved.",
+    "[2026-05-27 14:21:47] [consulting] Cycle complete: completed",
+    "[2026-05-27 14:21:47] [consulting] Reached max_cycles (1). Stopping."
+  ]
+}

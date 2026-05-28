@@ -1,0 +1,16 @@
+{
+  "agent_id": "marketplace_48261b",
+  "vertical": "marketplace",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:07] [marketplace] Starting decision cycle...",
+    "[2026-05-27 18:07:07] [marketplace] Decision mp_a9b3436d waiting for Kimi approval: generate_product",
+    "[2026-05-27 18:12:07] [marketplace] Decision rejected by Kimi."
+  ]
+}

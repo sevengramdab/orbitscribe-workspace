@@ -368,11 +368,11 @@ async def chat(req: ChatRequest):
         return StreamingResponse(_stream_structured(mesh_gen()), media_type="text/event-stream")
     elif mode == "monetization":
         from modes.business.monetization_mode import run_monetization_mode
-        from core.model_router import ModelRouter
-        model_router = ModelRouter()
+        from core.llm_client import LLMClient
+        llm_client = LLMClient()
         gen = run_monetization_mode(
             request={"verticals": req.history or [], "autonomy_tier": req.autonomy_level or "AUTOPILOT", "one_shot": req.auto_execute},
-            model_router=model_router,
+            llm_client=llm_client,
             session_store=store,
             session_id=req.session_id or f"monetization-{uuid.uuid4().hex[:8]}",
         )

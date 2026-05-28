@@ -1,0 +1,16 @@
+{
+  "agent_id": "subscriptions_9a4cee",
+  "vertical": "subscriptions",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:09] [subscriptions] Starting decision cycle...",
+    "[2026-05-27 18:07:09] [subscriptions] Decision sub_1779930429_8326 waiting for Kimi approval: generate_newsletter",
+    "[2026-05-27 18:12:09] [subscriptions] Decision rejected by Kimi."
+  ]
+}

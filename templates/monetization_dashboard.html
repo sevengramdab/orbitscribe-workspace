@@ -66,9 +66,69 @@
             border-radius: 6px;
             margin-right: 8px;
         }
+        .mode-banner {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+        .mode-simulation {
+            background: #f59e0b;
+            color: #1e293b;
+            border: 2px solid #d97706;
+        }
+        .mode-live {
+            background: #ef4444;
+            color: #fff;
+            border: 2px solid #b91c1c;
+        }
+
+        /* Verticals & Checklist */
+        .verticals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .vertical-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .vertical-card:hover { border-color: #475569; }
+        .vertical-name { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .status-green .status-dot { background: #34d399; box-shadow: 0 0 6px #34d399; }
+        .status-yellow { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+        .status-yellow .status-dot { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+        .status-red { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+        .status-red .status-dot { background: #f87171; box-shadow: 0 0 6px #f87171; }
+
+        .checklist-section { margin-bottom: 16px; }
+        .checklist-title { font-weight: 700; font-size: 13px; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .checklist { display: grid; gap: 6px; }
+        .checklist-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #0f172a; padding: 8px 12px; border-radius: 6px;
+        }
+        .checklist-key { font-family: monospace; font-size: 12px; color: #cbd5e1; }
+        .checklist-label { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
     </style>
 </head>
 <body>
+    <div id="modeBanner" class="mode-banner mode-simulation">SIMULATION MODE — NO REAL MONEY IS MOVING</div>
     <h1>Monetization Swarm</h1>
     <p class="subtitle">10-agent autonomous business suite</p>
 
@@ -105,6 +165,36 @@
         <button class="btn secondary" onclick="refreshStatus()">REFRESH</button>
     </div>
 
+    <div class="card controls">
+        <h3>Keep-Awake Control</h3>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+            <span id="keepAwakeStatusPill" class="status-pill status-red"><span class="status-dot"></span>Stopped</span>
+            <span id="keepAwakeLastAction" style="font-size:12px;color:#64748b;">—</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+            <label style="font-size:13px;color:#94a3b8;">Duration:</label>
+            <input type="range" id="keepAwakeSlider" min="1" max="24" value="4" style="width:120px;" oninput="document.getElementById('keepAwakeHours').value=this.value;document.getElementById('keepAwakeForever').checked=false;">
+            <input type="number" id="keepAwakeHours" value="4" min="1" max="24" style="width:60px;text-align:center;" oninput="document.getElementById('keepAwakeSlider').value=this.value;document.getElementById('keepAwakeForever').checked=false;">
+            <span style="font-size:13px;color:#94a3b8;">hours</span>
+            <label style="font-size:13px;color:#94a3b8;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="keepAwakeForever" onchange="if(this.checked){document.getElementById('keepAwakeHours').value='∞';}else{document.getElementById('keepAwakeHours').value=document.getElementById('keepAwakeSlider').value;}">
+                Forever
+            </label>
+        </div>
+        <button class="btn" onclick="startKeepAwake()">START KEEP-AWAKE</button>
+        <button class="btn stop" onclick="stopKeepAwake()">STOP KEEP-AWAKE</button>
+    </div>
+
+    <div class="card">
+        <h3>Verticals Status</h3>
+        <div class="verticals-grid" id="verticalsGrid">Loading...</div>
+    </div>
+
+    <div class="card">
+        <h3>Go Live Checklist</h3>
+        <div id="goLiveChecklist">Loading...</div>
+    </div>
+
     <div class="card">
         <h3>Agents</h3>
         <div class="agent-list" id="agentList">Loading...</div>
@@ -125,8 +215,67 @@
         async function api(method, path, body) {
             const opts = { method, headers: { 'Content-Type': 'application/json' } };
             if (body) opts.body = JSON.stringify(body);
-            const res = await fetch('http://127.0.0.1:58081' + path, opts);
+            const base = window.location.origin;
+            const res = await fetch(base + path, opts);
             return res.json();
+        }
+
+        const VERTICAL_LABELS = {
+            affiliate: 'Affiliate',
+            content_marketing: 'Content Marketing',
+            print_on_demand: 'Print-on-Demand',
+            dropshipping: 'Dropshipping',
+            saas_micro_app: 'SaaS Micro-App'
+        };
+
+        const STATUS_CONFIG = {
+            green: { class: 'status-green', text: 'Live Ready' },
+            yellow: { class: 'status-yellow', text: 'Partially Configured' },
+            red: { class: 'status-red', text: 'Not Configured' }
+        };
+
+        async function refreshVerticals() {
+            try {
+                const data = await api('GET', '/api/system/mode');
+                const grid = document.getElementById('verticalsGrid');
+                const checklist = document.getElementById('goLiveChecklist');
+                grid.innerHTML = '';
+                checklist.innerHTML = '';
+
+                for (const [key, info] of Object.entries(data.verticals || {})) {
+                    const label = VERTICAL_LABELS[key] || key;
+                    const cfg = STATUS_CONFIG[info.status] || STATUS_CONFIG.red;
+
+                    // Vertical card
+                    const card = document.createElement('div');
+                    card.className = 'vertical-card';
+                    card.innerHTML = `
+                        <div class="vertical-name">${label}</div>
+                        <span class="status-pill ${cfg.class}"><span class="status-dot"></span>${cfg.text}</span>
+                    `;
+                    grid.appendChild(card);
+
+                    // Checklist section
+                    const section = document.createElement('div');
+                    section.className = 'checklist-section';
+                    let rows = '';
+                    for (const [k, present] of Object.entries(info.keys || {})) {
+                        const dotClass = present ? 'status-green' : 'status-red';
+                        const labelText = present ? 'Present' : 'Missing';
+                        rows += `
+                            <div class="checklist-row">
+                                <span class="checklist-key">${k}</span>
+                                <span class="checklist-label"><span class="status-pill ${dotClass}"><span class="status-dot"></span>${labelText}</span></span>
+                            </div>
+                        `;
+                    }
+                    section.innerHTML = `<div class="checklist-title">${label}</div><div class="checklist">${rows}</div>`;
+                    checklist.appendChild(section);
+                }
+            } catch (e) {
+                document.getElementById('verticalsGrid').textContent = 'Error loading verticals.';
+                document.getElementById('goLiveChecklist').textContent = 'Error loading checklist.';
+            }
         }
 
         async function refreshStatus() {
@@ -161,7 +310,7 @@
             const interval = parseInt(document.getElementById('intervalInput').value) || 300;
             log('Starting swarm in ' + autonomy + ' mode...');
 
-            const resp = await fetch('http://127.0.0.1:58081/api/monetization/start', {
+            const resp = await fetch(window.location.origin + '/api/monetization/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ autonomy_tier: autonomy, interval_seconds: interval })
@@ -198,7 +347,7 @@
         async function oneShot() {
             const autonomy = document.getElementById('autonomySelect').value;
             log('Running one-shot cycle...');
-            const resp = await fetch('http://127.0.0.1:58081/api/monetization/start', {
+            const resp = await fetch(window.location.origin + '/api/monetization/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ autonomy_tier: autonomy, one_shot: true })
@@ -229,8 +378,65 @@
             refreshStatus();
         }
 
+        async function checkMode() {
+            try {
+                const data = await api('GET', '/api/system/mode');
+                const banner = document.getElementById('modeBanner');
+                if (data.is_live) {
+                    banner.className = 'mode-banner mode-live';
+                    banner.textContent = 'LIVE MODE — REAL FINANCIAL TRANSACTIONS ARE ACTIVE';
+                } else {
+                    banner.className = 'mode-banner mode-simulation';
+                    banner.textContent = 'SIMULATION MODE — NO REAL MONEY IS MOVING';
+                }
+            } catch (e) {}
+        }
+
+        async function refreshKeepAwakeStatus() {
+            try {
+                const data = await api('GET', '/api/system/keep-awake/status');
+                const pill = document.getElementById('keepAwakeStatusPill');
+                const lastAction = document.getElementById('keepAwakeLastAction');
+                if (data.running) {
+                    pill.className = 'status-pill status-green';
+                    pill.innerHTML = '<span class="status-dot"></span>Running';
+                } else {
+                    pill.className = 'status-pill status-red';
+                    pill.innerHTML = '<span class="status-dot"></span>Stopped';
+                }
+                lastAction.textContent = data.last_action ? 'Last action: ' + new Date(data.last_action).toLocaleString() : '—';
+            } catch (e) {}
+        }
+
+        async function startKeepAwake() {
+            const forever = document.getElementById('keepAwakeForever').checked;
+            const hours = forever ? 0 : parseFloat(document.getElementById('keepAwakeHours').value) || 4;
+            log('Starting keep-awake (' + (hours > 0 ? hours + 'h' : 'forever') + ')...');
+            try {
+                const res = await api('POST', '/api/system/keep-awake/start', { duration_hours: hours });
+                log('[keep-awake] ' + res.message);
+            } catch (e) {
+                log('[keep-awake] Error starting: ' + e);
+            }
+            refreshKeepAwakeStatus();
+        }
+
+        async function stopKeepAwake() {
+            log('Stopping keep-awake...');
+            try {
+                const res = await api('POST', '/api/system/keep-awake/stop');
+                log('[keep-awake] ' + res.message);
+            } catch (e) {
+                log('[keep-awake] Error stopping: ' + e);
+            }
+            refreshKeepAwakeStatus();
+        }
+
+        checkMode();
         refreshStatus();
-        setInterval(refreshStatus, 10000);
+        refreshVerticals();
+        refreshKeepAwakeStatus();
+        setInterval(() => { checkMode(); refreshStatus(); refreshVerticals(); refreshKeepAwakeStatus(); }, 10000);
     </script>
 </body>
 </html>

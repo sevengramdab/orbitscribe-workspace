@@ -1,0 +1,24 @@
+{
+  "agent_id": "content_b4d43e",
+  "vertical": "content",
+  "status": "error",
+  "revenue": 0.5,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779916728.4382117,
+  "ledger": [
+    {
+      "timestamp": 1779916728.438209,
+      "decision_id": "content_aa394c55",
+      "action": "generate_blog",
+      "revenue": 0.5,
+      "costs": 0.0,
+      "success": false
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 14:18:47] [content] Starting decision cycle...",
+    "[2026-05-27 14:18:47] [content] Executing: generate_blog | Selected 'generate_blog' based on heuristic weights and recent ledger."
+  ]
+}

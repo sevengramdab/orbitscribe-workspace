@@ -1,0 +1,88 @@
+# Personal Finance Trackers Prompt Pack
+
+## Personal Finance Tracker Prompt Collection
+This collection of prompts covers various aspects of a personal finance tracker app, from designing and building the app to creating a dashboard and a tool for automating expense tracking. Each prompt is tailored to address specific use cases and challenges in personal finance management.
+
+Total prompts: 9
+============================================================
+
+1. Create a Personal Finance Tracker App
+   Category: AI-Powered Finances
+   Use case: Personal finance management is a crucial part of everyday life for many individuals. This prompt focuses on developing an AI-powered tool that can help users manage their finances more effectively.
+
+   Prompt:
+   Design and develop an iOS/Android app that helps users track their income, expenses, and savings. The app should have features such as budgeting, categorization, alerts, and integration with other financial tools like banks or credit cards.
+
+------------------------------------------------------------
+
+2. Build a Personal Finance Tracker Bot
+   Category: AI-Powered Finances
+   Use case: Chatbots have become increasingly popular in the personal finance industry as they can provide 24/7 assistance to users. This prompt focuses on building a chatbot that can help users manage their finances more effectively using AI technology.
+
+   Prompt:
+   Create a chatbot that assists users in tracking their income, expenses, and savings. The bot should be able to provide real-time updates on the user's financial status, suggest budgeting strategies, and handle common financial inquiries.
+
+------------------------------------------------------------
+
+3. Design a Personal Finance Tracker Dashboard
+   Category: AI-Powered Finances
+   Use case: A personalized dashboard can help users stay on top of their finances by providing real-time updates and insights into their financial performance.
+
+   Prompt:
+   Create a dashboard that displays various financial metrics such as income, expenses, and savings. The dashboard should be intuitive and easy to use, allowing users to quickly access the information they need.
+
+------------------------------------------------------------
+
+4. Develop a Personal Finance Tracker Tool
+   Category: AI-Powered Finances
+   Use case: Automating the finance tracking process can save users time and effort, while also providing accurate and up-to-date information.
+
+   Prompt:
+   Create a tool that automates the process of tracking expenses and saving money. The tool should be able to track income, categorize expenses, and generate reports on financial performance.
+
+------------------------------------------------------------
+
+5. Create a Personal Finance Tracker Application
+   Category: AI-Powered Finances
+   Use case: Personal finance management is a crucial part of everyday life for many individuals. This prompt focuses on developing an AI-powered tool that can help users manage their finances more effectively.
+
+   Prompt:
+   Design and develop an iOS/Android application that helps users track their income, expenses, and savings. The app should have features such as budgeting, categorization, alerts, and integration with other financial tools like banks or credit cards.
+
+------------------------------------------------------------
+
+6. Build a Personal Finance Tracker Bot
+   Category: AI-Powered Finances
+   Use case: Chatbots have become increasingly popular in the personal finance industry as they can provide 24/7 assistance to users. This prompt focuses on building a chatbot that can help users manage their finances more effectively using AI technology.
+
+   Prompt:
+   Create a chatbot that assists users in tracking their income, expenses, and savings. The bot should be able to provide real-time updates on the user's financial status, suggest budgeting strategies, and handle common financial inquiries.
+
+------------------------------------------------------------
+
+7. Design a Personal Finance Tracker Dashboard
+   Category: AI-Powered Finances
+   Use case: A personalized dashboard can help users stay on top of their finances by providing real-time updates and insights into their financial performance.
+
+   Prompt:
+   Create a dashboard that displays various financial metrics such as income, expenses, and savings. The dashboard should be intuitive and easy to use, allowing users to quickly access the information they need.
+
+------------------------------------------------------------
+
+8. Develop a Personal Finance Tracker Tool
+   Category: AI-Powered Finances
+   Use case: Automating the finance tracking process can save users time and effort, while also providing accurate and up-to-date information.
+
+   Prompt:
+   Create a tool that automates the process of tracking expenses and saving money. The tool should be able to track income, categorize expenses, and generate reports on financial performance.
+
+------------------------------------------------------------
+
+9. Create a Personal Finance Tracker Application
+   Category: AI-Powered Finances
+   Use case: Personal finance management is a crucial part of everyday life for many individuals. This prompt focuses on developing an AI-powered tool that can help users manage their finances more effectively.
+
+   Prompt:
+   Design and develop an iOS/Android application that helps users track their income, expenses, and savings. The app should have features such as budgeting, categorization, alerts, and integration with other financial tools like banks or credit cards.
+
+------------------------------------------------------------

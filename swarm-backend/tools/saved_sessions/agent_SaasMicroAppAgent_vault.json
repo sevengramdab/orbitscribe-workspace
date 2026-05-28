@@ -1,12 +1,12 @@
 {
   "agent_name": "SaasMicroAppAgent",
-  "updated_at": "2026-05-27T14:17:29.865326",
+  "updated_at": "2026-05-28T12:13:44.362856",
   "ledger": {
     "agent_name": "SaasMicroAppAgent",
     "lifetime_revenue": 0.0,
     "lifetime_costs": 0.0,
-    "decisions_made": 5,
-    "decisions_executed": 3,
+    "decisions_made": 7,
+    "decisions_executed": 4,
     "active_campaigns": [],
     "daily_history": []
   },
@@ -111,6 +111,48 @@
       "status": "executed",
       "timestamp": "2026-05-27T14:17:29.841677",
       "result_summary": "Created custom app 'custom_5d2afaba' with 0 features. Payment link: None. Deploy manifest: packaged.",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "1aa7c7a4",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "add_feature",
+      "rationale": "The QR Code Generator app has low-performing feedback and a high demand for new features, such as custom colors. Adding these features will improve user satisfaction and increase the app's appeal.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": "qr_generator",
+        "features": [
+          "custom_colors"
+        ],
+        "price": 5.0,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "failed",
+      "timestamp": "2026-05-28T07:38:07.898379",
+      "result_summary": "app_id is required for add_feature",
+      "actual_revenue": 0.0
+    },
+    {
+      "decision_id": "282ffba4",
+      "agent_name": "SaasMicroAppAgent",
+      "decision_type": "spin_up_app",
+      "rationale": "Market gaps exist and there are only 3 active apps, so we should create a new micro-SaaS app to fill the gap.",
+      "action_payload": {
+        "app_id": null,
+        "app_type": "json_formatter",
+        "features": [],
+        "price": 9.99,
+        "recurring": false
+      },
+      "estimated_revenue_impact": 150.0,
+      "risk_score": 0.2,
+      "confidence": 0.85,
+      "status": "executed",
+      "timestamp": "2026-05-28T07:43:13.295208",
+      "result_summary": "Created json_formatter app 'json_formatter_5825a715' with 0 features. Payment link: https://dashboard.stripe.com/test/payment-links/create?prefilled[amount]=999. Deploy manifest: packaged.",
       "actual_revenue": 0.0
     }
   ]

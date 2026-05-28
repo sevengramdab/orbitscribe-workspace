@@ -1,0 +1,27 @@
+{
+  "agent_id": "ads_ce8c51",
+  "vertical": "ads",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922665.6212547,
+  "ledger": [
+    {
+      "timestamp": 1779922665.621253,
+      "decision_id": "ads_1779922665_83ed",
+      "action": "create_ad_copy",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:57:45] [ads] Starting decision cycle...",
+    "[2026-05-27 15:57:45] [ads] Executing: create_ad_copy | Selected template 'Stop Overpaying for Software' for new ad copy.",
+    "[2026-05-27 15:57:45] [ads] Generated ad copy \u2014 Headline: 'Stop Overpaying for Software' | CTA: 'See Pricing'",
+    "[2026-05-27 15:57:45] [ads] Cycle complete: completed",
+    "[2026-05-27 15:57:45] [ads] Reached max_cycles (1). Stopping."
+  ]
+}

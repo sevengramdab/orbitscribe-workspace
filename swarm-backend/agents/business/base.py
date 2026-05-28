@@ -17,7 +17,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Callable
 
-from core.model_router import ModelRouter
+from core.llm_client import LLMClient
 from core.business_tools.registry import BusinessToolRegistry
 
 
@@ -66,13 +66,17 @@ class BaseBusinessAgent:
         self,
         name: str,
         description: str,
-        model_router: ModelRouter,
+        llm_client: Optional[LLMClient] = None,
+        model_router: Optional[Any] = None,
         autonomy_tier: str = "AUTOPILOT",
         decision_callback: Optional[Callable[[BusinessDecision], asyncio.Future]] = None,
     ):
+        client = llm_client or model_router
+        if client is None:
+            raise TypeError("Either llm_client or model_router is required")
         self.name = name
         self.description = description
-        self.model_router = model_router
+        self.llm_client = client
         self.autonomy_tier = autonomy_tier  # DEFAULT, OVERRIDE, AUTOPILOT
         self.decision_callback = decision_callback
         self.tools = BusinessToolRegistry()
@@ -163,7 +167,7 @@ class BaseBusinessAgent:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
-        text = await self.model_router.chat(
+        text = await self.llm_client.chat(
             messages=messages,
             temperature=0.2,
         )

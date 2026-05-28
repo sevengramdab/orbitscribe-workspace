@@ -1,0 +1,46 @@
+{
+  "published": [
+    {
+      "slug": "adobe-photoshop-vs-gimp-which-one-should-you-choose",
+      "title": "Adobe Photoshop vs GIMP: Which One Should You Choose?",
+      "tags": [
+        "comparison",
+        "affiliate",
+        "photo editing",
+        "software",
+        "design"
+      ],
+      "publish_as_free": true,
+      "simulated": true,
+      "output_path": "content\\published\\substack\\adobe-photoshop-vs-gimp-which-one-should-you-choose.md"
+    },
+    {
+      "slug": "bluehost-vs-siteground-which-one-should-you-choose",
+      "title": "Bluehost vs SiteGround: Which One Should You Choose?",
+      "tags": [
+        "web",
+        "comparison",
+        "wordpress",
+        "affiliate",
+        "hosting"
+      ],
+      "publish_as_free": true,
+      "simulated": true,
+      "output_path": "content\\published\\substack\\bluehost-vs-siteground-which-one-should-you-choose.md"
+    },
+    {
+      "slug": "nordvpn-vs-expressvpn-which-one-should-you-choose",
+      "title": "NordVPN vs ExpressVPN: Which One Should You Choose?",
+      "tags": [
+        "comparison",
+        "affiliate",
+        "security",
+        "vpn",
+        "privacy"
+      ],
+      "publish_as_free": true,
+      "simulated": true,
+      "output_path": "content\\published\\substack\\nordvpn-vs-expressvpn-which-one-should-you-choose.md"
+    }
+  ]
+}

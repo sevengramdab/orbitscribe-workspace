@@ -1,0 +1,28 @@
+{
+  "agent_id": "subscriptions_c04c5f",
+  "vertical": "subscriptions",
+  "status": "idle",
+  "revenue": 2.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930492.1054356,
+  "ledger": [
+    {
+      "timestamp": 1779930492.1054332,
+      "decision_id": "sub_1779930483_4447",
+      "action": "generate_newsletter",
+      "revenue": 2.0,
+      "costs": 0.0,
+      "success": false
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:08:03] [subscriptions] Starting decision cycle...",
+    "[2026-05-27 18:08:03] [subscriptions] Executing: generate_newsletter | Time to generate a new newsletter issue to keep subscribers engaged.",
+    "[2026-05-27 18:08:03] [subscriptions] Generating newsletter via registry...",
+    "[2026-05-27 18:08:12] [subscriptions] Newsletter generated. Revenue: $2.00",
+    "[2026-05-27 18:08:12] [subscriptions] Cycle complete: error",
+    "[2026-05-27 18:08:12] [subscriptions] Reached max_cycles (1). Stopping."
+  ]
+}

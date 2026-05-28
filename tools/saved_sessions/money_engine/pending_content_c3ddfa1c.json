@@ -1,0 +1,14 @@
+{
+  "agent_id": "content_05d4e4",
+  "vertical": "content",
+  "decision_id": "content_c3ddfa1c",
+  "timestamp": 1779916699.3143425,
+  "action": "generate_social",
+  "params": {
+    "platform": "instagram",
+    "hook": "Why your offer isn't selling"
+  },
+  "reasoning": "Selected 'generate_social' based on heuristic weights and recent ledger.",
+  "screenshot": null,
+  "status": "pending"
+}

@@ -1,0 +1,28 @@
+{
+  "agent_id": "dropshipping_6543a1",
+  "vertical": "dropshipping",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 1.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930452.3293796,
+  "ledger": [
+    {
+      "timestamp": 1779930452.3293762,
+      "decision_id": "ds_80c8dda2",
+      "action": "create_listing",
+      "revenue": 0.0,
+      "costs": 1.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:32] [dropshipping] Starting decision cycle...",
+    "[2026-05-27 18:07:32] [dropshipping] Executing: create_listing | Weighted decision selected 'create_listing' with 1 existing listings.",
+    "[2026-05-27 18:07:32] [dropshipping] Executing dropshipping action: create_listing",
+    "[2026-05-27 18:07:32] [dropshipping] Created listing DS-F781FF: Polarized Sunglasses @ $8.64",
+    "[2026-05-27 18:07:32] [dropshipping] Cycle complete: completed",
+    "[2026-05-27 18:07:32] [dropshipping] Reached max_cycles (1). Stopping."
+  ]
+}

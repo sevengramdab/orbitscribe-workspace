@@ -1,0 +1,27 @@
+{
+  "agent_id": "affiliate_2c6fc0",
+  "vertical": "affiliate",
+  "status": "idle",
+  "revenue": 2.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922553.8534918,
+  "ledger": [
+    {
+      "timestamp": 1779922553.8534899,
+      "decision_id": "aff_5644ffe7",
+      "action": "generate_comparison",
+      "revenue": 2.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:55:51] [affiliate] Starting decision cycle...",
+    "[2026-05-27 15:55:51] [affiliate] Executing: generate_comparison | Generate a comparison post for 'NordVPN' vs 'ExpressVPN' to drive affiliate traffic.",
+    "[2026-05-27 15:55:53] [affiliate] Comparison post result: success=True, revenue=2.0",
+    "[2026-05-27 15:55:53] [affiliate] Cycle complete: completed",
+    "[2026-05-27 15:55:53] [affiliate] Reached max_cycles (1). Stopping."
+  ]
+}

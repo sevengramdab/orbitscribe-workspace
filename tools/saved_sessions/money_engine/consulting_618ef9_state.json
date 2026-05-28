@@ -1,0 +1,28 @@
+{
+  "agent_id": "consulting_618ef9",
+  "vertical": "consulting",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779922552.0465488,
+  "ledger": [
+    {
+      "timestamp": 1779922552.0465448,
+      "decision_id": "consult_4e635b85",
+      "action": "generate_proposal",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 15:55:52] [consulting] Starting decision cycle...",
+    "[2026-05-27 15:55:52] [consulting] Executing: generate_proposal | Generating a tailored proposal for the best available open gig.",
+    "[2026-05-27 15:55:52] [consulting] ConsultingAgent executing: generate_proposal",
+    "[2026-05-27 15:55:52] [consulting] Generated proposal prop_90916241 for ''",
+    "[2026-05-27 15:55:52] [consulting] Cycle complete: completed",
+    "[2026-05-27 15:55:52] [consulting] Reached max_cycles (1). Stopping."
+  ]
+}

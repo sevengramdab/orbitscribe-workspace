@@ -1,0 +1,27 @@
+{
+  "agent_id": "dropshipping_8a53ad",
+  "vertical": "dropshipping",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930478.6020741,
+  "ledger": [
+    {
+      "timestamp": 1779930478.6020718,
+      "decision_id": "ds_4032a861",
+      "action": "screenshot_dashboard",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:58] [dropshipping] Starting decision cycle...",
+    "[2026-05-27 18:07:58] [dropshipping] Executing: screenshot_dashboard | Weighted decision selected 'screenshot_dashboard' with 2 existing listings.",
+    "[2026-05-27 18:07:58] [dropshipping] Executing dropshipping action: screenshot_dashboard",
+    "[2026-05-27 18:07:58] [dropshipping] Cycle complete: completed",
+    "[2026-05-27 18:07:58] [dropshipping] Reached max_cycles (1). Stopping."
+  ]
+}

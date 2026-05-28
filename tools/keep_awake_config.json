@@ -1,0 +1,10 @@
+{
+    "default_duration_hours": 4.0,
+    "auto_start_on_boot": false,
+    "preferred_mode": "headless",
+    "last_used": {
+        "duration_hours": 8.0,
+        "mode": "gui",
+        "timestamp": "2026-05-28T04:00:54"
+    }
+}

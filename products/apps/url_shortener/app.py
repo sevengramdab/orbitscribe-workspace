@@ -4,7 +4,7 @@ import string
 import random
 import os
 
-# Requested features: analytics dashboard, custom domains, QR codes
+# Requested features: auth, dashboard, api
 
 
 app = Flask(__name__)

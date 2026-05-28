@@ -1,0 +1,27 @@
+{
+  "agent_id": "affiliate_860822",
+  "vertical": "affiliate",
+  "status": "idle",
+  "revenue": 2.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930475.0110595,
+  "ledger": [
+    {
+      "timestamp": 1779930475.0110571,
+      "decision_id": "aff_ebd28487",
+      "action": "generate_comparison",
+      "revenue": 2.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:55] [affiliate] Starting decision cycle...",
+    "[2026-05-27 18:07:55] [affiliate] Executing: generate_comparison | Generate a comparison post for 'Bluehost' vs 'SiteGround' to drive affiliate traffic.",
+    "[2026-05-27 18:07:55] [affiliate] Comparison post result: success=True, revenue=2.0",
+    "[2026-05-27 18:07:55] [affiliate] Cycle complete: completed",
+    "[2026-05-27 18:07:55] [affiliate] Reached max_cycles (1). Stopping."
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "agent_id": "ads_31238d",
+  "vertical": "ads",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930448.0729747,
+  "ledger": [
+    {
+      "timestamp": 1779930448.072973,
+      "decision_id": "ads_1779930448_249d",
+      "action": "create_ad_copy",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:28] [ads] Starting decision cycle...",
+    "[2026-05-27 18:07:28] [ads] Executing: create_ad_copy | Selected template 'Results in 24 Hours\u2014Guaranteed' for new ad copy.",
+    "[2026-05-27 18:07:28] [ads] Generated ad copy \u2014 Headline: 'Results in 24 Hours\u2014Guaranteed' | CTA: 'Start Trial'",
+    "[2026-05-27 18:07:28] [ads] Cycle complete: completed",
+    "[2026-05-27 18:07:28] [ads] Reached max_cycles (1). Stopping."
+  ]
+}

@@ -14,7 +14,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from core.business_tools.vault import vault
-from core.model_router import ModelRouter
 from agents.business.base import BaseBusinessAgent, BusinessDecision
 
 
@@ -36,17 +35,19 @@ class AssetFactoryAgent(BaseBusinessAgent):
 
     def __init__(
         self,
-        model_router: ModelRouter,
+        llm_client=None,
+        model_router=None,
         autonomy_tier: str = "AUTOPILOT",
         decision_callback=None,
     ):
         # Initialize custom fields BEFORE super().__init__() because it calls _load_vault()
         self.asset_type_revenue: Dict[str, float] = {}
         self.pending_briefs: List[str] = []
+        client = llm_client or model_router
         super().__init__(
             name="AssetFactory",
             description="Autonomous digital asset creation, packaging, and listing agent.",
-            model_router=model_router,
+            llm_client=client,
             autonomy_tier=autonomy_tier,
             decision_callback=decision_callback,
         )

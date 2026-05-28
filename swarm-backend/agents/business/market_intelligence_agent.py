@@ -36,14 +36,16 @@ class MarketIntelligenceAgent(BaseBusinessAgent):
 
     def __init__(
         self,
-        model_router: Any,
+        llm_client=None,
+        model_router=None,
         autonomy_tier: str = "AUTOPILOT",
-        decision_callback: Optional[Any] = None,
+        decision_callback=None,
     ):
+        client = llm_client or model_router
         super().__init__(
             name="market_intelligence",
             description="Competitor tracking, trend analysis, sentiment mining, and pricing intelligence for the swarm.",
-            model_router=model_router,
+            llm_client=client,
             autonomy_tier=autonomy_tier,
             decision_callback=decision_callback,
         )

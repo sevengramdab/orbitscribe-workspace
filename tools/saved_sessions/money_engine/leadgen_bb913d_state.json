@@ -1,0 +1,16 @@
+{
+  "agent_id": "leadgen_bb913d",
+  "vertical": "leadgen",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:05] [leadgen] Starting decision cycle...",
+    "[2026-05-27 18:07:05] [leadgen] Decision leadgen_4eab7f2d waiting for Kimi approval: search_leads",
+    "[2026-05-27 18:12:05] [leadgen] Decision rejected by Kimi."
+  ]
+}

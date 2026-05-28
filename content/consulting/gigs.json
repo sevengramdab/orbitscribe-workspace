@@ -1,0 +1,43 @@
+{
+  "stage": "screenshot_opportunities",
+  "gigs": [
+    {
+      "url": "https://www.upwork.com/jobs/Python-Automation-Script_~01abcd/",
+      "title": "",
+      "found_at": 1779916536.0137546,
+      "platform": "upwork",
+      "status": "applied"
+    },
+    {
+      "url": "https://www.upwork.com/jobs/Web-Scraping-Data-Pipeline_~02efgh/",
+      "title": "",
+      "found_at": 1779916536.0137634,
+      "platform": "upwork",
+      "status": "open"
+    },
+    {
+      "url": "https://www.upwork.com/jobs/API-Integration-Consultant_~03ijkl/",
+      "title": "",
+      "found_at": 1779916536.013766,
+      "platform": "upwork",
+      "status": "open"
+    }
+  ],
+  "proposals": [
+    {
+      "proposal_id": "prop_90916241",
+      "gig_url": "https://www.upwork.com/jobs/Python-Automation-Script_~01abcd/",
+      "gig_title": "",
+      "platform": "upwork",
+      "file": "C:\\Users\\Shadow\\voice to text engine\\content\\consulting\\proposals\\prop_90916241.txt",
+      "status": "sent",
+      "generated_at": 1779922552.045496,
+      "sent_at": 1779922684.5538297
+    }
+  ],
+  "last_follow_up": 1779930422.0993054,
+  "last_screenshot": 1779916907.5549421,
+  "proposals_sent_count": 1,
+  "gigs_won_count": 0,
+  "platform_idx": 1
+}

@@ -1,0 +1,25 @@
+{
+  "agent_id": "ads_b0b88a",
+  "vertical": "ads",
+  "status": "completed",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 1,
+  "last_run": 1779930420.0932908,
+  "ledger": [
+    {
+      "timestamp": 1779930420.0932887,
+      "decision_id": "ads_1779930420_3dc9",
+      "action": "create_ad_copy",
+      "revenue": 0.0,
+      "costs": 0.0,
+      "success": true
+    }
+  ],
+  "session_log": [
+    "[2026-05-27 18:07:00] [ads] Starting decision cycle...",
+    "[2026-05-27 18:07:00] [ads] Executing: create_ad_copy | Selected template 'Save 50% This Week Only' for new ad copy.",
+    "[2026-05-27 18:07:00] [ads] Generated ad copy \u2014 Headline: 'Save 50% This Week Only' | CTA: 'Claim Offer'"
+  ]
+}

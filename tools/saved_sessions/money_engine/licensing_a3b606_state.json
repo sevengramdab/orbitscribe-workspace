@@ -1,0 +1,16 @@
+{
+  "agent_id": "licensing_a3b606",
+  "vertical": "licensing",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:06] [licensing] Starting decision cycle...",
+    "[2026-05-27 18:07:06] [licensing] Decision lic_058ccc38 waiting for Kimi approval: list_on_gumroad",
+    "[2026-05-27 18:12:06] [licensing] Decision rejected by Kimi."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "agent_id": "dropshipping_b5b612",
+  "vertical": "dropshipping",
+  "status": "idle",
+  "revenue": 0.0,
+  "costs": 0.0,
+  "decisions_made": 1,
+  "decisions_executed": 0,
+  "last_run": null,
+  "ledger": [],
+  "session_log": [
+    "[2026-05-27 18:07:04] [dropshipping] Starting decision cycle...",
+    "[2026-05-27 18:07:04] [dropshipping] Decision ds_644a0118 waiting for Kimi approval: research_products",
+    "[2026-05-27 18:12:04] [dropshipping] Decision rejected by Kimi."
+  ]
+}

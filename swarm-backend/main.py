@@ -11,8 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router as api_router
 from api.monetization_routes import router as monetization_router
+from api.money_engine_routes import router as money_engine_router
+from api.system_routes import router as system_router
 from core import config
 from core.discovery import get_discovery_service
+from core.mode_guard import mode_guard
 
 
 @asynccontextmanager
@@ -49,6 +52,8 @@ app.add_middleware(
 # Include API routes
 app.include_router(api_router, prefix="/api")
 app.include_router(monetization_router, prefix="/api")
+app.include_router(money_engine_router, prefix="/api")
+app.include_router(system_router, prefix="/api")
 
 # Serve monetization dashboard
 import os

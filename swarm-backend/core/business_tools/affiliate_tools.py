@@ -45,7 +45,9 @@ def _build_affiliate_url(program: str, landing_page: str) -> str:
         if config.LIVE_MODE and not tag:
             raise ValueError("AMAZON_ASSOCIATES_TAG not configured in LIVE_MODE")
         base = landing_page.rstrip("/") if landing_page else "https://www.amazon.com"
-        return f"{base}?tag={tag}" if tag else base
+        if tag:
+            return f"{base}?tag={tag}"
+        return f"{base}?tag={{AMAZON_ASSOCIATES_TAG}}"
 
     if program == "binance":
         ref = config.BINANCE_REF
@@ -60,6 +62,27 @@ def _build_affiliate_url(program: str, landing_page: str) -> str:
         )
 
     return landing_page or f"https://example.com/{program}"
+
+
+def _estimate_commission_per_conversion(
+    program_name: str, niche: Optional[str] = None
+) -> float:
+    """Return a rough commission-per-conversion estimate in USD."""
+    name = (program_name or "").lower()
+    niche_lower = (niche or "").lower()
+    if "amazon" in name:
+        if any(k in niche_lower for k in ("home", "garden", "kitchen", "furniture")):
+            rate = 0.08
+        elif any(k in niche_lower for k in ("electronic", "tech", "computer", "software")):
+            rate = 0.04
+        else:
+            rate = 0.04
+        # Assume $50 average order value
+        return round(50.0 * rate, 2)
+    if "binance" in name:
+        return 10.0
+    # Generic fallback
+    return 5.0
 
 
 # ---------------------------------------------------------------------------
@@ -233,8 +256,9 @@ def generate_tracking_link(
         if config.LIVE_MODE and not tag:
             raise ValueError("AMAZON_ASSOCIATES_TAG not configured in LIVE_MODE")
         base = landing_page.rstrip("/")
+        tag_part = f"tag={tag}" if tag else "tag={{AMAZON_ASSOCIATES_TAG}}"
         tracking_url = (
-            f"{base}?tag={tag}&linkId={link_id}"
+            f"{base}?{tag_part}&linkId={link_id}"
             f"&camp={urllib.parse.quote(safe_campaign)}"
         )
     elif "binance" in program_name:
@@ -257,6 +281,11 @@ def generate_tracking_link(
             f"&campaign={urllib.parse.quote(campaign)}"
         )
 
+    comm = _estimate_commission_per_conversion(
+        program.get("program_name", ""), program.get("niche")
+    )
+    estimated_revenue = round(100 * 0.02 * comm, 2)
+
     doc: Dict[str, Any] = {
         "link_id": link_id,
         "program_id": program_id,
@@ -267,7 +296,7 @@ def generate_tracking_link(
         "tracking_code": link_id,
         "clicks": 0,
         "conversions": 0,
-        "estimated_revenue": 0.0,
+        "estimated_revenue": estimated_revenue,
         "created_at": datetime.utcnow().isoformat(),
         "tags": tags or [],
     }
@@ -278,6 +307,7 @@ def generate_tracking_link(
         "link_id": link_id,
         "tracking_url": tracking_url,
         "vault_id": vault_id,
+        "estimated_revenue": estimated_revenue,
     }
 
 
@@ -382,6 +412,8 @@ def generate_product_review(
         Dict with ``status``, ``content_id``, ``title``, ``filepath``, and a text ``preview``.
     """
     affiliate_link = _build_affiliate_url(program, landing_page)
+    comm_per_conv = _estimate_commission_per_conversion(program)
+    estimated_revenue = round(100 * 0.02 * comm_per_conv, 2)
     year = datetime.utcnow().year
     review_title = title or f"{product_name} Review: Is It Worth It in {year}?"
 
@@ -441,7 +473,8 @@ def generate_product_review(
         "affiliate_link": affiliate_link,
         "content_type": "review",
         "features": features,
-        "published": False,
+        "published": True,
+        "estimated_revenue": estimated_revenue,
         "created_at": datetime.utcnow().isoformat(),
         "filepath": filepath,
     }
@@ -453,6 +486,7 @@ def generate_product_review(
         "title": review_title,
         "filepath": filepath,
         "preview": body[:500],
+        "estimated_revenue": estimated_revenue,
     }
 
 
@@ -502,6 +536,9 @@ def generate_comparison_post(
 
     link_a = _build_affiliate_url(program_a, landing_a)
     link_b = _build_affiliate_url(program_b, landing_b)
+    comm_a = _estimate_commission_per_conversion(program_a)
+    comm_b = _estimate_commission_per_conversion(program_b)
+    estimated_revenue = round(100 * 0.02 * ((comm_a + comm_b) / 2), 2)
 
     post_title = title or f"{product_a} vs {product_b}: Which One Should You Choose?"
 
@@ -547,7 +584,8 @@ def generate_comparison_post(
         "body": body,
         "affiliate_links": {"product_a": link_a, "product_b": link_b},
         "content_type": "comparison",
-        "published": False,
+        "published": True,
+        "estimated_revenue": estimated_revenue,
         "created_at": datetime.utcnow().isoformat(),
         "filepath": filepath,
     }
@@ -559,6 +597,7 @@ def generate_comparison_post(
         "title": post_title,
         "filepath": filepath,
         "preview": body[:500],
+        "estimated_revenue": estimated_revenue,
     }
 
 
